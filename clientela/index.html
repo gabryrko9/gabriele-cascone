@@ -515,7 +515,8 @@ pre.csv{margin:0;background:var(--soft);border-radius:12px;padding:12px;font:400
 .rep-by small{color:var(--muted);font-size:.76rem}
 .rep-sim{margin:-8px 0 0;font:500 .7rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--warn)}
 .rep-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.rkp{border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.rkp{border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.rkp .delta{white-space:normal;max-width:100%}
 .rkp small{color:var(--muted);font-size:.76rem}
 .rkp b{font:800 1.5rem var(--f-display);font-variant-numeric:tabular-nums}
 .rkp > div{display:flex;flex-wrap:wrap;gap:6px}
@@ -532,6 +533,22 @@ pre.csv{margin:0;background:var(--soft);border-radius:12px;padding:12px;font:400
 .rep-f{color:var(--faint);font:400 .72rem var(--f-mono);border-top:1px solid var(--line);padding-top:12px}
 @media (max-width:900px){ .split,.rep-grid{grid-template-columns:minmax(0,1fr)} .rep-kpis{grid-template-columns:repeat(2,minmax(0,1fr))} .report{padding:18px} }
 @media (max-width:560px){ .cats{flex-wrap:nowrap} .profile-note{flex-wrap:wrap} .profile-note .btn{width:100%;justify-content:center} .ws-opt .ws-tag{display:none} }
+/* ---------- profession lens ---------- */
+.lens-h{margin:26px 2px 12px}
+.lens-h h3{font-size:1.2rem;font-weight:800;letter-spacing:-.02em;margin-top:3px}
+.lens-h p{margin-top:3px;color:var(--muted);font-size:.88rem;max-width:72ch}
+.lt td,.lt th{white-space:nowrap}
+.lt td:first-child{white-space:normal;min-width:170px}
+.lt .num,.clients .num{text-align:right}
+.lt-bar{height:4px;border-radius:3px;background:var(--soft);margin-top:7px;max-width:240px;overflow:hidden}
+.lt-bar i{display:block;height:100%;border-radius:3px;transform-origin:left;animation:grow .9s cubic-bezier(.2,.8,.2,1) both}
+@keyframes grow{from{transform:scaleX(0)}to{transform:none}}
+.minis.m4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:560px){ .minis.m4{grid-template-columns:repeat(2,minmax(0,1fr))} }
+.rowx .dot{display:inline-block;width:8px;height:8px;border-radius:3px;margin-right:7px;vertical-align:1px}
+.panel .minis+.chart,.panel .minis+p+.chart{margin-top:2px}
+.cr{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;color:var(--muted)} .cr b{color:var(--ink)} .cr i{width:42px;height:5px;border-radius:3px;background:var(--lime-s);overflow:hidden;display:block} .cr u{display:block;height:100%;background:var(--ink);opacity:.75}
+@media (max-width:560px){ .lens-h{margin-top:20px} .lt td:first-child{min-width:140px} }
 @media print{
   @page{size:A4;margin:12mm}
   body{font-size:12px}
@@ -680,6 +697,7 @@ const PROF = [
   id: "tour", color: "--blue", name: T("Tour guide", "Guida turistica"), biz: "Prague Walks",
   blurb: T("Walking tours, private tours, day trips", "Tour a piedi, privati, gite"),
   who: T("guests", "ospiti"), who1: T("guest", "ospite"), oneoff: true, names: [["it", .93], ["en", .07]],
+  unit: T("tours", "tour"), unit1: T("tour", "tour"), lead: 9,
   baseNew: 40, growth: .012, repeat: .003, upgrade: 0, reviewRate: .34, capacity: 34, elasticity: -.55, holdDays: 45,
   season: [.35,.42,.62,1.05,1.25,1.2,1.3,1.45,1.15,1.0,.55,1.0],
   hours: { 9: 3, 10: 4, 14: 3, 15: 2, 18: 1, 20: 2 }, days: [.7,.8,.9,1,1.2,1.5,1.3],
@@ -711,8 +729,8 @@ const PROF = [
   segments: [
     { n: T("Couples", "Coppie"), w: .34, size: [2, 2] }, { n: T("Families", "Famiglie"), w: .26, size: [3, 5] },
     { n: T("Friends", "Amici"), w: .18, size: [3, 6] }, { n: T("Solo travellers", "Viaggiatori soli"), w: .1, size: [1, 1] },
-    { n: T("School trips", "Gite scolastiche"), w: .05, size: [12, 22], disc: .7 },
-    { n: T("Companies & business trips", "Aziende e viaggi di lavoro"), w: .04, size: [6, 14], svc: 3, mult: 2.4, corp: true },
+    { n: T("School trips", "Gite scolastiche"), w: .05, size: [12, 22], disc: .7, lead: 60 },
+    { n: T("Companies & business trips", "Aziende e viaggi di lavoro"), w: .04, size: [6, 14], svc: 3, mult: 2.4, corp: true, lead: 28 },
   ],
   fields: [
     { k: "lang", n: T("Tour language", "Lingua del tour"), type: "select", opts: [["Italiano", .92], ["English", .05], ["Español", .03]] },
@@ -727,6 +745,7 @@ const PROF = [
   id: "trainer", color: "--coral", name: T("Personal trainer", "Personal trainer"), biz: "Studio Forma",
   blurb: T("1:1 sessions, packs, online coaching", "Sessioni 1:1, pacchetti, coaching online"),
   who: T("clients", "clienti"), who1: T("client", "cliente"), names: [["cz", .55], ["en", .3], ["it", .15]],
+  unit: T("sessions", "sessioni"), unit1: T("session", "sessione"),
   baseNew: 3.2, growth: .015, churn: .1, renew: .55, repeat: .02, upgrade: .4, reviewRate: .25, capacity: 62, elasticity: -.35, freq: [1, 3],
   season: [1.5,1.2,1.1,1.05,1.1,.9,.6,.6,1.3,1.1,.9,.6],
   hours: { 6: 2, 7: 3, 8: 2, 12: 2, 17: 3, 18: 4, 19: 3, 20: 1 }, days: [1.2,1.15,1.2,1.1,.9,.6,.2],
@@ -770,6 +789,7 @@ const PROF = [
   id: "tutor", color: "--violet", name: T("Private tutor", "Insegnante privato"), biz: "Tutor Lab",
   blurb: T("Lessons, packs, exam prep", "Lezioni, pacchetti, preparazione esami"),
   who: T("students", "studenti"), who1: T("student", "studente"), names: [["cz", .5], ["it", .3], ["en", .2]],
+  unit: T("lessons", "lezioni"), unit1: T("lesson", "lezione"),
   baseNew: 4, growth: .02, churn: .1, renew: .6, repeat: .03, upgrade: .45, reviewRate: .22, capacity: 30, elasticity: -.3, freq: [1, 2], summerChurn: true,
   season: [1.2,1.0,.9,1.0,1.3,.9,.2,.4,1.5,1.2,1.0,.7],
   hours: { 9: 1, 10: 1, 14: 2, 15: 3, 16: 4, 17: 4, 18: 3, 19: 1 }, days: [1.1,1.1,1.1,1.05,.8,.5,.3],
@@ -814,6 +834,7 @@ const PROF = [
   id: "physio", color: "--lime", name: T("Physiotherapist", "Fisioterapista"), biz: "Fyzio Point",
   blurb: T("Assessments, treatments, rehab plans", "Valutazioni, trattamenti, riabilitazione"),
   who: T("patients", "pazienti"), who1: T("patient", "paziente"), names: [["cz", .65], ["en", .2], ["it", .15]],
+  unit: T("sessions", "sedute"), unit1: T("session", "seduta"),
   baseNew: 19, growth: .012, churn: .2, renew: .35, repeat: .07, upgrade: .35, reviewRate: .2, capacity: 46, elasticity: -.25, freq: [1, 2],
   season: [1.25,1.3,1.15,1,1,.95,.7,.7,1.05,1.05,1,.8],
   hours: { 8: 3, 9: 3, 10: 3, 11: 2, 13: 2, 14: 3, 15: 3, 16: 3, 17: 2 }, days: [1.1,1.1,1.1,1.1,1,.15,0],
@@ -855,6 +876,7 @@ const PROF = [
   id: "photo", color: "--pink", name: T("Photographer", "Fotografo"), biz: "Luce Studio",
   blurb: T("Portraits, couples, weddings, brands", "Ritratti, coppie, matrimoni, brand"),
   who: T("clients", "clienti"), who1: T("client", "cliente"), oneoff: true, names: [["en", .5], ["cz", .25], ["it", .25]],
+  unit: T("shoots", "servizi"), unit1: T("shoot", "servizio"), lead: 18,
   baseNew: 7.5, growth: .016, repeat: .012, upgrade: 0, reviewRate: .4, capacity: 9, elasticity: -.45, holdDays: 60,
   season: [.5,.55,.7,.95,1.25,1.4,1.35,1.3,1.25,1,.7,.9],
   hours: { 7: 2, 9: 2, 11: 1, 15: 2, 17: 3, 18: 3 }, days: [.5,.5,.6,.7,1,1.8,1.4],
@@ -883,7 +905,7 @@ const PROF = [
   originLabel: T("Where clients come from", "Da dove arrivano i clienti"),
   origins: [["Prague",.35],["Italy",.15],["Germany",.1],["USA",.1],["United Kingdom",.1],["Spain",.06],["France",.06],["Other",.08]],
   segments: [
-    { n: T("Individuals", "Privati"), w: .45 }, { n: T("Tourists", "Turisti"), w: .3 }, { n: T("Brands & companies", "Brand e aziende"), w: .12, svc: 4, corp: true }, { n: T("Wedding couples", "Sposi"), w: .13, svc: 2 },
+    { n: T("Individuals", "Privati"), w: .45 }, { n: T("Tourists", "Turisti"), w: .3, lead: 6 }, { n: T("Brands & companies", "Brand e aziende"), w: .12, svc: 4, corp: true, lead: 21 }, { n: T("Wedding couples", "Sposi"), w: .13, svc: 2, lead: 170 },
   ],
   fields: [
     { k: "loc", n: T("Location", "Location"), type: "select", opts: [["Charles Bridge", .25], ["Prague Castle", .18], ["Old Town Square", .15], ["Vyšehrad", .1], ["Letná Park", .1], ["Studio", .22]] },
@@ -897,6 +919,7 @@ const PROF = [
   id: "yoga", color: "--teal", name: T("Yoga & pilates studio", "Studio yoga e pilates"), biz: "Studio Prana",
   blurb: T("Classes, memberships, workshops", "Lezioni, abbonamenti, workshop"),
   who: T("members", "iscritti"), who1: T("member", "iscritto"), names: [["cz", .55], ["en", .3], ["it", .15]],
+  unit: T("classes", "lezioni"), unit1: T("class", "lezione"),
   baseNew: 24, growth: .014, churn: .14, renew: .5, repeat: .05, upgrade: .35, reviewRate: .18, capacity: 230, elasticity: -.4, freq: [1, 3],
   season: [1.5,1.2,1.1,1,.95,.8,.55,.6,1.35,1.15,1,.65],
   hours: { 7: 3, 8: 1, 12: 2, 17: 2, 18: 4, 19: 4, 20: 1 }, days: [1.1,1.15,1.15,1.1,.8,.9,.7],
@@ -1077,11 +1100,22 @@ function buy(db, c, date, sIdx) {
     const boost = (sg.corp ? 1.8 : 1) * (1 + .15 * monthIdx(date) / NM) * (P.consultStart && date >= P.consultStart ? 1.4 : 1);
     if (R() < ex.attach * boost) addTxn(db, c, new Date(+date + 6e5), "ext", e, ex.p * (ex.perhead ? c.size : 1));
   }
-  if (svc.kind === "perhead" || svc.kind === "oneoff") addBook(db, c, date, sIdx);
+  if (svc.kind === "perhead" || svc.kind === "oneoff") {
+    if (P.oneoff) {
+      const td = withHour(new Date(+date + leadDays(c) * DAY));
+      if (td > NOW) (db.future = db.future || []).push({ c: c.id, d: td, s: sIdx }); else addBook(db, c, td, sIdx);
+    } else addBook(db, c, date, sIdx);
+  }
   if (svc.kind === "pack") addSessions(db, c, date, svc.sessions, Math.max(1, c.freq), sIdx);
   return tx;
 }
 
+// days between booking and the tour or shoot: a log-normal around the segment's typical lead
+function leadDays(c) {
+  const sg = P.segments[c.seg] || {}, ch = P.channels[c.ch] || {};
+  const mu = (sg.lead || P.lead || 10) * (ch.comm ? 1.5 : 1);
+  return clamp(Math.round(mu * Math.exp(gauss() * .75) - 1), 0, 330);
+}
 function lifecycle(db, c, ch, start) {
   const sg = P.segments[c.seg];
   let sIdx = sg.svc != null ? sg.svc : P.services.indexOf(wpick(P.services, s => s.w));
@@ -1135,10 +1169,12 @@ function finalize(db) {
   for (const x of db.txns) db.clients[x.c].txIdx.push(x.id);
   db.books.sort((a, b) => a.d - b.d);
   // per-client aggregates + profession fields that depend on behaviour
+  db.upcoming = [...(db.future || [])]; delete db.future;
+  indexVisits(db);
   for (const c of db.clients) refreshClient(db, c, true);
-  // upcoming bookings for the next 7 days
-  db.upcoming = [];
-  const pool = db.clients.filter(c => c.status === "active");
+  delete db._seen; delete db._next;
+  // upcoming bookings for the next 7 days (one-off professions already have the real future bookings)
+  const pool = P.oneoff ? [] : db.clients.filter(c => c.status === "active");
   const perDay = Math.max(1, Math.round(P.capacity / 6 * (P.oneoff ? .6 : .55)));
   for (let dd = 0; dd < 7 && pool.length; dd++) {
     const day = new Date(TODAY); day.setDate(day.getDate() + dd + 1);
@@ -1153,6 +1189,22 @@ function finalize(db) {
   for (const u of db.trialsUp || []) db.upcoming.push(u);
   delete db.trialsUp;
   db.upcoming.sort((a, b) => a.d - b.d);
+  for (const c of db.clients) c.next = null;
+  for (const u of db.upcoming) { const c = db.clients[u.c]; if (c && !isTrialSvc(u.s) && (!c.next || u.d < c.next)) c.next = u.d; }
+}
+const isTrialSvc = s => !!P.services[s]?.trial;
+// last attended session and next booking of every client, in one pass (used by refreshClient)
+function indexVisits(db) {
+  db._seen = new Map(); db._next = new Map();
+  for (const b of db.books) { if (b.ns || isTrialSvc(b.s)) continue; const v = db._seen.get(b.c); if (!v || b.d > v) db._seen.set(b.c, b.d); }
+  for (const u of db.upcoming || []) { if (isTrialSvc(u.s)) continue; const v = db._next.get(u.c); if (!v || u.d < v) db._next.set(u.c, u.d); }
+}
+function visitsOf(db, c) {
+  if (db._seen) return [db._seen.get(c.id) || null, db._next.get(c.id) || null];
+  let seen = null, next = null;
+  for (const b of db.books) if (b.c === c.id && !b.ns && !isTrialSvc(b.s) && (!seen || b.d > seen)) seen = b.d;
+  for (const u of db.upcoming || []) if (u.c === c.id && !isTrialSvc(u.s) && (!next || u.d < next)) next = u.d;
+  return [seen, next];
 }
 
 function refreshClient(db, c, initial) {
@@ -1161,12 +1213,14 @@ function refreshClient(db, c, initial) {
   c.spent = tx.reduce((s, x) => s + (x.st === "refund" ? 0 : x.a), 0);
   c.n = svc.length;
   c.first = svc.length ? new Date(Math.min(...svc.map(x => +x.d))) : null;
-  c.last = tx.length ? new Date(Math.max(...tx.map(x => +x.d))) : null;
+  const [seen, next] = visitsOf(db, c);
+  c.last = tx.length ? new Date(Math.max(...tx.map(x => +x.d), seen ? +seen : 0)) : seen;
+  c.next = next && next > NOW ? next : null;
   if (!c.first) c.status = "lead";
   else {
     const since = (NOW - c.last) / DAY;
-    if (P.oneoff) c.status = since <= (P.holdDays || 45) ? "active" : "lapsed";
-    else if (c.subActive || since <= 45) c.status = "active";
+    if (P.oneoff) c.status = c.next || since <= (P.holdDays || 45) ? "active" : "lapsed";
+    else if (c.subActive || c.next || since <= 45) c.status = "active";
     else if (since <= 120) c.status = "risk";
     else c.status = "lapsed";
   }
@@ -1270,7 +1324,7 @@ function lineChart(host, o) {
   const W = Math.max(280, host.clientWidth || 600), H = o.h || 240, pad = { l: 46, r: 10, t: 10, b: 24 };
   const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b, n = o.labels.length;
   let vmax = 0; o.series.forEach(s => s.values.forEach(v => { if (v != null && v > vmax) vmax = v; }));
-  const { max, step } = niceMax(vmax * 1.05);
+  const { max, step } = o.max ? { max: o.max, step: o.max / 4 } : niceMax(vmax * 1.05);
   const svg = S("svg", { viewBox: `0 0 ${W} ${H}`, height: H, role: "img" }, host);
   const x = i => pad.l + (n === 1 ? iw / 2 : i * iw / (n - 1)), y = v => pad.t + ih - v / max * ih;
   for (let v = 0; v <= max + 1e-9; v += step) { S("line", { x1: pad.l, x2: W - pad.r, y1: y(v), y2: y(v), class: v === 0 ? "axis-l" : "grid-l" }, svg); const tx = S("text", { x: pad.l - 8, y: y(v) + 3.5, "text-anchor": "end" }, svg); tx.textContent = (o.fmt || eurK)(v); }
@@ -1570,7 +1624,7 @@ const AVC = ["--blue", "--coral", "--lime", "--violet", "--teal", "--pink", "--s
 const avatar = c => { const p = c.name.split(" "); const ini = (p[0][0] || "") + (p.length > 1 ? p[p.length - 1][0] : ""); return `<span class="av" style="background:var(${AVC[hashStr(c.name) % AVC.length]})">${esc(ini.toUpperCase())}</span>`; };
 const who = (plural = true) => tr(plural ? P.who : P.who1);
 const Who = (plural = true) => { const w = who(plural); return w[0].toUpperCase() + w.slice(1); };
-const stLabel = s => s === "lapsed" && P.oneoff ? t("st_past") : t("st_" + s);
+const stLabel = s => s === "lapsed" && P.oneoff ? t("st_past") : s === "active" && P.oneoff ? L("Recent", "Recente") : t("st_" + s);
 const pill = s => `<span class="pill ${s}">${esc(stLabel(s))}</span>`;
 const chName = i => tr(P.channels[i]?.n) || "—";
 const segName = i => tr(P.segments[i]?.n) || "—";
@@ -1605,19 +1659,10 @@ VIEWS.overview = el => {
   let h = vhead(tr(P.name) + " · " + pname, t("nav_overview"), L(`How the business is doing, at a glance. Compared with the ${pname.replace("last", "previous")}.`, `Come va l'attività, a colpo d'occhio. Confronto con i ${pname.replace("ultimi", "precedenti")}.`));
   h += profileBanner();
   if (!hasData()) { el.innerHTML = h + emptyState(L("Nothing to analyse yet", "Ancora niente da analizzare"), L(`Add ${who()} and payments by hand or import them from a spreadsheet. Every chart on this page fills itself in from there.`, `Aggiungi ${who()} e pagamenti a mano o importali da un foglio di calcolo. Tutti i grafici si compilano da lì.`)); return; }
-  const last12 = a => a.slice(NM - 12);
-  const extShare = S1.rev ? S1.ext / S1.rev : 0, extShare0 = S0 && S0.rev ? S0.ext / S0.rev : null;
-  const kp = [
-    { k: "revenue", lab: t("revenue"), v: S1.rev, p: S0?.rev, f: eur, sp: last12(M.rev), c: "--blue" },
-    { k: "new", lab: t("newClients") + " " + who(), v: S1.newC, p: S0?.newC, f: v => nf(v), sp: last12(M.newC), c: "--coral" },
-    { k: "pay", lab: L("Paying " + who(), Who() + " paganti"), v: S1.paying, p: S0?.paying, f: v => nf(v), sp: last12(M.active), c: "--lime" },
-    { k: "arpc", lab: t("arpc") + " " + who(false), v: S1.arpc, p: S0?.arpc, f: eur, sp: last12(M.rev.map((v, i) => M.active[i] ? v / M.active[i] : 0)), c: "--violet" },
-    { k: "rep", lab: t("repeat"), v: S1.repeat, p: S0?.repeat, f: v => pct(v), rate: 1, sp: null, c: "--teal", hint: L(`${who()} who bought more than once`, `${who()} che hanno acquistato più volte`) },
-    { k: "books", lab: t("bookings"), v: S1.books, p: S0?.books, f: v => nf(v), sp: last12(M.books), c: "--sun" },
-    { k: "ext", lab: t("extrasShare"), v: extShare, p: extShare0, f: v => pct(v, 1), rate: 1, sp: last12(M.ext.map((v, i) => M.rev[i] ? v / M.rev[i] : 0)), c: "--pink", hint: L("of revenue from add-ons", "dei ricavi da servizi extra") },
-    { k: "ltv", lab: t("ltv"), v: lifetimeValue(), p: null, f: eur, sp: null, c: "--slate", hint: L(`average per ${who(false)}, all time`, `media per ${who(false)}, da sempre`) },
-  ];
-  h += `<div class="kpis">${kp.map(k => `<div class="kpi" style="--kc:var(${k.c})"><span class="lab"><i></i>${esc(k.lab)}</span><div class="row"><span class="val" data-count="${k.v}" data-k="${k.k}">${k.f(k.v)}</span>${k.sp ? `<span class="spark" data-spark="${k.k}"></span>` : ""}</div><div class="row">${deltaPill(k.v, k.p, k.rate) || `<span class="hint">${esc(k.hint || "")}</span>`}${k.p != null && k.hint ? `<span class="hint">${esc(k.hint)}</span>` : ""}</div></div>`).join("")}</div>`;
+  const kp = lensKpis(r);
+  h += kpiCards(kp);
+  h += lensPanelsHtml();
+  h += `<div class="lens-h"><span class="eyebrow">${L("Every business", "Ogni attività")}</span><h3>${L("Revenue, channels and next steps", "Ricavi, canali e prossimi passi")}</h3></div>`;
   h += `<div class="grid">
     <div class="panel c8"><div class="ph"><div><h3>${t("revTrend")}</h3><p>${t("revTrendSub")}</p></div><div class="legend"><span><i style="background:var(--blue)"></i>${t("actual")}</span><span><i class="dash" style="border-color:var(--slate)"></i>${t("lastYear")}</span><span><i class="dash" style="border-color:var(--blue)"></i>${t("forecast")}</span></div></div><div id="ovRev"></div></div>
     <div class="stack c4"><div class="panel" id="goalP"></div><div class="panel" id="impactP"></div></div>
@@ -1626,8 +1671,7 @@ VIEWS.overview = el => {
     <div class="panel c4"><div class="ph"><div><h3>${t("upcoming")}</h3><p>${t("upcomingSub")}</p></div></div><div class="list" id="ovUp"></div></div>
   </div>`;
   el.innerHTML = h;
-  $$("[data-count]", el).forEach(v => { const k = kp.find(x => x.k === v.dataset.k); countUp(v, k.v, k.f); });
-  kp.forEach(k => { const s = $(`[data-spark="${k.k}"]`, el); if (s) spark(s, k.sp, cssv(k.c)); });
+  drawKpis(el, kp); drawLensPanels(el);
   revenueChart($("#ovRev", el));
   goalPanel($("#goalP", el)); impactPanel($("#impactP", el));
   const cs = channelStats(r.a, r.b, r.months).filter(c => c.newPaid > 0).sort((a, b) => b.newPaid - a.newPaid);
@@ -1698,7 +1742,7 @@ VIEWS.clients = el => {
     <select class="sel" id="cch" aria-label="${esc(t("channel"))}"><option value="">${t("allCh")}</option>${P.channels.map((c, i) => `<option value="${i}" ${APP.fCh === String(i) ? "selected" : ""}>${esc(tr(c.n))}</option>`).join("")}</select>
     <select class="sel" id="csg" aria-label="${esc(t("segment"))}"><option value="">${t("allSeg")}</option>${P.segments.map((c, i) => `<option value="${i}" ${APP.fSeg === String(i) ? "selected" : ""}>${esc(tr(c.n))}</option>`).join("")}</select>
   </div><div class="tablewrap"><table class="clients"><thead><tr>
-    ${[["name", Who(false)], ["origin", t("origin")], ["ch", t("channel")], ["seg", t("segment")], ["first", t("firstVisit")], ["last", t("lastVisit")], ["n", t("visits")], ["spent", t("spent")], ["status", t("status")]].map(([k, l]) => `<th><button data-sort="${k}" ${APP.sort.k === k ? `data-dir="${APP.sort.dir}"` : ""}>${esc(l)}</button></th>`).join("")}
+    ${tableCols().map(c => `<th${c.num ? ' class="num"' : ""}><button data-sort="${c.k}" ${APP.sort.k === c.k ? `data-dir="${APP.sort.dir}"` : ""}>${esc(c.lab)}</button></th>`).join("")}
   </tr></thead><tbody id="ctb"></tbody></table></div><div class="pager" id="cpg"></div></div>`;
   el.innerHTML = h;
   drawTable(el);
@@ -1711,12 +1755,12 @@ VIEWS.clients = el => {
 function drawTable(el) {
   const q = APP.q.trim().toLowerCase();
   let rows = DB.clients.filter(c => (!APP.fSt || c.status === APP.fSt) && (APP.fCh === "" || c.ch === +APP.fCh) && (APP.fSeg === "" || c.seg === +APP.fSeg) && (!q || (c.name + " " + c.email + " " + c.origin + " " + c.phone).toLowerCase().includes(q)));
-  const k = APP.sort.k, dir = APP.sort.dir === "asc" ? 1 : -1;
-  const val = c => k === "name" ? c.name : k === "origin" ? c.origin : k === "ch" ? chName(c.ch) : k === "seg" ? segName(c.seg) : k === "first" ? +(c.first || 0) : k === "last" ? +(c.last || 0) : k === "n" ? c.n : k === "spent" ? c.spent : ["active", "risk", "lapsed", "lead"].indexOf(c.status);
+  const cols = tableCols(), k = APP.sort.k, dir = APP.sort.dir === "asc" ? 1 : -1;
+  const sc = cols.find(x => x.k === k) || cols.find(x => x.k === "spent"), val = sc.val;
   rows.sort((a, b) => { const x = val(a), y = val(b); return (typeof x === "string" ? x.localeCompare(y) : x - y) * dir; });
   const per = 20, pages = Math.max(1, Math.ceil(rows.length / per)); APP.page = Math.min(APP.page, pages - 1);
   const slice = rows.slice(APP.page * per, APP.page * per + per);
-  $("#ctb", el).innerHTML = slice.length ? slice.map(c => `<tr data-client="${c.id}" tabindex="0"><td><div class="who">${avatar(c)}<div><b>${esc(c.name)}</b><small>${esc(c.email)}</small></div></div></td><td>${esc(c.origin)}</td><td><span class="chip"><i style="background:${col(c.ch)}"></i>${esc(chName(c.ch))}</span></td><td>${esc(segName(c.seg))}</td><td>${fdate(c.first)}</td><td>${fdate(c.last)}</td><td class="num">${c.n}</td><td class="num"><b>${eur(c.spent)}</b></td><td>${pill(c.status)}</td></tr>`).join("") : `<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted)">${L("No one matches these filters.", "Nessuno corrisponde a questi filtri.")}</td></tr>`;
+  $("#ctb", el).innerHTML = slice.length ? slice.map(c => `<tr data-client="${c.id}" tabindex="0">${cols.map(x => `<td${x.num ? ' class="num"' : ""}>${x.cell(c)}</td>`).join("")}</tr>`).join("") : `<tr><td colspan="${cols.length}" style="text-align:center;padding:30px;color:var(--muted)">${L("No one matches these filters.", "Nessuno corrisponde a questi filtri.")}</td></tr>`;
   $("#cpg", el).innerHTML = `<span>${nf(rows.length)} ${t("shown")} · ${eur(sum(rows.map(r => r.spent)))}</span><div><button class="btn ghost sm" id="pp" ${APP.page === 0 ? "disabled" : ""}>${t("prev")}</button><span style="align-self:center" class="mono">${APP.page + 1}/${pages}</span><button class="btn ghost sm" id="pn" ${APP.page >= pages - 1 ? "disabled" : ""}>${t("next")}</button></div>`;
   $("#pp", el).onclick = () => { APP.page--; drawTable(el); };
   $("#pn", el).onclick = () => { APP.page++; drawTable(el); };
@@ -1737,11 +1781,11 @@ function openClient(id) {
   layer.innerHTML = `<div class="scrim" data-close></div><aside class="drawer" role="dialog" aria-modal="true" aria-label="${esc(c.name)}">
     <div class="dh">${avatar(c)}<div style="min-width:0"><h3>${esc(c.name)}</h3><div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">${pill(c.status)}<span class="chip">${esc(segName(c.seg))}</span>${c.subActive ? `<span class="chip"><i style="background:var(--lime)"></i>${esc(tr(P.services[c.sub]?.n) || "")}</span>` : ""}</div></div><button class="x" data-close aria-label="Close">${icon(IC.x)}</button></div>
     <div class="db">
-      <div class="minis"><div class="mini"><b>${eur(c.spent)}</b><small>${t("spent")}</small></div><div class="mini"><b>${c.n}</b><small>${t("visits")}</small></div><div class="mini"><b>${bk.length}</b><small>${L("Sessions", "Sessioni")}${bk.filter(b => b.ns).length ? " · " + bk.filter(b => b.ns).length + " no-show" : ""}</small></div></div>
+      ${drawerMinis(c, bk)}
       ${progress}
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn main sm" data-act="addPay">${icon(IC.euro)}${t("addPay")}</button><button class="btn ghost sm" data-act="logSess">${icon(IC.cal)}${L("Log session", "Registra sessione")}</button><button class="btn ghost sm" data-act="editClient">${icon(IC.edit)}${L("Edit", "Modifica")}</button>${c.subActive ? `<button class="btn ghost sm" data-act="endPlan">${L("End plan", "Chiudi abbonamento")}</button>` : ""}<button class="btn ghost sm" data-act="delClient" style="margin-left:auto">${icon(IC.trash)}<span>${L("Delete", "Elimina")}</span></button></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn main sm" data-act="addPay">${icon(IC.euro)}${t("addPay")}</button><button class="btn ghost sm" data-act="logSess">${icon(IC.cal)}${L("Log " + unit(false), "Registra " + unit(false))}</button><button class="btn ghost sm" data-act="editClient">${icon(IC.edit)}${L("Edit", "Modifica")}</button>${c.subActive ? `<button class="btn ghost sm" data-act="endPlan">${L("End plan", "Chiudi abbonamento")}</button>` : ""}<button class="btn ghost sm" data-act="delClient" style="margin-left:auto">${icon(IC.trash)}<span>${L("Delete", "Elimina")}</span></button></div>
       <div><span class="eyebrow">${t("profile")}</span><dl class="facts" style="margin:8px 0 0">
-        ${[[t("email"), c.email || "—"], [t("phone"), c.phone || "—"], [t("origin"), c.origin || "—"], [t("channel"), chName(c.ch)], [L("First contact", "Primo contatto"), fdate(c.created)], [L("Client for", "Cliente da"), months ? months + " " + L("months", "mesi") : "—"], ...P.fields.map(f => [tr(f.n), fieldValue(c, f)])].map(([a, b]) => `<div><dt>${esc(a)}</dt><dd>${esc(b)}</dd></div>`).join("")}
+        ${[[t("email"), c.email || "—"], [t("phone"), c.phone || "—"], [t("origin"), c.origin || "—"], [t("channel"), chName(c.ch)], [L("First contact", "Primo contatto"), fdate(c.created)], ...(isVisit() ? [] : [[L("Client for", "Cliente da"), months ? months + " " + L("months", "mesi") : "—"]]), ...P.fields.map(f => [tr(f.n), fieldValue(c, f)])].map(([a, b]) => `<div><dt>${esc(a)}</dt><dd>${esc(b)}</dd></div>`).join("")}
       </dl></div>
       ${c.first ? `<div><span class="eyebrow">${L("Spend, last 12 months", "Spesa, ultimi 12 mesi")}</span><div id="cSpend" style="margin-top:6px"></div></div>` : ""}
       <div><span class="eyebrow">${t("history")}</span><div class="timeline">${tx.length ? tx.slice(0, 40).map(x => `<div class="tl"><i style="background:${x.k === "ext" ? "var(--pink)" : col(x.s)}"></i><div style="min-width:0"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(itemName(x))}</div><small>${fdate(x.d)} · ${esc(trMethod(x.m))}${x.st === "pending" ? " · " : ""}${x.st === "pending" ? `<span class="pill pending">${L("Pending", "Da incassare")}</span>` : ""}</small></div><span class="amt">${eur(x.a)}</span></div>`).join("") : `<p class="muted-p">${L("No purchases yet. This is still a lead.", "Nessun acquisto. È ancora un contatto.")}</p>`}</div></div>
@@ -1782,6 +1826,7 @@ function modal(title, body, onSubmit) {
 const fld = (id, label, input, cls = "", help = "") => `<div class="fld ${cls}"><label for="${id}">${esc(label)}</label>${input}${help ? `<span class="help">${esc(help)}</span>` : ""}</div>`;
 const inp = (id, v = "", type = "text", extra = "") => `<input id="${id}" name="${id}" type="${type}" value="${esc(v)}" ${extra}>`;
 const selI = (id, opts, v) => `<select id="${id}" name="${id}">${opts.map(([val, lab]) => `<option value="${esc(val)}" ${String(val) === String(v) ? "selected" : ""}>${esc(lab)}</option>`).join("")}</select>`;
+const withHour10 = day => new Date(day + "T10:00");
 const isoDay = d => { const x = new Date(d); x.setMinutes(x.getMinutes() - x.getTimezoneOffset()); return x.toISOString().slice(0, 10); };
 const methodsList = () => [...new Set([...P.methods.map(m => m[0]), "Card", "Cash", "Bank transfer", "Other"])];
 function priceFor(c, kind, idx) { if (kind === "ext") { const e = P.extras[idx]; return e ? e.p * (e.perhead ? (c?.size || 1) : 1) : 0; } const s = P.services[idx]; if (!s) return 0; const sg = P.segments[c?.seg ?? 0] || {}; return Math.round(s.p * (s.kind === "perhead" ? (c?.size || 1) * (sg.disc || 1) : 1)); }
@@ -1809,10 +1854,11 @@ function clientModal(c) {
     ${fld("m_seg", t("segment"), selI("m_seg", P.segments.map((x, i) => [i, tr(x.n)]), c?.seg ?? 0))}
     ${sizeField ? fld("m_size", L("Group size", "Persone"), inp("m_size", c?.size || 2, "number", 'min="1" inputmode="numeric"')) : ""}
     ${P.freq ? fld("m_freq", L("Sessions per week", "Sessioni a settimana"), inp("m_freq", c?.freq || 1, "number", 'min="1" max="7" inputmode="numeric"')) : ""}
-    ${isNew ? `<h4>${t("firstPurchase")}</h4>
+    ${isNew ? `<h4>${isVisit() ? L("The booking", "La prenotazione") : t("firstPurchase")}</h4>
     ${fld("m_svc", t("service"), selI("m_svc", [["", L("No purchase yet (lead)", "Nessun acquisto (contatto)")], ...P.services.map((s, i) => [i, tr(s.n) + (s.trial ? " · " + L("free, logs the trial session", "gratis, registra la lezione di prova") : " · " + eur(s.p))])], P.services[0]?.trial ? "0" : 0), "full")}
     ${fld("m_amt", t("amount"), inp("m_amt", priceFor(null, "svc", 0), "number", 'min="0" step="0.01" inputmode="decimal"'), "", L("Filled from the price list, change it if needed", "Dal listino, modificalo se serve"))}
-    ${fld("m_date", t("date"), inp("m_date", isoDay(new Date()), "date"))}
+    ${isVisit() ? fld("m_tdate", L(`Day of the ${unit(false)}`, `Giorno del ${unit(false)}`), inp("m_tdate", isoDay(new Date()), "date"), "", L("A future day goes into the calendar", "Un giorno futuro va in calendario")) : ""}
+    ${fld("m_date", isVisit() ? L("Paid on", "Pagato il") : t("date"), inp("m_date", isoDay(new Date()), "date"))}
     ${fld("m_m", t("method"), selI("m_m", methodsList().map(m => [m, trMethod(m)]), methodsList()[0]))}
     ${fld("m_st", t("status"), selI("m_st", [["paid", L("Paid", "Pagato")], ["pending", L("Pending", "Da incassare")]], "paid"))}` : ""}
     ${P.fields.length ? `<h4>${t("proFields")} · ${esc(tr(P.name))}</h4>${proFieldInputs(c)}` : ""}`;
@@ -1825,7 +1871,7 @@ function clientModal(c) {
       if (fd.m_svc !== "" && !trial && !(+fd.m_amt > 0)) return t("needAmt");
       const nc = addClient({ name: fd.m_name.trim(), email: fd.m_email.trim(), phone: fd.m_phone.trim(), origin: fd.m_origin.trim() || "—", ch: +fd.m_ch, seg: +fd.m_seg, size, freq, f: readProFields(fd), created: date });
       if (trial) addSession(nc, { d: date, s: +fd.m_svc, ns: 0 });
-      else if (fd.m_svc !== "") addPayment(nc, { k: "svc", s: +fd.m_svc, a: +fd.m_amt, d: date, m: fd.m_m, st: fd.m_st, logSession: true });
+      else if (fd.m_svc !== "") addPayment(nc, { k: "svc", s: +fd.m_svc, a: +fd.m_amt, d: date, m: fd.m_m, st: fd.m_st, logSession: true, sd: fd.m_tdate ? withHour10(fd.m_tdate) : null });
       persistClient(nc); afterChange(); toast(t("clientAdded")); openClient(nc.id);
     } else {
       Object.assign(c, { name: fd.m_name.trim(), email: fd.m_email.trim(), phone: fd.m_phone.trim(), origin: fd.m_origin.trim() || "—", ch: +fd.m_ch, seg: +fd.m_seg, size, freq });
@@ -1846,7 +1892,7 @@ function payModal(c) {
     ${fld("p_date", t("date"), inp("p_date", isoDay(new Date()), "date"))}
     ${fld("p_m", t("method"), selI("p_m", methodsList().map(m => [m, trMethod(m)]), lastSvc?.m || methodsList()[0]))}
     ${fld("p_st", t("status"), selI("p_st", [["paid", L("Paid", "Pagato")], ["pending", L("Pending", "Da incassare")]], "paid"))}
-    <label class="toggle full"><input type="checkbox" name="p_log" checked><span class="sw"></span><span><b>${L("Also log a session on this date", "Registra anche una sessione in questa data")}</b><small>${L("Keeps the schedule and capacity charts accurate", "Mantiene corretti agenda e capacità")}</small></span></label>`, fd => {
+    <label class="toggle full"><input type="checkbox" name="p_log" checked><span class="sw"></span><span><b>${L(`Also log the ${unit(false)} on this date`, `Registra anche ${isVisit() ? "il" : "la"} ${unit(false)} in questa data`)}</b><small>${L("Keeps the schedule and capacity charts accurate", "Mantiene corretti agenda e capacità")}</small></span></label>`, fd => {
     if (!(+fd.p_amt > 0)) return t("needAmt");
     const [k, s] = fd.p_item.split(":");
     addPayment(c, { k, s: +s, a: +fd.p_amt, d: new Date(fd.p_date + "T10:00"), m: fd.p_m, st: fd.p_st, logSession: !!fd.p_log && k === "svc" });
@@ -1859,7 +1905,7 @@ function payModal(c) {
 function sessModal(c) {
   const lastSvc = c.txIdx.map(i => DB.txns[i]).filter(x => x.k === "svc").pop();
   const now = new Date(); now.setMinutes(0);
-  modal(L("Log session", "Registra sessione") + " · " + c.name, `
+  modal(L("Log " + unit(false), "Registra " + unit(false)) + " · " + c.name, `
     ${fld("s_svc", t("service"), selI("s_svc", P.services.map((s, i) => [i, tr(s.n)]), lastSvc?.s ?? 0), "full")}
     ${fld("s_date", t("date"), inp("s_date", isoDay(now), "date"), "", L("A future date adds it to Next up", "Una data futura lo aggiunge ai prossimi appuntamenti"))}
     ${fld("s_time", L("Time", "Ora"), inp("s_time", String(now.getHours()).padStart(2, "0") + ":00", "time"))}
@@ -1880,7 +1926,7 @@ function addPayment(c, o) {
   const tx = { id: DB.txns.length, c: c.id, d: o.d, k: o.k, s: o.s, a: Math.round(o.a * 100) / 100, m: o.m || "Card", st: o.st || "paid" };
   DB.txns.push(tx); c.txIdx.push(tx.id);
   if (o.k === "svc" && P.services[o.s]?.kind === "sub") { c.subActive = true; c.sub = o.s; }
-  if (o.logSession) addSession(c, { d: o.d, s: o.s, ns: 0 }, true);
+  if (o.logSession) addSession(c, { d: o.sd || o.d, s: o.s, ns: 0 }, true);
   refreshClient(DB, c);
   return tx;
 }
@@ -2363,6 +2409,7 @@ function extraInsights(out, paid) {
   if (due.length) { const val = sum(due.map(x => P.services[x.p.s]?.p || x.p.a)); out.push({ tag: "opp", score: 9.2, title: L(`${due.length} ${who()} are about to finish their package`, `${due.length} ${who()} stanno per finire il pacchetto`), text: L(`They have one session or none left and came in the last weeks. Offering the next package at the last session, maybe with the 10-lesson saving, is the easiest revenue this month. The list is in Retention.`, `Hanno una sessione o nessuna e sono venuti nelle ultime settimane. Proporre il prossimo pacchetto all'ultima sessione, magari con il risparmio del pacchetto più grande, è il ricavo più facile del mese. La lista è in Fidelizzazione.`), impact: [L("Renewals", "Rinnovi"), eurK(val)] }); }
   const ti = trialSvc();
   if (ti >= 0) { const r = rangeFor("12"), s = trialStats(r.a, r.b); if (s.n >= 10) { const gain = s.n * .1 * (lifetimeValue() || 0); out.push({ tag: s.rate < .5 ? "opp" : "info", score: 8.6, title: L(`${pct(s.rate)} of free trials become paying ${who()}`, `Il ${pct(s.rate)} delle prove gratuite diventa ${who()} paganti`), text: L(`${nf(s.n)} trials in 12 months${s.days != null ? `, first payment after ${nf(s.days)} days on average` : ""}. A short written plan after the trial and a follow-up message within 24 hours lift conversion; 10 points more is worth about ${eur(gain)}.`, `${nf(s.n)} prove in 12 mesi${s.days != null ? `, primo pagamento dopo ${nf(s.days)} giorni in media` : ""}. Un breve piano scritto dopo la prova e un messaggio entro 24 ore alzano la conversione; 10 punti in più valgono circa ${eur(gain)}.`), impact: [L("+10 pp conversion", "+10 pp conversione"), "+" + eurK(gain)] }); } }
+  lensInsights(out);
   const rs = resultsStats();
   if (rs && rs.n >= 5) out.push({ tag: "info", score: 6.8, title: rs.pr.kind === "level" ? L(`${pct(rs.rate)} of ${who()} moved up a level`, `Il ${pct(rs.rate)} degli ${who()} è salito di livello`) : L(`${pct(rs.rate)} of ${who()} improved`, `Il ${pct(rs.rate)} dei ${who()} è migliorato`), text: L(`Results are the strongest marketing you have. Ask the ones with the biggest progress for a short review or a before/after story, and put it on the website.`, `I risultati sono il marketing più forte che hai. Chiedi a chi ha fatto più progressi una breve recensione o una storia prima/dopo, e mettila sul sito.`), impact: [rs.pr.lab(), pct(rs.rate)] });
 }
@@ -2401,18 +2448,18 @@ VIEWS.report = el => {
   const imp = P.consultStart ? impactStats() : null;
   const goal = P.goal || 0, rev = S1.rev;
   const vs = (cur, prev) => prev ? (cur / prev - 1) : null;
-  const ch = (v, lab) => v == null ? "" : `<span class="delta ${Math.abs(v) < .005 ? "flat" : v > 0 ? "up" : "down"}">${v > 0 ? "▲" : v < 0 ? "▼" : ""} ${(v >= 0 ? "+" : "−") + nf(Math.abs(v) * 100, 0)}% <small>${esc(lab)}</small></span>`;
-  const kp = [
-    [t("revenue"), eur(rev), vs(rev, S0?.rev), vs(rev, SY?.rev)],
-    [L("New " + who(), "Nuovi " + who()), nf(S1.newC), vs(S1.newC, S0?.newC), vs(S1.newC, SY?.newC)],
-    [L("Paying " + who(), Who() + " paganti"), nf(S1.paying), vs(S1.paying, S0?.paying), vs(S1.paying, SY?.paying)],
-    [t("arpc") + " " + who(false), eur(S1.arpc), vs(S1.arpc, S0?.arpc), vs(S1.arpc, SY?.arpc)],
-    [t("bookings"), nf(S1.books), vs(S1.books, S0?.books), vs(S1.books, SY?.books)],
-    [t("extrasShare"), pct(S1.rev ? S1.ext / S1.rev : 0, 1), null, null],
-  ];
+  const chTxt = o => { const v = o.pp ?? o.r; return (v >= 0 ? "+" : "−") + nf(Math.abs(v) * 100, o.pp != null ? 1 : 0) + (o.pp != null ? " pp" : "%"); };
+  const ch = (o, lab) => { if (o == null) return ""; const v = o.pp ?? o.r, flat = Math.abs(v) < .005, good = o.inv ? v < 0 : v > 0; return `<span class="delta ${flat || o.neutral ? "flat" : good ? "up" : "down"}">${flat ? "" : v > 0 ? "▲" : "▼"} ${chTxt(o)} <small>${esc(lab)}</small></span>`; };
+  // the month's figures for this profession, each with the change on the previous month and on a year earlier
+  const kp = kpiKeys(lens().report).map(k => {
+    const d = KDEF[k], calc = d.calc || ((x, y) => d.now({ a: x, b: y }).v), v = calc(a, b);
+    const cmp = (x, y) => { const p = calc(x, y); return v == null || p == null ? null : d.rate ? { pp: v - p, inv: d.inv } : p ? { r: v / p - 1, inv: d.inv, neutral: d.neutral } : null; };
+    return [d.lab(), v == null ? "—" : d.f(v), m > 0 ? cmp(monthDate(m - 1), monthEnd(m - 1)) : null, m >= 12 ? cmp(monthDate(m - 12), monthEnd(m - 12)) : null];
+  });
   const best = cs[0], up = cs.filter(c => c.newPaid).sort((x, y) => y.newPaid - x.newPaid)[0];
   const lines = [
     S0 && S0.rev ? (rev >= S0.rev ? L(`Revenue grew ${pct(rev / S0.rev - 1)} on the previous month`, `Ricavi in crescita del ${pct(rev / S0.rev - 1)} sul mese precedente`) : L(`Revenue was ${pct(1 - rev / S0.rev)} below the previous month`, `Ricavi del ${pct(1 - rev / S0.rev)} sotto il mese precedente`)) + (SY && SY.rev ? L(` and ${rev >= SY.rev ? "+" : "−"}${pct(Math.abs(rev / SY.rev - 1))} on the same month last year.`, ` e ${rev >= SY.rev ? "+" : "−"}${pct(Math.abs(rev / SY.rev - 1))} sullo stesso mese dell'anno scorso.`) : ".") : null,
+    lensLine(a, b),
     up ? L(`${up.name} brought the most new ${who()} (${nf(up.newPaid)}).`, `${up.name} ha portato più nuovi ${who()} (${nf(up.newPaid)}).`) : null,
     goal ? L(`Monthly goal ${eur(goal)}: ${pct(rev / goal)} reached.`, `Obiettivo mensile ${eur(goal)}: raggiunto al ${pct(rev / goal)}.`) : null,
     imp && imp.n >= 2 && imp.rev && imp.rev[2] != null ? L(`Since working together (${fdate(P.consultStart, { month: "short", year: "numeric" })}): revenue ${imp.rev[2] >= 0 ? "+" : "−"}${pct(Math.abs(imp.rev[2]))} on the same months a year earlier.`, `Da quando lavoriamo insieme (${fdate(P.consultStart, { month: "short", year: "numeric" })}): ricavi ${imp.rev[2] >= 0 ? "+" : "−"}${pct(Math.abs(imp.rev[2]))} sugli stessi mesi dell'anno prima.`) : null,
@@ -2442,7 +2489,7 @@ VIEWS.report = el => {
   ta.onblur = saveNotes;
   $("#repPrint", el).onclick = () => { saveNotes(); doPrint(); };
   $("#repCopy", el).onclick = () => {
-    const txt = [`${L("Monthly report", "Report mensile")} · ${name} · ${mName(a)}`, "", ...kp.map(([l, v, p]) => `${l}: ${v}${p == null ? "" : ` (${p >= 0 ? "+" : "−"}${nf(Math.abs(p) * 100, 0)}% ${L("vs previous month", "vs mese precedente")})`}`), "", ...lines, "", L("Next steps:", "Prossimi passi:"), ...ins.map((i, k) => `${k + 1}. ${i.title}`), ...(ta.value ? ["", ta.value] : [])].join("\n");
+    const txt = [`${L("Monthly report", "Report mensile")} · ${name} · ${mName(a)}`, "", ...kp.map(([l, v, p]) => `${l}: ${v}${p == null ? "" : ` (${chTxt(p)} ${L("vs previous month", "vs mese precedente")})`}`), "", ...lines, "", L("Next steps:", "Prossimi passi:"), ...ins.map((i, k) => `${k + 1}. ${i.title}`), ...(ta.value ? ["", ta.value] : [])].join("\n");
     try { navigator.clipboard.writeText(txt).then(() => toast(L("Copied: paste it in an email or WhatsApp", "Copiato: incollalo in una mail o su WhatsApp")), () => showText(txt)); } catch (e) { showText(txt); }
   };
 };
@@ -2451,6 +2498,442 @@ function doPrint() {
   const framed = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
   if (framed && !window.CLIENTELA_STANDALONE) { toast(L("Printing works in the standalone version. Here, use Copy text.", "La stampa funziona nella versione indipendente. Qui usa Copia testo.")); return; }
   window.print();
+}
+
+/* ================= profession lens =================
+   A tour guide's guests come once: what counts is how many people, how far ahead they book and what
+   they write afterwards. Students, trainees, patients and members stay: what counts is how long they
+   stay, how often they come, whether they renew and how they progress. Each profession gets its own
+   numbers (kpis), charts (panels), report figures and client table columns. */
+const LENSES = {
+  tour: {
+    model: "visit", title: T("What matters for a tour guide", "Cosa conta per una guida turistica"),
+    why: T("Guests come once: what counts is how many people you host, how far ahead they book and what they write afterwards.", "Gli ospiti vengono una volta sola: conta quante persone accompagni, con quanto anticipo prenotano e cosa scrivono dopo."),
+    kpis: ["revenue", "guests", "tours", "group", "perGuest", "ahead", "lead", "reviews"],
+    panels: ["season:8", "ahead:4", "groups:4", "leadDist:4", "reviews:4", "svcTable:12"],
+    report: ["revenue", "guests", "tours", "group", "perGuest", "reviews"],
+  },
+  photo: {
+    model: "visit", title: T("What matters for a photographer", "Cosa conta per un fotografo"),
+    why: T("Clients usually book once: what counts is the value of each shoot, how far ahead the calendar fills and the reviews that bring the next client.", "I clienti di solito prenotano una volta: conta il valore di ogni servizio, con quanto anticipo si riempie il calendario e le recensioni che portano il prossimo cliente."),
+    kpis: ["revenue", "tours", "ticket", "newC", "ahead", "lead", "extras", "reviews"],
+    panels: ["season:8", "ahead:4", "leadDist:6", "reviews:6", "svcTable:12"],
+    report: ["revenue", "tours", "ticket", "newC", "extras", "reviews"],
+  },
+  tutor: {
+    model: "rel", title: T("What matters for a private tutor", "Cosa conta per un insegnante privato"),
+    why: T("Students stay for months: what counts is how long they stay, how many lessons they take and whether they renew.", "Gli studenti restano per mesi: conta quanto restano, quante lezioni fanno e se rinnovano."),
+    kpis: ["revenue", "activeNow", "newC", "stay", "freq", "renewal", "trialConv", "ltv"],
+    panels: ["survival:8", "stayDist:4", "freq:4", "ladder:4", "prepaid:4"],
+    report: ["revenue", "active", "newC", "freq", "renewal", "trialConv"],
+  },
+  trainer: {
+    model: "rel", title: T("What matters for a personal trainer", "Cosa conta per un personal trainer"),
+    why: T("Clients train with you for months: what counts is how long they stay, how often they come and whether they renew.", "I clienti si allenano con te per mesi: conta quanto restano, quanto spesso vengono e se rinnovano."),
+    kpis: ["revenue", "activeNow", "newC", "stay", "freq", "renewal", "noshow", "ltv"],
+    panels: ["survival:8", "stayDist:4", "freq:4", "ladder:4", "prepaid:4"],
+    report: ["revenue", "active", "newC", "freq", "renewal", "noshow"],
+  },
+  physio: {
+    model: "rel", title: T("What matters for a physiotherapist", "Cosa conta per un fisioterapista"),
+    why: T("Patients come for a course of treatment: what counts is how many sessions a course takes, whether they finish it and whether the pain goes down.", "I pazienti vengono per un percorso: conta quante sedute dura, se lo portano a termine e se il dolore scende."),
+    kpis: ["revenue", "newC", "activeNow", "course", "renewal", "noshow", "improved", "ltv"],
+    panels: ["survival:8", "courseDist:4", "freq:4", "ladder:4", "prepaid:4"],
+    report: ["revenue", "newC", "active", "course", "renewal", "noshow"],
+  },
+  yoga: {
+    model: "rel", title: T("What matters for a yoga studio", "Cosa conta per uno studio yoga"),
+    why: T("Members come every week: what counts is how long they stay, how often they come and how full the classes are.", "Gli iscritti vengono ogni settimana: conta quanto restano, quanto spesso vengono e quanto sono piene le lezioni."),
+    kpis: ["revenue", "activeNow", "newC", "stay", "freq", "fill", "churn", "ltv"],
+    panels: ["survival:8", "stayDist:4", "freq:4", "ladder:4", "prepaid:4"],
+    report: ["revenue", "active", "newC", "freq", "fill", "churn"],
+  },
+};
+const lens = () => LENSES[P.id] || (P.oneoff ? LENSES.tour : LENSES.trainer);
+const isVisit = () => lens().model === "visit";
+const unit = (pl = true) => tr(pl ? P.unit : P.unit1) || (pl ? L("sessions", "sessioni") : L("session", "sessione"));
+const Cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
+// Italian articles: "gli studenti", "i clienti"; "degli ospiti", "dei pazienti"
+const gliIt = () => /^([aeiouh]|s[^aeiou]|z|gn|ps)/i.test(who()) ? "gli" : "i";
+const gliWho = () => gliIt() + " " + who(), degliWho = () => (gliIt() === "gli" ? "degli " : "dei ") + who();
+const MON = 30.44 * DAY;
+const ratingField = () => P.fields.find(f => f.auto === "rating" || f.k === "rating");
+const hasSize = () => P.fields.some(f => f.auto === "size");
+const hasPack = () => P.services.some(s => s.kind === "pack");
+
+/* ---------- one pass over the data, rebuilt whenever the monthly figures are ---------- */
+let LXC = null;
+function LX() {
+  if (LXC && LXC.db === DB && LXC.M === M) return LXC;
+  const n = DB.clients.length, act = Array.from({ length: n }, () => []), att = new Array(n).fill(0);
+  const gm = new Array(NM).fill(0), tm = new Array(NM).fill(0), fb = new Array(NM).fill(0), fcS = Array.from({ length: NM }, () => new Set());
+  const svcTx = Array.from({ length: n }, () => []);
+  for (const x of DB.txns) if (x.k === "svc" && x.st !== "refund" && !isTrial(x.s) && svcTx[x.c]) { svcTx[x.c].push(x); act[x.c].push(+x.d); }
+  for (const a of svcTx) a.sort((x, y) => x.d - y.d);
+  const lead = new Array(DB.books.length).fill(null), lm = Array.from({ length: NM }, () => []);
+  DB.books.forEach((b, i) => {
+    if (isTrial(b.s) || !act[b.c]) return;
+    const mi = monthIdx(b.d), inM = mi >= 0 && mi < NM;
+    if (inM) tm[mi]++;
+    if (b.ns) return;
+    act[b.c].push(+b.d); att[b.c]++;
+    if (inM) { gm[mi] += b.size || DB.clients[b.c]?.size || 1; fb[mi]++; fcS[mi].add(b.c); }
+    // lead time: days from the payment that bought it to the day it happened
+    const txs = svcTx[b.c]; let best = null;
+    for (const x of txs) { if (+x.d > +b.d + DAY / 2) break; if (!best || x.s === b.s || best.s !== b.s) best = x; }
+    if (best) { lead[i] = Math.max(0, Math.round((b.d - best.d) / DAY)); if (inM) lm[mi].push(lead[i]); }
+  });
+  for (const a of act) a.sort((x, y) => x - y);
+  const rf = ratingField(), rm = new Array(NM).fill(0);
+  if (rf) for (const c of DB.clients) { const v = +c.f[rf.k]; if (v > 0 && c.last) { const mi = monthIdx(c.last); if (mi >= 0 && mi < NM) rm[mi]++; } }
+  LXC = { db: DB, M, act, att, svcTx, lead, gm, tm, fb, fc: fcS.map(s => s.size), lm: lm.map(a => a.length ? median(a) : null), rm, memo: new Map() };
+  return LXC;
+}
+function memo(key, fn) { const X = LX(); if (!X.memo.has(key)) X.memo.set(key, fn()); return X.memo.get(key); }
+const PS = (a, b) => memo("ps" + +a + ":" + +b, () => periodStats(a, b));
+const div = (x, y) => y ? x / y : null;
+const lastBefore = (arr, t) => { let lo = 0, hi = arr.length - 1, r = null; while (lo <= hi) { const m = (lo + hi) >> 1; if (arr[m] <= t) { r = arr[m]; lo = m + 1; } else hi = m - 1; } return r; };
+
+// one-off visits in a range: groups hosted, people, no-shows, lead times
+function VS(a, b) {
+  return memo("vs" + +a + ":" + +b, () => {
+    const X = LX(); let groups = 0, guests = 0, ns = 0; const leads = [];
+    DB.books.forEach((bk, i) => { if (!inR(bk.d, a, b) || isTrial(bk.s)) return; if (bk.ns) { ns++; return; } groups++; guests += bk.size || DB.clients[bk.c]?.size || 1; if (X.lead[i] != null) leads.push(X.lead[i]); });
+    return { groups, guests, ns, leads, lead: leads.length ? median(leads) : null };
+  });
+}
+function reviewsIn(a, b) {
+  const rf = ratingField(); if (!rf) return { n: 0, avg: null };
+  const v = DB.clients.filter(c => c.last && inR(c.last, a, b) && +c.f[rf.k] > 0).map(c => +c.f[rf.k]);
+  return { n: v.length, avg: v.length ? avg(v) : null };
+}
+// bookings already in the calendar for the next `days`, and how many were booked at this point a year ago
+function forward(days = 30) {
+  return memo("fw" + days, () => {
+    const X = LX(), end = +NOW + days * DAY;
+    let groups = 0, guests = 0, value = 0;
+    for (const u of DB.upcoming || []) {
+      if (+u.d > end || isTrial(u.s)) continue; const c = DB.clients[u.c]; if (!c) continue;
+      groups++; guests += c.size || 1;
+      const tx = [...X.svcTx[c.id]].reverse().find(x => x.s === u.s); value += tx ? tx.a : priceFor(c, "svc", u.s);
+    }
+    const ly = +NOW - 365 * DAY; let lyGroups = 0, lyGuests = 0, seen = false;
+    DB.books.forEach((b, i) => { if (+b.d <= ly || +b.d > ly + days * DAY || isTrial(b.s) || X.lead[i] == null) return; seen = true; if ((b.d - ly) / DAY <= X.lead[i]) { lyGroups++; lyGuests += b.size || 1; } });
+    // too few bookings a year ago make the comparison noise
+    const hasLy = DB.txns.some(x => +x.d < ly - 30 * DAY) && seen && lyGroups >= 15;
+    return { groups, guests, value, ly: hasLy ? { groups: lyGroups, guests: lyGuests } : null };
+  });
+}
+// students: who is still coming N months after starting (survival with clients still active counted as ongoing)
+function survival(cutoff = NOW, filter) {
+  const key = "sv" + +cutoff + (filter ? filter.key : "");
+  return memo(key, () => {
+    const X = LX(), K = 24, risk = new Array(K + 1).fill(0), left = new Array(K + 1).fill(0), atNow = +cutoff >= +NOW - DAY;
+    let n = 0;
+    for (const c of DB.clients) {
+      if (!c.first || c.first > cutoff || (filter && !filter.fn(c))) continue;
+      const lt = lastBefore(X.act[c.id], +cutoff) ?? +c.first, t = Math.max(0, (lt - c.first) / MON), m = Math.floor(t);
+      const gone = atNow ? c.status !== "active" : +cutoff - lt > 60 * DAY;
+      n++; for (let k = 0; k <= Math.min(m, K); k++) risk[k]++;
+      if (gone && m <= K) left[m]++;
+    }
+    const S = [1]; for (let k = 0; k < K; k++) S.push(S[k] * (risk[k] ? 1 - left[k] / risk[k] : 1));
+    let mean = 0; for (let k = 0; k < K; k++) mean += (S[k] + S[k + 1]) / 2;
+    let med = null; for (let k = 1; k <= K; k++) if (S[k] < .5) { med = k - 1 + (S[k - 1] - .5) / Math.max(1e-9, S[k - 1] - S[k]); break; }
+    return { n, S, mean, med, maxK: risk.findLastIndex ? risk.findLastIndex(v => v >= 5) : K };
+  });
+}
+function tenure(c) { const X = LX(); const lt = X.act[c.id].length ? X.act[c.id][X.act[c.id].length - 1] : +c.first; return c.first ? Math.max(0, (Math.min(+NOW, lt) - c.first) / MON) : 0; }
+function activeIn(a, b) { const X = LX(); let n = 0; for (const arr of X.act) { const v = lastBefore(arr, +b); if (v != null && v >= +a) n++; } return n; }
+function activeAt(d) { return activeIn(new Date(+d - 45 * DAY), d); }
+// lessons per student per month: attended sessions / (student, month) pairs
+function freqIn(a, b) {
+  return memo("fq" + +a + ":" + +b, () => { const pairs = new Set(); let n = 0; for (const bk of DB.books) { if (!inR(bk.d, a, b) || bk.ns || isTrial(bk.s)) continue; n++; pairs.add(bk.c + ":" + monthIdx(bk.d)); } return pairs.size ? n / pairs.size : null; });
+}
+// packages that ended in the range: renewed (a new purchase followed) or not (the student stopped coming)
+function renewalIn(a, b) {
+  return memo("rn" + +a + ":" + +b, () => {
+    const X = LX(), kinds = hasPack() ? ["pack"] : ["oneoff", "pack"]; let ren = 0, tot = 0;
+    DB.clients.forEach((c, ci) => {
+      const txs = X.svcTx[ci], acts = X.act[ci];
+      txs.forEach((x, j) => {
+        if (!kinds.includes(svcKind(x.s))) return;
+        const nx = txs[j + 1];
+        if (nx) { if (inR(nx.d, a, b)) { tot++; ren++; } return; }
+        const lt = acts.length ? acts[acts.length - 1] : +x.d, dec = lt + 45 * DAY;
+        if (c.status !== "active" && dec <= +NOW && dec >= +a && dec <= +b) tot++;
+      });
+    });
+    return tot ? ren / tot : null;
+  });
+}
+function churnIn(a, b) { const v = []; for (let m = 1; m < NM; m++) { const d = monthDate(m); if (d < a || d > b) continue; const prev = M.act[m - 1], cur = M.act[m]; if (!prev.size) continue; let lost = 0; for (const id of prev) if (!cur.has(id)) lost++; v.push(lost / prev.size); } return v.length ? avg(v) : null; }
+// sessions in the first course of treatment (90 days from the first visit)
+function courseIn(a, b) {
+  return memo("co" + +a + ":" + +b, () => { const X = LX(), v = []; for (const c of DB.clients) { if (!c.first || !inR(c.first, a, b) || NOW - c.first < 30 * DAY) continue; const lim = +c.first + 90 * DAY; v.push(X.act[c.id].filter(t => t <= lim).length - X.svcTx[c.id].filter(x => +x.d <= lim).length || 1); } return v.length ? avg(v) : null; });
+}
+function courseLen(c) { const X = LX(), lim = +c.first + 90 * DAY; return DB.books.filter(b => b.c === c.id && !b.ns && !isTrial(b.s) && +b.d >= +c.first - DAY && +b.d <= lim).length; }
+function fillIn(a, b) { const s = PS(a, b), weeks = Math.max(1, (b - a) / (7 * DAY)); return P.capacity ? (s.books - s.ns) / (P.capacity * weeks) : null; }
+function purchasesOf(c) { return LX().svcTx[c.id].length; }
+function creditLeft(c) { const x = memo("cr", () => new Map(packCredit().map(p => [p.c.id, p]))).get(c.id); return x || null; }
+
+/* ---------- the numbers ---------- */
+const nf0 = v => nf(v), nf1 = v => nf(v, 1);
+const last12 = a => a ? a.slice(NM - 12).map(v => v ?? 0) : null;
+const ratioArr = (x, y) => x.map((v, i) => y[i] ? v / y[i] : 0);
+const KDEF = {
+  revenue: { c: "--blue", lab: () => t("revenue"), f: eur, calc: (a, b) => PS(a, b).rev, sp: () => M.rev },
+  newC: { c: "--coral", lab: () => L("New " + who(), "Nuovi " + who()), f: nf0, calc: (a, b) => PS(a, b).newC, sp: () => M.newC },
+  guests: { c: "--lime", lab: () => Who(), f: nf0, calc: (a, b) => VS(a, b).guests, sp: () => LX().gm, hint: () => L(`people on your ${unit()}`, `persone ai tuoi ${unit()}`) },
+  tours: { c: "--sun", lab: () => Cap(unit()), f: nf0, calc: (a, b) => VS(a, b).groups, sp: () => LX().tm, hint: () => L("bookings that took place", "prenotazioni svolte") },
+  group: { c: "--violet", lab: () => L("People per booking", "Persone per prenotazione"), f: nf1, calc: (a, b) => div(VS(a, b).guests, VS(a, b).groups), sp: () => ratioArr(LX().gm, LX().fb) },
+  perGuest: { c: "--teal", lab: () => L("Revenue per " + who(false), "Ricavo per " + who(false)), f: eur, calc: (a, b) => div(PS(a, b).rev, VS(a, b).guests), sp: () => ratioArr(M.rev, LX().gm), hint: () => L("extras included", "extra inclusi") },
+  ticket: { c: "--teal", lab: () => L("Average booking", "Prenotazione media"), f: eur, calc: (a, b) => div(PS(a, b).rev, PS(a, b).svcN), sp: () => ratioArr(M.rev, M.svcN), hint: () => L("extras included", "extra inclusi") },
+  extras: { c: "--pink", lab: () => t("extrasShare"), f: v => pct(v, 1), rate: 1, calc: (a, b) => div(PS(a, b).ext, PS(a, b).rev), sp: () => ratioArr(M.ext, M.rev), hint: () => L("of revenue from add-ons", "dei ricavi da servizi extra") },
+  lead: { c: "--slate", lab: () => L("Booked ahead", "Anticipo di prenotazione"), f: v => v == null ? "—" : nf(v) + " " + L(v === 1 ? "day" : "days", v === 1 ? "giorno" : "giorni"), calc: (a, b) => VS(a, b).lead, sp: () => LX().lm, hint: () => L("median, booking to " + unit(false), "mediana, dalla prenotazione al " + unit(false)), neutral: 1 },
+  reviews: { c: "--coral", lab: () => L("Reviews", "Recensioni"), f: nf0, calc: (a, b) => reviewsIn(a, b).n, sp: () => LX().rm, hint: r => { const v = reviewsIn(r.a, r.b); return v.avg ? `★ ${nf(v.avg, 1)} ${L("average", "di media")}` : L("ask after every " + unit(false), "chiedila dopo ogni " + unit(false)); } },
+  ahead: {
+    c: "--sun", lab: () => L("Booked, next 30 days", "Prenotati, prossimi 30 giorni"), f: nf0, now: r => {
+      const fw = forward(30), byPeople = hasSize();
+      return { v: byPeople ? fw.guests : fw.groups, p: fw.ly ? (byPeople ? fw.ly.guests : fw.ly.groups) : null, hint: fw.ly ? L("vs this point last year", "vs stesso momento l'anno scorso") : eurK(fw.value) + " " + L("booked", "prenotati") };
+    }, sp: null,
+  },
+  activeNow: { c: "--lime", lab: () => L("Active " + who(), Who() + " attivi"), f: nf0, now: r => ({ v: DB.clients.filter(c => c.status === "active").length, p: activeAt(r.a), hint: L("now, vs the start of the period", "ora, vs inizio periodo") }), sp: () => M.active },
+  active: { c: "--lime", lab: () => L("Active " + who(), Who() + " attivi"), f: nf0, calc: (a, b) => activeIn(a, b), sp: () => M.active },
+  stay: { c: "--violet", lab: () => L("Average stay", "Permanenza media"), f: v => v == null ? "—" : nf(v, 1) + " " + L("months", "mesi"), calc: (a, b) => { const s = survival(b); return s.n >= 5 ? s.mean : null; }, sp: null, hint: () => L("expected, from who stays and who leaves", "attesa, da chi resta e chi lascia") },
+  freq: { c: "--teal", lab: () => L(`${Cap(unit())} per ${who(false)} a month`, `${Cap(unit())} al mese per ${who(false)}`), f: nf1, calc: freqIn, sp: () => ratioArr(LX().fb, LX().fc) },
+  renewal: { c: "--sun", lab: () => L("Package renewals", "Rinnovi dei pacchetti"), f: v => v == null ? "—" : pct(v), rate: 1, calc: renewalIn, sp: null, hint: () => L("of packages that ended", "dei pacchetti finiti") },
+  trialConv: { c: "--pink", lab: () => L("Free trial → paying", "Prova gratuita → pagante"), f: v => v == null ? "—" : pct(v), rate: 1, calc: (a, b) => { const s = trialStats(a, b); return s && s.n ? s.rate : null; }, sp: () => { const s = trialStats(START, NOW); return s ? ratioArr(s.byMc, s.byM) : null; } },
+  churn: { c: "--coral", lab: () => L("Monthly churn", "Abbandono mensile"), f: v => v == null ? "—" : pct(v, 1), rate: 1, inv: 1, calc: churnIn, sp: () => { const z = new Array(NM).fill(0); churnSeries().forEach((v, i) => z[NM - 12 + i] = v || 0); return z; } },
+  noshow: { c: "--coral", lab: () => L("No-shows", "Assenze"), f: v => v == null ? "—" : pct(v, 1), rate: 1, inv: 1, calc: (a, b) => div(PS(a, b).ns, PS(a, b).books), sp: () => ratioArr(M.noshow, M.books), hint: () => L(`of booked ${unit()}`, `delle ${unit()} prenotate`) },
+  fill: { c: "--sun", lab: () => L("Places filled", "Posti occupati"), f: v => v == null ? "—" : pct(v), rate: 1, calc: fillIn, sp: () => LX().fb.map(v => P.capacity ? v / (P.capacity * 4.35) : 0), hint: () => L(`of ${nf(P.capacity)} places a week`, `di ${nf(P.capacity)} posti a settimana`) },
+  course: { c: "--violet", lab: () => L(`${Cap(unit())} per course`, `${Cap(unit())} per percorso`), f: v => v == null ? "—" : nf(v, 1), calc: courseIn, sp: null, hint: () => L("first 90 days of treatment", "primi 90 giorni di trattamento") },
+  improved: { c: "--teal", lab: () => { const r = resultsStats(); return r ? L(`${r.pr.lab()} improved`, `${r.pr.lab()} migliorato`) : L("Improved", "Migliorati"); }, f: v => v == null ? "—" : pct(v), rate: 1, now: () => { const r = resultsStats(); return { v: r && r.n >= 3 ? r.rate : null, p: null, hint: r && r.n >= 3 ? L(`${nf(r.n)} ${who()} with both values`, `${nf(r.n)} ${who()} con entrambi i valori`) : L("record start and latest value", "registra valore iniziale e attuale") }; }, sp: null },
+  ltv: { c: "--slate", lab: () => t("ltv"), f: eur, now: () => ({ v: lifetimeValue(), p: null, hint: L(`average per ${who(false)}, all time`, `media per ${who(false)}, da sempre`) }), sp: null },
+};
+function kpiKeys(list) {
+  return list.map(k => k === "trialConv" && trialSvc() < 0 ? (list.includes("churn") ? "stay" : "churn") : k === "improved" && !(resultsStats()?.n >= 3) ? "stay" : k === "reviews" && !ratingField() ? "extras" : k)
+    .filter((k, i, a) => a.indexOf(k) === i);
+}
+function lensKpis(r) {
+  return kpiKeys(lens().kpis).map(k => {
+    const d = KDEF[k]; let v, p, hint = d.hint ? d.hint(r) : "";
+    if (d.now) { const o = d.now(r); v = o.v; p = o.p; hint = o.hint || hint; }
+    else { v = d.calc(r.a, r.b); p = r.prev ? d.calc(r.prev.a, r.prev.b) : null; }
+    const sp = d.sp ? last12(d.sp()) : null;
+    return { k, lab: d.lab(), v, p, f: d.f, sp: sp && sp.some(x => x) ? sp : null, c: d.c, rate: d.rate, inv: d.inv, neutral: d.neutral, hint };
+  });
+}
+function lensDelta(cur, prev, isRate, inv, neutral) {
+  if (prev == null || cur == null) return "";
+  let v, txt;
+  if (isRate) { v = cur - prev; txt = (v >= 0 ? "+" : "−") + nf(Math.abs(v) * 100, 1) + " pp"; }
+  else { if (!prev) return `<span class="delta flat">—</span>`; v = cur / prev - 1; txt = (v >= 0 ? "+" : "−") + nf(Math.abs(v) * 100, Math.abs(v) < .1 ? 1 : 0) + "%"; }
+  const flat = Math.abs(v) < .005, good = inv ? v < 0 : v > 0;
+  const cls = flat || neutral ? "flat" : good ? "up" : "down";
+  return `<span class="delta ${cls}" title="${esc(t("vsPrev"))}">${flat ? "" : v > 0 ? "▲" : "▼"} ${txt}</span>`;
+}
+function kpiCards(kp) {
+  return `<div class="kpis">${kp.map(k => `<div class="kpi" style="--kc:var(${k.c})"><span class="lab"><i></i>${esc(k.lab)}</span><div class="row"><span class="val" ${k.v != null ? `data-count="${k.v}"` : ""} data-k="${k.k}">${k.v == null ? "—" : k.f(k.v)}</span>${k.sp ? `<span class="spark" data-spark="${k.k}"></span>` : ""}</div><div class="row">${lensDelta(k.v, k.p, k.rate, k.inv, k.neutral) || `<span class="hint">${esc(k.hint || "")}</span>`}${k.p != null && k.v != null && k.hint ? `<span class="hint">${esc(k.hint)}</span>` : ""}</div></div>`).join("")}</div>`;
+}
+function drawKpis(el, kp) {
+  $$("[data-count]", el).forEach(v => { const k = kp.find(x => x.k === v.dataset.k); if (k && k.v != null) countUp(v, k.v, k.f); });
+  kp.forEach(k => { const s = $(`[data-spark="${k.k}"]`, el); if (s) spark(s, k.sp, cssv(k.c)); });
+}
+
+/* ---------- the charts ---------- */
+const ph = (title, sub, right = "") => `<div class="ph"><div><h3>${esc(title)}</h3>${sub ? `<p>${esc(sub)}</p>` : ""}</div>${right}</div>`;
+const periodLab = () => ({ "30": L("last 30 days", "ultimi 30 giorni"), "90": L("last 90 days", "ultimi 90 giorni"), "12": L("last 12 months", "ultimi 12 mesi"), all: L("last 24 months", "ultimi 24 mesi") }[PERIOD]);
+const m12 = () => { const l = []; for (let i = NM - 12; i < NM; i++) l.push(monthLabel(i)); return l; };
+const histo = (vals, edges) => edges.map(([lo, hi]) => vals.filter(v => v >= lo && v <= hi).length);
+const PANELS = {
+  season: {
+    html: () => ph(hasSize() ? L(`${Who()} per month`, `${Who()} al mese`) : L(`${Cap(unit())} per month`, `${Cap(unit())} al mese`), L("Compared with the same month a year earlier. The current month is still running.", "Confronto con lo stesso mese dell'anno prima. Il mese in corso non è finito.")) + `<div class="lz-c"></div>`,
+    draw: h => { const X = LX(), s = hasSize() ? X.gm : X.fb; barChart($(".lz-c", h), { labels: m12(), series: [{ name: L("This year", "Quest'anno"), color: cssv(P.color), values: s.slice(NM - 12) }, { name: L("A year earlier", "Un anno prima"), color: cssv("--soft2"), values: s.slice(NM - 24, NM - 12) }], fmt: nf0, h: 250 }); },
+  },
+  ahead: {
+    html: () => {
+      const f7 = forward(7), f30 = forward(30), by = hasSize(), key = by ? "guests" : "groups", w = by ? who() : unit();
+      const pace = f30.ly && f30.ly[key] ? f30[key] / f30.ly[key] - 1 : null;
+      return ph(L("Already booked", "Già prenotati"), L(`${Cap(w)} in the calendar from today`, `${Cap(w)} in calendario da oggi`)) + `<div class="minis">
+        <div class="mini"><b>${nf(f7[key])}</b><small>${L("next 7 days", "prossimi 7 giorni")}</small></div>
+        <div class="mini"><b>${nf(f30[key])}</b><small>${L("next 30 days", "prossimi 30 giorni")}</small><small class="faint">${eurK(f30.value)}</small></div></div>
+        ${pace != null ? `<p class="muted-p" style="margin:0">${pace >= 0 ? L(`${pct(pace)} more than at this point last year.`, `${pct(pace)} in più rispetto a questo momento l'anno scorso.`) : L(`${pct(-pace)} fewer than at this point last year.`, `${pct(-pace)} in meno rispetto a questo momento l'anno scorso.`)}</p>` : ""}<div class="lz-c"></div>`;
+    },
+    draw: h => {
+      const by = hasSize(), labs = [], vals = [], d0 = new Date(TODAY);
+      for (let w = 0; w < 8; w++) { const a = +d0 + w * 7 * DAY, b = a + 7 * DAY; labs.push(fdate(new Date(a), { day: "numeric", month: "short" })); vals.push(sum((DB.upcoming || []).filter(u => +u.d >= a && +u.d < b && !isTrial(u.s)).map(u => by ? DB.clients[u.c]?.size || 1 : 1))); }
+      barChart($(".lz-c", h), { labels: labs, series: [{ name: by ? Who() : Cap(unit()), color: cssv("--sun"), values: vals }], fmt: nf0, h: 150 });
+    },
+  },
+  groups: {
+    html: () => { const r = rangeFor(PERIOD), v = VS(r.a, r.b); return ph(L("Group size", "Dimensione dei gruppi"), L(`Bookings by number of people · ${periodLab()}`, `Prenotazioni per numero di persone · ${periodLab()}`)) + `<div class="lz-c"></div><p class="hint" style="font-size:.76rem;color:var(--faint);margin:0">${v.groups ? L(`${nf(v.guests / v.groups, 1)} people per booking on average`, `${nf(v.guests / v.groups, 1)} persone per prenotazione in media`) : ""}</p>`; },
+    draw: h => { const r = rangeFor(PERIOD), sz = DB.books.filter(b => inR(b.d, r.a, r.b) && !b.ns && !isTrial(b.s)).map(b => b.size || 1), E = [[1, 1], [2, 2], [3, 4], [5, 8], [9, 15], [16, 999]]; barChart($(".lz-c", h), { labels: ["1", "2", "3–4", "5–8", "9–15", "16+"], series: [{ name: L("Bookings", "Prenotazioni"), color: cssv("--violet"), values: histo(sz, E) }], fmt: nf0, h: 190 }); },
+  },
+  leadDist: {
+    html: () => ph(L("How far ahead they book", "Con quanto anticipo prenotano"), L(`Days between booking and ${unit(false)} · ${periodLab()}`, `Giorni tra prenotazione e ${unit(false)} · ${periodLab()}`)) + `<div class="lz-c"></div><div class="lz-l"></div>`,
+    draw: h => {
+      const r = rangeFor(PERIOD), X = LX(), E = [[0, 3], [4, 7], [8, 14], [15, 30], [31, 60], [61, 9999]];
+      const rows = DB.books.map((b, i) => [b, X.lead[i]]).filter(([b, l]) => l != null && inR(b.d, r.a, r.b) && !b.ns);
+      barChart($(".lz-c", h), { labels: ["0–3", "4–7", "8–14", "15–30", "31–60", "60+"], series: [{ name: L("Bookings", "Prenotazioni"), color: cssv("--slate"), values: histo(rows.map(x => x[1]), E) }], fmt: nf0, h: 170 });
+      const byCh = P.channels.map((c, i) => { const l = rows.filter(([b]) => DB.clients[b.c]?.ch === i).map(x => x[1]); return [tr(c.n), l.length, l.length ? median(l) : 0, i]; }).filter(x => x[1] >= 5).sort((a, b) => b[1] - a[1]).slice(0, 4);
+      $(".lz-l", h).innerHTML = byCh.length ? `<small class="faint" style="display:block;margin:6px 0 4px">${L("Median by channel", "Mediana per canale")}</small>` + byCh.map(([n, , m, i]) => `<div class="rowx"><span><i class="dot" style="background:${col(i)}"></i>${esc(n)}</span><b class="mono">${nf(m)} ${L("days", "gg")}</b></div>`).join("") : "";
+    },
+  },
+  reviews: {
+    html: () => {
+      const r = rangeFor(PERIOD), rv = reviewsIn(r.a, r.b), groups = DB.clients.filter(c => c.first && c.last && inR(c.last, r.a, r.b)).length;
+      return ph(L("Reviews", "Recensioni"), periodLab()) + `<div class="minis">
+        <div class="mini"><b>${rv.avg ? "★ " + nf(rv.avg, 1) : "—"}</b><small>${L("average", "media")}</small></div>
+        <div class="mini"><b>${nf(rv.n)}</b><small>${L("reviews", "recensioni")}</small><small class="faint">${groups ? pct(rv.n / groups) + " " + L("of " + who(), degliWho()) : ""}</small></div></div><div class="lz-c"></div>
+        <p class="hint" style="font-size:.76rem;color:var(--faint);margin:0">${L(`Ask on the day of the ${unit(false)}: reviews are what new ${who()} read first.`, `Chiedila il giorno stesso: le recensioni sono la prima cosa che leggono i nuovi ${who()}.`)}</p>`;
+    },
+    draw: h => barChart($(".lz-c", h), { labels: m12(), series: [{ name: L("Reviews", "Recensioni"), color: cssv("--coral"), values: LX().rm.slice(NM - 12) }], fmt: nf0, h: 140 }),
+  },
+  svcTable: {
+    html: () => {
+      const r = rangeFor(PERIOD), X = LX(), rf = ratingField(), by = hasSize();
+      const rows = P.services.map((s, i) => {
+        if (s.trial) return null;
+        let n = 0, ppl = 0, rev = 0, ext = 0; const st = [];
+        DB.books.forEach(b => { if (b.s !== i || b.ns || !inR(b.d, r.a, r.b)) return; n++; ppl += b.size || 1; });
+        for (const x of DB.txns) { if (!inR(x.d, r.a, r.b) || x.st === "refund") continue; if (x.k === "svc" && x.s === i) rev += x.a; }
+        for (const c of DB.clients) { const last = X.svcTx[c.id][X.svcTx[c.id].length - 1]; if (!last || last.s !== i || !inR(last.d, r.a, r.b)) continue; for (const ti of c.txIdx) { const x = DB.txns[ti]; if (x.k === "ext" && Math.abs(x.d - last.d) < 2 * DAY) ext += x.a; } if (rf && +c.f[rf.k] > 0) st.push(+c.f[rf.k]); }
+        return { i, n: tr(s.n), b: n, ppl, rev, ext, star: st.length >= 3 ? avg(st) : null };
+      }).filter(x => x && (x.b || x.rev)).sort((a, b) => b.rev - a.rev);
+      const tot = sum(rows.map(x => x.rev)) || 1;
+      return ph(L(`${Cap(unit())} compared`, `${Cap(unit())} a confronto`), L(`What each one brings · ${periodLab()}`, `Quanto porta ognuno · ${periodLab()}`)) + `<div class="tablewrap"><table class="lt"><thead><tr><th>${esc(Cap(unit(false)))}</th><th class="num">${L("Bookings", "Prenotazioni")}</th>${by ? `<th class="num">${Who()}</th><th class="num">${L("Per booking", "Per prenotazione")}</th>` : ""}<th class="num">${t("revenue")}</th><th class="num">${by ? L("Per " + who(false), "Per " + who(false)) : L("Average", "Media")}</th><th class="num">${L("Extras", "Extra")}</th>${rf ? `<th class="num">★</th>` : ""}</tr></thead><tbody>
+        ${rows.map(x => `<tr><td><span class="chip"><i style="background:${col(x.i)}"></i>${esc(x.n)}</span><div class="lt-bar"><i style="width:${(x.rev / tot * 100).toFixed(1)}%;background:${col(x.i)}"></i></div></td><td class="num">${nf(x.b)}</td>${by ? `<td class="num">${nf(x.ppl)}</td><td class="num">${x.b ? nf(x.ppl / x.b, 1) : "—"}</td>` : ""}<td class="num"><b>${eur(x.rev)}</b></td><td class="num">${(by ? x.ppl : x.b) ? eur(x.rev / (by ? x.ppl : x.b)) : "—"}</td><td class="num">${x.ext ? eur(x.ext) : "—"}</td>${rf ? `<td class="num">${x.star ? nf(x.star, 1) : "—"}</td>` : ""}</tr>`).join("")}</tbody></table></div>`;
+    },
+  },
+  survival: {
+    html: () => {
+      const s = survival(), since = P.consultStart ? survival(NOW, { key: "cs", fn: c => c.first >= P.consultStart }) : null;
+      const showSince = since && since.n >= 8;
+      const lead = s.n < 5 ? L(`Too few ${who()} yet to see how long they stay.`, `Ancora troppo pochi ${who()} per vedere quanto restano.`)
+        : (s.med != null ? L(`Half of your ${who()} stay longer than ${nf(s.med, 1)} months.`, `La metà dei tuoi ${who()} resta più di ${nf(s.med, 1)} mesi.`) : L(`More than half of your ${who()} are still with you after two years.`, `Più della metà dei tuoi ${who()} è ancora con te dopo due anni.`)) + " " + L(`${pct(1 - s.S[2])} stop within the first two months.`, `Il ${pct(1 - s.S[2])} si ferma entro i primi due mesi.`);
+      return ph(L(`How long ${who()} stay`, `Quanto restano ${gliWho()}`), L(`Share still coming, month by month after they start`, `Quota che continua a venire, mese per mese dall'inizio`), `<div class="legend"><span><i style="background:${cssv(P.color)}"></i>${L("All", "Tutti")}</span>${showSince ? `<span><i class="dash" style="border-color:var(--coral)"></i>${L("Since working together", "Da quando lavoriamo insieme")}</span>` : ""}</div>`) + `<p class="muted-p" style="margin:0 0 4px">${esc(lead)}</p><div class="lz-c"></div>`;
+    },
+    draw: h => {
+      const s = survival(), K = 18, since = P.consultStart ? survival(NOW, { key: "cs", fn: c => c.first >= P.consultStart }) : null;
+      const labels = [...Array(K + 1)].map((_, k) => k ? k + " " + L("mo", "m") : L("Start", "Inizio"));
+      const series = [{ name: L("All", "Tutti"), color: cssv(P.color), values: s.S.slice(0, K + 1), area: 1, width: 2.8 }];
+      if (since && since.n >= 8) { const maxK = Math.floor((NOW - P.consultStart) / MON); series.push({ name: L("Since working together", "Da quando lavoriamo insieme"), color: cssv("--coral"), values: since.S.slice(0, K + 1).map((v, k) => k <= maxK ? v : null), dash: 1, width: 2.2 }); }
+      lineChart($(".lz-c", h), { labels, series, fmt: v => pct(v), max: 1, h: 240, tipTitle: i => i ? L(`After ${i} months`, `Dopo ${i} mesi`) : L("Start", "Inizio") });
+    },
+  },
+  stayDist: {
+    html: () => ph(L("Length of stay", "Durata della permanenza"), L(`Every paying ${who(false)}, by months with you`, `Ogni ${who(false)} pagante, per mesi con te`), `<div class="legend"><span><i style="background:var(--teal)"></i>${L("Still coming", "Ancora attivi")}</span><span><i style="background:var(--soft2)"></i>${L("Left", "Usciti")}</span></div>`) + `<div class="lz-c"></div>`,
+    draw: h => {
+      const E = [[0, .999], [1, 2.999], [3, 5.999], [6, 11.999], [12, 9999]], paid = DB.clients.filter(c => c.first);
+      const on = paid.filter(c => c.status === "active").map(tenure), off = paid.filter(c => c.status !== "active").map(tenure);
+      barChart($(".lz-c", h), { labels: [L("<1 mo", "<1 m"), "1–2", "3–5", "6–11", "12+"], series: [{ name: L("Still coming", "Ancora attivi"), color: cssv("--teal"), values: histo(on, E) }, { name: L("Left", "Usciti"), color: cssv("--soft2"), values: histo(off, E) }], stacked: 1, fmt: nf0, h: 210 });
+    },
+  },
+  freq: {
+    html: () => { const r = rangeFor(PERIOD), v = freqIn(r.a, r.b); return ph(L(`${Cap(unit())} per ${who(false)}`, `${Cap(unit())} per ${who(false)}`), L("Average a month, for those who came", "Media al mese, per chi è venuto")) + `<div class="minis"><div class="mini"><b>${v == null ? "—" : nf(v, 1)}</b><small>${periodLab()}</small></div></div><div class="lz-c"></div>`; },
+    draw: h => { const X = LX(); lineChart($(".lz-c", h), { labels: m12(), series: [{ name: Cap(unit()), color: cssv("--teal"), values: ratioArr(X.fb, X.fc).slice(NM - 12).map(v => v || null), area: 1 }], fmt: v => nf(v, 1), h: 150 }); },
+  },
+  ladder: {
+    html: () => ph(L("Who buys again", "Chi compra di nuovo"), L(`How far ${who()} go, from the first purchase on`, `Fin dove arrivano ${gliWho()}, dal primo acquisto in poi`)) + `<div class="lz-r"></div>`,
+    draw: h => {
+      const paid = DB.clients.filter(c => c.first), n = paid.map(purchasesOf), ti = trialSvc();
+      const steps = [];
+      if (ti >= 0) { const tried = new Set(DB.books.filter(b => b.s === ti).map(b => b.c)); steps.push([L("Free trial", "Prova gratuita"), tried.size]); }
+      steps.push([L("1st purchase", "1° acquisto"), paid.length], [L("2nd", "2°"), n.filter(v => v >= 2).length], [L("3rd", "3°"), n.filter(v => v >= 3).length], [L("4th or more", "4° o più"), n.filter(v => v >= 4).length]);
+      rankList($(".lz-r", h), steps.map(([lab, v], i) => ({ label: lab, value: v, color: cssv(i ? "--sun" : "--pink"), right: nf(v) + (i ? ` · <small>${pct(v / Math.max(1, steps[i - 1][1]))}</small>` : "") })));
+    },
+  },
+  prepaid: {
+    html: () => {
+      if (!hasPack()) return ph(L("Plans", "Abbonamenti"), "") + `<p class="muted-p">${L("No packages in the price list.", "Nessun pacchetto nel listino.")}</p>`;
+      const pc = packCredit().filter(x => x.c.status === "active" && x.left + x.booked > 0), left = sum(pc.map(x => x.left + x.booked));
+      const val = sum(pc.map(x => (x.left + x.booked) * (x.p.a / Math.max(1, x.total))));
+      return ph(L(`${Cap(unit())} already paid for`, `${Cap(unit())} già pagate`), L(`Credit that active ${who()} still have to use`, `Credito che ${gliWho()} attivi devono ancora usare`)) + `<div class="minis">
+        <div class="mini"><b>${nf(left)}</b><small>${unit()}</small><small class="faint">${nf(pc.length)} ${who()}</small></div>
+        <div class="mini"><b>${eurK(val)}</b><small>${L("value to deliver", "valore da erogare")}</small></div></div>
+        <p class="hint" style="font-size:.76rem;color:var(--faint);margin:0">${L("Paid in advance: it is in the bank but not earned until the " + unit() + " take place.", "Pagato in anticipo: è già incassato ma va ancora erogato.")}</p>`;
+    },
+  },
+  courseDist: {
+    html: () => ph(L("Sessions per course", "Sedute per percorso"), L("First 90 days of every patient", "Primi 90 giorni di ogni paziente")) + `<div class="lz-c"></div>`,
+    draw: h => { const v = DB.clients.filter(c => c.first && NOW - c.first > 30 * DAY).map(courseLen), E = [[0, 1], [2, 3], [4, 5], [6, 8], [9, 999]]; barChart($(".lz-c", h), { labels: ["1", "2–3", "4–5", "6–8", "9+"], series: [{ name: L("Patients", "Pazienti"), color: cssv("--violet"), values: histo(v, E) }], fmt: nf0, h: 210 }); },
+  },
+};
+function lensPanelsHtml() {
+  const lz = lens();
+  return `<div class="lens-h"><span class="eyebrow">${esc(tr(P.name))}</span><h3>${esc(tr(lz.title))}</h3><p>${esc(tr(lz.why))}</p></div>
+    <div class="grid lens-g">${lz.panels.map(s => { const [k, w] = s.split(":"); return `<div class="panel c${w}" data-lz="${k}">${PANELS[k].html()}</div>`; }).join("")}</div>`;
+}
+function drawLensPanels(el) { $$("[data-lz]", el).forEach(h => { const p = PANELS[h.dataset.lz]; if (p.draw) p.draw(h); }); }
+
+/* ---------- clients table: columns that fit how the profession sells ---------- */
+function keyField() { return P.fields.find(f => f.k === "level1") || P.fields.find(f => f.auto === "segment") || P.fields.find(f => f.opts && !["mode", "deliv"].includes(f.k)); }
+function statusCell(c) { return isVisit() && c.next ? `<span class="pill active">${L("Booked", "Prenotato")}</span>` : pill(c.status); }
+function lastSvcName(c) { const s = LX().svcTx[c.id]; const x = s[s.length - 1]; return x ? tr(P.services[x.s]?.n) : "—"; }
+function visitDate(c) { if (c.next) return c.next; const X = LX(); const a = X.act[c.id]; return a.length ? new Date(a[a.length - 1]) : c.last; }
+function tableCols() {
+  const name = { k: "name", lab: Who(false), val: c => c.name, cell: c => `<div class="who">${avatar(c)}<div><b>${esc(c.name)}</b><small>${esc(c.email)}</small></div></div>` };
+  const ch = { k: "ch", lab: t("channel"), val: c => chName(c.ch), cell: c => `<span class="chip"><i style="background:${col(c.ch)}"></i>${esc(chName(c.ch))}</span>` };
+  const spent = { k: "spent", lab: t("spent"), num: 1, val: c => c.spent, cell: c => `<b>${eur(c.spent)}</b>` };
+  const status = { k: "status", lab: t("status"), val: c => (c.next ? -1 : ["active", "risk", "lapsed", "lead"].indexOf(c.status)), cell: statusCell };
+  if (isVisit()) {
+    const rf = ratingField();
+    return [name,
+      { k: "svc", lab: Cap(unit(false)), val: lastSvcName, cell: c => esc(lastSvcName(c)) },
+      { k: "date", lab: L("Date", "Data"), val: c => +(visitDate(c) || 0), cell: c => c.next ? `<b>${fdate(c.next)}</b>` : fdate(visitDate(c)) },
+      ...(hasSize() ? [{ k: "size", lab: L("People", "Persone"), num: 1, val: c => c.size || 1, cell: c => nf(c.size || 1) }] : []),
+      ch, { k: "origin", lab: t("origin"), val: c => c.origin, cell: c => esc(c.origin) },
+      ...(rf ? [{ k: "rating", lab: "★", num: 1, val: c => +c.f[rf.k] || 0, cell: c => +c.f[rf.k] > 0 ? `<span style="color:var(--sun)">${"★".repeat(+c.f[rf.k])}</span>` : `<span class="faint">—</span>` }] : []),
+      spent, status];
+  }
+  const kf = keyField(), X = LX();
+  return [name,
+    { k: "first", lab: L("Since", "Dal"), val: c => +(c.first || 0), cell: c => fdate(c.first, { month: "short", year: "numeric" }) },
+    { k: "stay", lab: L("Months", "Mesi"), num: 1, val: c => c.first ? tenure(c) : -1, cell: c => c.first ? nf(Math.max(1, Math.round(tenure(c)))) : "—" },
+    { k: "n", lab: Cap(unit()), num: 1, val: c => X.att[c.id], cell: c => nf(X.att[c.id]) },
+    ...(hasPack() ? [{ k: "credit", lab: L("Left", "Rimaste"), val: c => { const x = creditLeft(c); return x ? x.left : -1; }, cell: c => { const x = creditLeft(c); return x && c.status !== "lapsed" ? `<span class="cr" title="${esc(L(`${x.used} used, ${x.booked} booked, ${x.left} left`, `${x.used} usate, ${x.booked} prenotate, ${x.left} rimaste`))}"><b>${x.left + x.booked}</b>/${x.total}<i><u style="width:${((x.used / x.total) * 100).toFixed(0)}%"></u></i></span>` : `<span class="faint">—</span>`; } }] : []),
+    ...(kf ? [{ k: "kf", lab: tr(kf.n), val: c => fieldValue(c, kf), cell: c => esc(fieldValue(c, kf)) }] : []),
+    { k: "last", lab: L(`Last ${unit(false)}`, `Ultima ${unit(false)}`), val: c => +(c.last || 0), cell: c => fdate(c.last, { day: "numeric", month: "short" }) },
+    ch, spent, status];
+}
+
+/* ---------- client card: the few numbers that matter for this kind of client ---------- */
+function drawerMinis(c, bk) {
+  const ns = bk.filter(b => b.ns).length, rf = ratingField(), X = LX();
+  let m;
+  if (isVisit()) {
+    const i = DB.books.findIndex(b => b.c === c.id && !b.ns && !isTrial(b.s)), lead = i >= 0 ? X.lead[i] : null;
+    m = [[eur(c.spent), t("spent")],
+      hasSize() ? [nf(c.size || 1), L("People", "Persone")] : [nf(c.n), Cap(unit())],
+      c.next ? [fdate(c.next, { day: "numeric", month: "short" }), L("Booked for", "Prenotato per")] : [lead == null ? "—" : nf(lead) + " " + L("d", "gg"), L("Booked ahead", "Anticipo")],
+      rf ? [+c.f[rf.k] > 0 ? "★ " + c.f[rf.k] : "—", L("Review", "Recensione")] : [nf(c.n), L("Purchases", "Acquisti")]];
+  } else {
+    const cr = hasPack() ? creditLeft(c) : null;
+    m = [[eur(c.spent), t("spent")], [c.first ? nf(Math.max(1, Math.round(tenure(c)))) : "—", L("Months with you", "Mesi con te")], [nf(X.att[c.id]), Cap(unit()) + (ns ? " · " + ns + " " + L("missed", "saltate") : "")],
+      cr && c.status !== "lapsed" ? [nf(cr.left), L("Left in the package", "Rimaste nel pacchetto")] : [nf(purchasesOf(c)), L("Purchases", "Acquisti")]];
+  }
+  return `<div class="minis m4">${m.map(([v, l]) => `<div class="mini"><b>${esc(v)}</b><small>${esc(l)}</small></div>`).join("")}</div>`;
+}
+
+/* ---------- insights that only make sense for one kind of business ---------- */
+function lensInsights(out) {
+  if (isVisit()) {
+    const r = rangeFor("12"), v = VS(r.a, r.b), rv = reviewsIn(r.a, r.b), groups = DB.clients.filter(c => c.first && c.last && inR(c.last, r.a, r.b)).length;
+    if (ratingField() && groups >= 20) { const rate = rv.n / groups; if (rate < .5) out.push({ tag: "opp", score: 8.1, title: L(`Only ${pct(rate)} of ${who()} leave a review`, `Solo il ${pct(rate)} ${degliWho()} lascia una recensione`), text: L(`${nf(groups - rv.n)} ${who()} in the last 12 months did not write one. A short message with the link on the evening of the ${unit(false)} is the cheapest way to rank higher where new ${who()} search.`, `${nf(groups - rv.n)} ${who()} negli ultimi 12 mesi non l'hanno scritta. Un breve messaggio con il link la sera stessa è il modo più economico per salire dove i nuovi ${who()} cercano.`), impact: [L("Reviews missing", "Recensioni mancanti"), nf(groups - rv.n)] }); }
+    if (v.leads.length >= 30) { const late = v.leads.filter(d => d <= 3).length / v.leads.length; if (late >= .25) out.push({ tag: "idea", score: 7.2, title: L(`${pct(late)} of bookings arrive in the last 3 days`, `Il ${pct(late)} delle prenotazioni arriva negli ultimi 3 giorni`), text: L(`Last-minute ${who()} decide on their phone, on the spot. Keeping availability open on the channels they use and answering messages fast is worth more than early-bird discounts.`, `Chi prenota all'ultimo decide dal telefono, sul posto. Tenere aperta la disponibilità sui canali che usano e rispondere in fretta vale più degli sconti per chi prenota prima.`), impact: [L("Median lead", "Anticipo mediano"), nf(v.lead) + " " + L("days", "giorni")] }); }
+    const fw = forward(30); if (fw.ly) { const p = (hasSize() ? fw.guests / fw.ly.guests : fw.groups / Math.max(1, fw.ly.groups)) - 1; if (Math.abs(p) >= .1) out.push({ tag: p > 0 ? "info" : "risk", score: p > 0 ? 6.5 : 8.4, title: p > 0 ? L(`Next month is ${pct(p)} ahead of last year`, `Il prossimo mese è avanti del ${pct(p)} sull'anno scorso`) : L(`Next month is ${pct(-p)} behind last year`, `Il prossimo mese è indietro del ${pct(-p)} sull'anno scorso`), text: p > 0 ? L("Bookings already in the calendar are above the same point last year. Check that guides and capacity are ready.", "Le prenotazioni già in calendario sono sopra lo stesso momento dell'anno scorso. Verifica che disponibilità e posti siano pronti.") : L("Fewer bookings are in the calendar than at this point last year. A push on the channels that bring last-minute bookings can still fill the gap.", "In calendario ci sono meno prenotazioni rispetto a questo momento l'anno scorso. Una spinta sui canali che portano prenotazioni last minute può ancora colmare il divario."), impact: [L("Booked, 30 days", "Prenotati, 30 giorni"), nf(hasSize() ? fw.guests : fw.groups)] }); }
+  } else {
+    const s = survival(); if (s.n >= 20) { const early = 1 - s.S[2]; if (early >= .2) { const lost = Math.round(s.n * early), val = lifetimeValue(); out.push({ tag: "opp", score: 8.7, title: L(`${pct(early)} of ${who()} stop within two months`, `Il ${pct(early)} ${degliWho()} si ferma entro due mesi`), text: L(`The first weeks decide whether a ${who(false)} stays. A short check-in after the third ${unit(false)} (how is it going, what would you change) and a clear plan for the next month keep more of them.`, `Le prime settimane decidono se un ${who(false)} resta. Un breve confronto dopo la terza ${unit(false)} (come va, cosa cambieresti) e un piano chiaro per il mese dopo ne trattengono di più.`), impact: [L("Keeping 1 in 5 of them", "Trattenerne 1 su 5"), eurK(lost * .2 * val * .5)] }); } }
+    const r = rangeFor("12"), rn = renewalIn(r.a, r.b); if (rn != null && rn < .6 && hasPack()) out.push({ tag: "opp", score: 8, title: L(`${pct(rn)} of finished packages are renewed`, `Il ${pct(rn)} dei pacchetti finiti viene rinnovato`), text: L(`Propose the next package one or two ${unit()} before the end, with the progress made so far in front of the ${who(false)}. It is easier than finding a new ${who(false)}.`, `Proponi il pacchetto successivo una o due ${unit()} prima della fine, mostrando i progressi fatti. È più facile che trovare un nuovo ${who(false)}.`), impact: [L("Renewal rate", "Tasso di rinnovo"), pct(rn)] });
+  }
+}
+
+// one sentence for the monthly report, in the profession's own terms
+function lensLine(a, b) {
+  if (isVisit()) { const v = VS(a, b); if (!v.groups) return null; return hasSize() ? L(`${nf(v.guests)} ${who()} on ${nf(v.groups)} ${unit()}, ${nf(v.guests / v.groups, 1)} people per booking${v.lead != null ? `, booked ${nf(v.lead)} days ahead (median)` : ""}.`, `${nf(v.guests)} ${who()} in ${nf(v.groups)} ${unit()}, ${nf(v.guests / v.groups, 1)} persone per prenotazione${v.lead != null ? `, prenotati con ${nf(v.lead)} giorni di anticipo (mediana)` : ""}.`) : L(`${nf(v.groups)} ${unit()}${v.lead != null ? `, booked ${nf(v.lead)} days ahead (median)` : ""}.`, `${nf(v.groups)} ${unit()}${v.lead != null ? `, prenotati con ${nf(v.lead)} giorni di anticipo (mediana)` : ""}.`); }
+  const act = activeIn(a, b), f = freqIn(a, b), rn = renewalIn(a, b); if (!act) return null;
+  return L(`${nf(act)} active ${who()}${f ? `, ${nf(f, 1)} ${unit()} each` : ""}${rn != null ? `; ${pct(rn)} of the packages that ended were renewed` : ""}.`, `${nf(act)} ${who()} attivi${f ? `, ${nf(f, 1)} ${unit()} a testa` : ""}${rn != null ? `; rinnovato il ${pct(rn)} dei pacchetti finiti` : ""}.`);
 }
 
 /* ================= persistence: saved workspaces in the artifact database =================
@@ -2534,7 +3017,9 @@ function buildDB(chunks) {
   db.txns.forEach(x => x.c = remap.get(x.c)); db.books.forEach(x => x.c = remap.get(x.c)); db.upcoming.forEach(x => x.c = remap.get(x.c));
   db.txns.sort((a, b) => a.d - b.d); db.txns.forEach((x, i) => { x.id = i; db.clients[x.c].txIdx.push(i); });
   db.books.sort((a, b) => a.d - b.d); db.upcoming.sort((a, b) => a.d - b.d);
+  indexVisits(db);
   for (const c of db.clients) refreshClient(db, c);
+  delete db._seen; delete db._next;
   return db;
 }
 
@@ -2568,7 +3053,7 @@ function rebuildFromStore(first) {
   else renderViewQuiet();
 }
 const DEMO_VARIANT = {};
-// key: a profession id ("tour") for its example, or "@" + profile id ("@ombrello") for a client profile
+// key: a profession id ("tour") for its example, or "@" + profile id ("@name") for a client profile
 function openDemo(key) {
   if (STORE.unsubCh) { STORE.unsubCh(); STORE.unsubCh = null; }
   Object.assign(STORE, { active: false, wsId: null, meta: null, loaded: false });
@@ -2977,7 +3462,7 @@ async function importBackup(obj) {
   return { nProf, nWs };
 }
 
-/* ================= import from Lucia's student portal (italianwithlucia.com) =================
+/* ================= import from a student portal export (CSV of students, packages, lessons) =================
    The portal keeps students, packages and lessons in Supabase. Lucia exports the three tables
    as CSV (Table editor > table > Export > CSV) and drops them here. The portal is the source of
    truth: a student imported again gets their packages and lessons rebuilt, so re-importing every
@@ -3076,9 +3561,10 @@ function importPortal(texts) {
   computeMonthly();
   return { nNew, nUpd, nPay, nSess, students: T0.students.length, hasPk: !!T0.packages, hasLs: !!T0.lessons };
 }
+const portalSite = () => (STORE.active ? STORE.meta?.site : null) || profileById(P.profile || STORE.meta?.profile)?.site || L("the portal", "il portale");
 function portalPanelHtml() {
   if (P.portal !== "lucia") return "";
-  return `<div class="panel c12" id="portalP" style="border-color:var(--violet)"><div class="ph"><div><h3>${L("Import from Lucia's student portal", "Importa dal portale studenti di Lucia")}</h3><p>${L("Students, packages and lessons from italianwithlucia.com, in one go. Import again each month: nothing is duplicated.", "Studenti, pacchetti e lezioni da italianwithlucia.com, in un colpo. Reimporta ogni mese: niente si duplica.")}</p></div></div>
+  return `<div class="panel c12" id="portalP" style="border-color:var(--violet)"><div class="ph"><div><h3>${L("Import from the student portal", "Importa dal portale studenti")}</h3><p>${L("Students, packages and lessons from " + portalSite() + ", in one go. Import again each month: nothing is duplicated.", "Studenti, pacchetti e lezioni da " + portalSite() + ", in un colpo. Reimporta ogni mese: niente si duplica.")}</p></div></div>
     <div class="grid" style="gap:14px;margin:0"><ol class="steps c6"><li>${L("Open Supabase, project of the portal, then <b>Table editor</b>.", "Apri Supabase, progetto del portale, poi <b>Table editor</b>.")}</li><li>${L("Open <b>students</b>, then <b>Export → Export table as CSV</b>. Do the same for <b>packages</b> and <b>lessons</b>.", "Apri <b>students</b>, poi <b>Export → Export table as CSV</b>. Fai lo stesso con <b>packages</b> e <b>lessons</b>.")}</li><li>${L("Drop the three files here together.", "Trascina qui i tre file insieme.")}</li></ol>
     <label class="drop c6" id="pdrop">${icon(IC.file)}<b>${L("Drop students.csv, packages.csv, lessons.csv", "Trascina students.csv, packages.csv, lessons.csv")}</b><span class="btn ghost sm">${t("choose")}</span><input type="file" id="pIn" accept=".csv,text/csv" multiple hidden></label></div>
     <div id="pRes">${APP.portalMsg || ""}</div></div>`;
@@ -3310,7 +3796,7 @@ APP.demoNames = {};
 const bizName = () => STORE.active ? (STORE.meta?.name || "—") : demoName();
 const NAV = ["overview", "clients", "revenue", "marketing", "retention", "schedule", "|", "insights", "simulator", "report", "|", "data"];
 function renderNav() {
-  $("#nav").innerHTML = NAV.map(v => v === "|" ? `<div class="sep"></div>` : `<button type="button" data-view="${v}" aria-current="${APP.view === v}">${icon(NAV_ICONS[v])}<span>${v === "clients" ? Who() : t("nav_" + v)}</span></button>`).join("");
+  $("#nav").innerHTML = NAV.map(v => v === "|" ? `<div class="sep"></div>` : `<button type="button" data-view="${v}" aria-current="${APP.view === v}">${icon(NAV_ICONS[v])}<span>${v === "clients" ? Who() : v === "retention" && isVisit() ? L("Reviews & returns", "Recensioni e ritorni") : t("nav_" + v)}</span></button>`).join("");
 }
 function crumb() {
   const prof = tr(P.name);
