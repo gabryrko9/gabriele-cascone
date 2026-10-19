@@ -549,6 +549,24 @@ pre.csv{margin:0;background:var(--soft);border-radius:12px;padding:12px;font:400
 .panel .minis+.chart,.panel .minis+p+.chart{margin-top:2px}
 .cr{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;color:var(--muted)} .cr b{color:var(--ink)} .cr i{width:42px;height:5px;border-radius:3px;background:var(--lime-s);overflow:hidden;display:block} .cr u{display:block;height:100%;background:var(--ink);opacity:.75}
 @media (max-width:560px){ .lens-h{margin-top:20px} .lt td:first-child{min-width:140px} }
+/* ---------- day register ---------- */
+.day-nav{gap:6px}.day-nav .sel{padding-right:12px}
+.day-list{display:flex;flex-direction:column}
+.day-r{display:flex;align-items:center;gap:10px;padding:10px 4px;border-top:1px solid var(--soft2)}
+.day-list .day-r:first-child{border-top:0}
+.day-r .when{width:46px;flex:none;font:500 .8rem var(--f-mono)}
+.day-r.miss{opacity:.72}
+.day-n{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.day-n small{color:var(--muted);font-size:.78rem}
+.day-n .warn{color:var(--coral);font-weight:600}
+.day-a{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.btn.ok{border-color:var(--lime);background:var(--lime-s)}
+.lnk{border:0;background:none;padding:0;font:inherit;font-weight:700;text-align:left;color:var(--ink);cursor:pointer}
+.lnk:hover{text-decoration:underline}
+.stars{display:flex;gap:2px}
+.stars button{border:0;background:none;padding:0 2px;font-size:1.05rem;color:var(--soft2);cursor:pointer;line-height:1}
+.stars button.on{color:var(--sun)}
+@media (max-width:560px){ .day-r{flex-wrap:wrap} .day-r .av{display:none} .day-a{width:100%;justify-content:flex-start;padding-left:56px} }
 @media print{
   @page{size:A4;margin:12mm}
   body{font-size:12px}
@@ -599,7 +617,7 @@ const I = {
   footnote: T("One platform for every independent professional. Your clients, your numbers, clear decisions.", "Una piattaforma per ogni libero professionista. I tuoi clienti, i tuoi numeri, decisioni chiare."),
   nav_overview: T("Overview", "Panoramica"), nav_clients: T("Clients", "Clienti"), nav_revenue: T("Revenue", "Ricavi"),
   nav_marketing: T("Marketing", "Marketing"), nav_retention: T("Retention", "Fidelizzazione"), nav_schedule: T("Schedule", "Agenda"),
-  nav_insights: T("AI insights", "Insight AI"), nav_simulator: T("What-if", "Simulatore"), nav_data: T("Data", "Dati"), nav_report: T("Report", "Report"),
+  nav_insights: T("AI insights", "Insight AI"), nav_simulator: T("What-if", "Simulatore"), nav_data: T("Data", "Dati"), nav_report: T("Report", "Report"), nav_today: T("Day register", "Registro"),
   p30: T("30d", "30g"), p90: T("90d", "90g"), p12: T("12m", "12m"), pall: T("All", "Tutto"),
   pickTitle: T("Choose a profession", "Scegli la professione"),
   pickSub: T("Same platform, different fields, KPIs and advice. The demo data changes with it.", "Stessa piattaforma, campi, KPI e consigli diversi. I dati demo cambiano di conseguenza."),
@@ -677,6 +695,7 @@ const NAV_ICONS = {
   retention: '<path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v5h-5"/>',
   schedule: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
   insights: '<path d="M12 3l2.2 5.3L20 9l-4.4 3.8L17 19l-5-3-5 3 1.4-6.2L4 9l5.8-.7z"/>',
+  today: '<rect x="4" y="4" width="16" height="17" rx="2"/><path d="M8 2v4M16 2v4M8 13l2.5 2.5L16 10"/>',
   report: '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 17v-3M13 17v-5M16 17v-2"/>',
   simulator: '<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',
   data: '<ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
@@ -1842,7 +1861,7 @@ function proFieldInputs(c) {
 }
 function readProFields(fd) { const o = {}; for (const f of P.fields) { const v = fd["pf_" + f.k]; if (v == null) continue; o[f.k] = f.type === "number" && v !== "" ? +v : v; } return o; }
 
-function clientModal(c) {
+function clientModal(c, opts = {}) {
   const isNew = !c;
   const sizeField = P.fields.some(f => f.auto === "size");
   const body = `<h4>${t("core")}</h4>
@@ -1857,7 +1876,7 @@ function clientModal(c) {
     ${isNew ? `<h4>${isVisit() ? L("The booking", "La prenotazione") : t("firstPurchase")}</h4>
     ${fld("m_svc", t("service"), selI("m_svc", [["", L("No purchase yet (lead)", "Nessun acquisto (contatto)")], ...P.services.map((s, i) => [i, tr(s.n) + (s.trial ? " · " + L("free, logs the trial session", "gratis, registra la lezione di prova") : " · " + eur(s.p))])], P.services[0]?.trial ? "0" : 0), "full")}
     ${fld("m_amt", t("amount"), inp("m_amt", priceFor(null, "svc", 0), "number", 'min="0" step="0.01" inputmode="decimal"'), "", L("Filled from the price list, change it if needed", "Dal listino, modificalo se serve"))}
-    ${isVisit() ? fld("m_tdate", L(`Day of the ${unit(false)}`, `Giorno del ${unit(false)}`), inp("m_tdate", isoDay(new Date()), "date"), "", L("A future day goes into the calendar", "Un giorno futuro va in calendario")) : ""}
+    ${isVisit() ? fld("m_tdate", L(`Day of the ${unit(false)}`, `Giorno del ${unit(false)}`), inp("m_tdate", opts.tdate || isoDay(new Date()), "date"), "", L("A future day goes into the calendar", "Un giorno futuro va in calendario")) : ""}
     ${fld("m_date", isVisit() ? L("Paid on", "Pagato il") : t("date"), inp("m_date", isoDay(new Date()), "date"))}
     ${fld("m_m", t("method"), selI("m_m", methodsList().map(m => [m, trMethod(m)]), methodsList()[0]))}
     ${fld("m_st", t("status"), selI("m_st", [["paid", L("Paid", "Pagato")], ["pending", L("Pending", "Da incassare")]], "paid"))}` : ""}
@@ -2936,6 +2955,102 @@ function lensLine(a, b) {
   return L(`${nf(act)} active ${who()}${f ? `, ${nf(f, 1)} ${unit()} each` : ""}${rn != null ? `; ${pct(rn)} of the packages that ended were renewed` : ""}.`, `${nf(act)} ${who()} attivi${f ? `, ${nf(f, 1)} ${unit()} a testa` : ""}${rn != null ? `; rinnovato il ${pct(rn)} dei pacchetti finiti` : ""}.`);
 }
 
+/* ================= day register: record a day's lessons or tours in a few taps =================
+   Recurring professions: who came, who missed, credit left, payments to collect, and a quick add
+   for anyone who came without a booking. One-off professions: the day's bookings, show or no-show,
+   the review stars once the tour is done, and a new booking for that day. Every tap saves. */
+APP.day = null;
+const dayStart = d => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
+const sameDay = (a, b) => dayStart(a).getTime() === dayStart(b).getTime();
+function currentSvc(c) {
+  if (c.subActive && c.sub != null) return c.sub;
+  const s = LX().svcTx[c.id]; if (s.length) return s[s.length - 1].s;
+  const i = P.services.findIndex(x => !x.trial); return i < 0 ? 0 : i;
+}
+function dayEntries(day) {
+  const out = [];
+  DB.books.forEach(b => { if (sameDay(b.d, day)) out.push({ kind: "book", ref: b, c: DB.clients[b.c], d: b.d, s: b.s }); });
+  (DB.upcoming || []).forEach(u => { if (sameDay(u.d, day)) out.push({ kind: "plan", ref: u, c: DB.clients[u.c], d: u.d, s: u.s }); });
+  return out.filter(e => e.c).sort((a, b) => a.d - b.d || a.c.name.localeCompare(b.c.name));
+}
+function setAttendance(e, came) {
+  const c = e.c;
+  if (e.kind === "plan") {
+    DB.upcoming = DB.upcoming.filter(u => u !== e.ref);
+    DB.books.push({ c: c.id, d: e.d, s: e.s, ns: came ? 0 : 1, size: c.size }); DB.books.sort((a, b) => a.d - b.d);
+  } else e.ref.ns = came ? 0 : 1;
+  refreshClient(DB, c); persistClient(c); afterChange();
+}
+function dayTime(day) { const d = new Date(day); const now = new Date(); if (sameDay(d, now)) d.setHours(now.getHours(), 0, 0, 0); else d.setHours(10, 0, 0, 0); return d; }
+
+VIEWS.today = el => {
+  const day = APP.day ? new Date(APP.day) : dayStart(new Date()), past = dayStart(day) <= dayStart(new Date());
+  const isToday = sameDay(day, new Date());
+  const title = isToday ? L("Today", "Oggi") : day.toLocaleDateString(loc(), { weekday: "long", day: "numeric", month: "long" });
+  const nav = `<div class="filters day-nav"><button class="btn ghost sm" data-day="-1" aria-label="${esc(L("Previous day", "Giorno prima"))}">‹</button><input type="date" class="sel" id="dayPick" value="${isoDay(day)}" aria-label="${esc(L("Day", "Giorno"))}"><button class="btn ghost sm" data-day="1" aria-label="${esc(L("Next day", "Giorno dopo"))}">›</button>${isToday ? "" : `<button class="btn ghost sm" data-day="0">${L("Today", "Oggi")}</button>`}</div>`;
+  let h = vhead(L("Day register", "Registro del giorno"), Cap(title), isVisit()
+    ? L(`The ${unit()} of the day: mark who showed up and add the review stars after the ${unit(false)}. Every tap is saved.`, `I ${unit()} del giorno: segna chi si è presentato e aggiungi le stelle della recensione dopo il ${unit(false)}. Ogni tocco viene salvato.`)
+    : L(`The ${unit()} of the day: mark who came or missed it, and add anyone who came without a booking. Every tap is saved.`, `Le ${unit()} del giorno: segna chi c'era e chi è mancato, e aggiungi chi è venuto senza prenotare. Ogni tocco viene salvato.`), nav);
+  const ents = dayEntries(day), came = ents.filter(e => e.kind === "book" && !e.ref.ns), miss = ents.filter(e => e.kind === "book" && e.ref.ns), plan = ents.filter(e => e.kind === "plan");
+  const sm = isVisit()
+    ? [[nf(ents.length), Cap(unit())], [nf(sum(ents.map(e => e.c.size || 1))), Who()], [nf(miss.length), "No-show"]]
+    : [[nf(came.length), L("Came", "Presenti")], [nf(miss.length), L("Missed", "Assenti")], [nf(plan.length), past ? L("To mark", "Da segnare") : L("Booked", "Prenotate")]];
+  h += `<div class="panel"><div class="minis">${sm.map(([v, l]) => `<div class="mini"><b>${v}</b><small>${esc(l)}</small></div>`).join("")}</div>`;
+  if (!ents.length) h += `<p class="muted-p" style="margin:0">${isVisit() ? L(`No ${unit()} on this day.`, `Nessun ${unit(false)} in questo giorno.`) : L(`No ${unit()} booked on this day. Add who came below.`, `Nessuna ${unit(false)} prenotata in questo giorno. Aggiungi qui sotto chi è venuto.`)}</p>`;
+  h += `<div class="day-list">${ents.map((e, i) => dayRow(e, i, past)).join("")}</div>`;
+  if (isVisit()) h += `<div><button class="btn main" data-act="dayBook">${icon(IC.plus)}${L("New booking for this day", "Nuova prenotazione per questo giorno")}</button></div>`;
+  h += `</div>`;
+  if (!isVisit()) {
+    h += `<div class="panel"><div class="ph"><div><h3>${L(`Add a ${unit(false)}`, `Aggiungi una ${unit(false)}`)}</h3><p>${L(`${Cap(who())} who came without a booking, or to book for this day`, `${Cap(who())} venuti senza prenotare, o da prenotare per questo giorno`)}</p></div></div>
+      <label class="search" style="flex:none">${icon(IC.search)}<input id="dayQ" type="search" placeholder="${esc(t("search"))}" aria-label="${esc(t("search"))}"></label><div class="day-list" id="dayAdd"></div></div>`;
+  }
+  el.innerHTML = h;
+  const goDay = d => { APP.day = +dayStart(d); renderView(); };
+  $$("[data-day]", el).forEach(b => b.onclick = () => { const k = +b.dataset.day; goDay(k === 0 ? new Date() : new Date(+day + k * DAY + 3 * 3600e3)); });
+  $("#dayPick", el).onchange = e => { if (e.target.value) goDay(new Date(e.target.value + "T12:00")); };
+  el.onclick = e => {
+    const r = e.target.closest("[data-i]"); const a = e.target.closest("[data-a]")?.dataset.a;
+    if (a === "dayBook") return;
+    if (r && a) {
+      const en = ents[+r.dataset.i];
+      if (a === "came") setAttendance(en, true);
+      if (a === "miss") setAttendance(en, false);
+      if (a === "open") openClient(en.c.id);
+      if (a === "pay") payModal(en.c);
+      if (a === "collect") { for (const ti of en.c.txIdx) { const x = DB.txns[ti]; if (x.st === "pending") x.st = "paid"; } refreshClient(DB, en.c); persistClient(en.c); afterChange(); toast(L("Marked as paid", "Segnato come pagato")); }
+      if (a === "star") { const rf = ratingField(); if (rf) { en.c.f[rf.k] = +e.target.closest("[data-v]").dataset.v; en.c.review = 1; persistClient(en.c); afterChange(); } }
+    }
+    if (e.target.closest("[data-act=dayBook]")) clientModal(null, { tdate: isoDay(day) });
+    const ad = e.target.closest("[data-add]");
+    if (ad) {
+      const c = DB.clients[+ad.dataset.add], d = dayTime(day);
+      addSession(c, { d, s: currentSvc(c), ns: 0 }); persistClient(c); afterChange();
+      toast(L(`${c.name}: ${unit(false)} added`, `${c.name}: ${unit(false)} aggiunta`));
+    }
+  };
+  const q = $("#dayQ", el);
+  if (q) {
+    const draw = () => {
+      const s = q.value.trim().toLowerCase(), ids = new Set(ents.map(e => e.c.id));
+      const list = DB.clients.filter(c => c.first && !ids.has(c.id) && (s ? c.name.toLowerCase().includes(s) : c.status === "active")).sort((a, b) => (b.last || 0) - (a.last || 0)).slice(0, s ? 12 : 8);
+      $("#dayAdd", el).innerHTML = list.length ? list.map(c => { const cr = hasPack() ? creditLeft(c) : null; return `<div class="day-r">${avatar(c)}<div class="day-n"><b>${esc(c.name)}</b><small>${esc(tr(P.services[currentSvc(c)]?.n) || "")}${cr && c.status !== "lapsed" ? " · " + L(`${cr.left} left`, `${cr.left} rimaste`) : ""}</small></div><button class="btn ghost sm" data-add="${c.id}">${icon(IC.plus)}${past ? L("Came", "C'era") : L("Book", "Prenota")}</button></div>`; }).join("") : `<p class="muted-p" style="margin:0">${L("No one found.", "Nessuno trovato.")}</p>`;
+    };
+    q.oninput = draw; draw();
+  }
+};
+function dayRow(e, i, past) {
+  const c = e.c, time = e.d.toLocaleTimeString(loc(), { hour: "2-digit", minute: "2-digit" });
+  const st = e.kind === "plan" ? "plan" : e.ref.ns ? "miss" : "came";
+  const pend = c.txIdx.map(k => DB.txns[k]).filter(x => x.st === "pending"), owed = sum(pend.map(x => x.a));
+  const cr = !isVisit() && hasPack() && !isTrial(e.s) ? creditLeft(c) : null;
+  const rf = ratingField(), stars = isVisit() && rf && st === "came" ? `<span class="stars" role="group" aria-label="${esc(L("Review stars", "Stelle recensione"))}">${[1, 2, 3, 4, 5].map(v => `<button type="button" data-a="star" data-v="${v}" class="${+c.f[rf.k] >= v ? "on" : ""}" aria-label="${v}">★</button>`).join("")}</span>` : "";
+  const sub = [tr(P.services[e.s]?.n), isVisit() && (c.size || 1) > 1 ? `${c.size} ${L("people", "persone")}` : "", cr ? (cr.left <= 1 ? `<b class="warn">${L(`${cr.left} left: offer the next package`, `${cr.left} rimaste: proponi il prossimo pacchetto`)}</b>` : L(`${cr.left} left`, `${cr.left} rimaste`)) : "", isTrial(e.s) ? `<b class="warn">${L("free trial: follow up today", "prova gratuita: ricontatta oggi")}</b>` : ""].filter(Boolean).join(" · ");
+  const acts = st === "plan"
+    ? (past ? `<button class="btn ghost sm ok" data-a="came">${L("Came", "C'era")}</button><button class="btn ghost sm" data-a="miss">${L("Missed", "Assente")}</button>` : `<span class="pill lead">${L("Booked", "Prenotato")}</span>`)
+    : `<span class="pill ${st === "came" ? "active" : "risk"}">${st === "came" ? L("Came", "C'era") : L("Missed", "Assente")}</span>${st === "came" ? `<button class="btn ghost sm" data-a="miss">${L("Missed", "Assente")}</button>` : `<button class="btn ghost sm" data-a="came">${L("Came", "C'era")}</button>`}`;
+  return `<div class="day-r ${st}" data-i="${i}"><span class="when"><b>${esc(time)}</b></span>${avatar(c)}<div class="day-n"><button type="button" class="lnk" data-a="open">${esc(c.name)}</button><small>${sub}</small>${stars}</div><div class="day-a">${acts}${owed ? `<button class="btn ghost sm" data-a="collect" title="${esc(L("Mark open payments as paid", "Segna i pagamenti aperti come pagati"))}">${L("Collect", "Incassa")} ${eur(owed)}</button>` : ""}${!isVisit() ? `<button class="btn ghost sm" data-a="pay" aria-label="${esc(t("addPay"))}">${icon(IC.euro)}</button>` : ""}</div></div>`;
+}
+
 /* ================= persistence: saved workspaces in the artifact database =================
    workspaces/{ws}                -> settings (name, profession, currency, price list, channels, goal, start date)
    workspaces/{ws}/chunks/{k}     -> { clients: { <clientKey>: client with its payments and sessions } }
@@ -3794,7 +3909,7 @@ function showCsv(kind, data) {
 /* ================= shell ================= */
 APP.demoNames = {};
 const bizName = () => STORE.active ? (STORE.meta?.name || "—") : demoName();
-const NAV = ["overview", "clients", "revenue", "marketing", "retention", "schedule", "|", "insights", "simulator", "report", "|", "data"];
+const NAV = ["overview", "today", "clients", "revenue", "marketing", "retention", "schedule", "|", "insights", "simulator", "report", "|", "data"];
 function renderNav() {
   $("#nav").innerHTML = NAV.map(v => v === "|" ? `<div class="sep"></div>` : `<button type="button" data-view="${v}" aria-current="${APP.view === v}">${icon(NAV_ICONS[v])}<span>${v === "clients" ? Who() : v === "retention" && isVisit() ? L("Reviews & returns", "Recensioni e ritorni") : t("nav_" + v)}</span></button>`).join("");
 }
