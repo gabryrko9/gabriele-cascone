@@ -588,6 +588,96 @@ pre.csv{margin:0;background:var(--soft);border-radius:12px;padding:12px;font:400
   .rep-notes:has(.rep-print-notes:empty){display:none}
   .draw{stroke-dashoffset:0}
 }
+
+/* ================= v2: calmer look (2026-10-30) =================
+   Grey page, white cards with a hairline, one accent. No offset shadows. Fewer, bigger numbers. */
+:root{--page:#F5F6F8;--line:#E7E9EE;--r:14px}
+html,body{background:var(--page)}
+.side{background:#fff;gap:18px}
+.side-foot{display:none}
+.top{background:rgba(245,246,248,.9);border-bottom:0;margin-bottom:6px;padding-block:16px 8px}
+#period{display:none}
+.bizname input{font-size:1.3rem;font-weight:700}
+.prof-btn{border:1px solid var(--line);box-shadow:none;padding:6px 12px 6px 6px;font-weight:600}
+.prof-btn:hover{transform:none;box-shadow:none;border-color:var(--faint)}
+.btn{border-width:1px;border-radius:10px;font-weight:600}
+.btn.main{box-shadow:none}.btn.main:hover{transform:none;background:#2B2E37}
+.btn.ghost:hover{border-color:var(--faint);background:var(--soft)}
+.panel,.kpi{border:1px solid var(--line);box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.panel{padding:20px}
+.toast{box-shadow:0 10px 30px rgba(19,21,27,.25)}
+.ws-opt[aria-pressed="true"],.cat[aria-selected="true"],.prof-opt[aria-pressed="true"]{box-shadow:none}
+.profile-note{border:1px solid var(--line);box-shadow:none;margin:0}
+.vhead h2{font-size:clamp(1.45rem,2.4vw,1.85rem);font-weight:700}
+.nav button{font-weight:500;padding:9px 12px}
+.nav button[aria-current="true"]{background:var(--soft2);color:var(--ink);font-weight:600}
+.nav-group{font:500 .64rem var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--faint);padding:16px 12px 4px}
+.nav .sep{margin:10px 10px}
+/* period bar */
+.per-bar{margin:0;gap:6px}
+.chipb{border-color:var(--line);background:#fff;font-weight:500}
+.chipb:hover{border-color:var(--faint)}
+.per-more{position:relative}
+.per-more summary{list-style:none;cursor:pointer}
+.per-more summary::-webkit-details-marker{display:none}
+.per-pop{position:absolute;z-index:20;top:calc(100% + 6px);left:0;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:0 12px 32px rgba(19,21,27,.12);display:flex;flex-direction:column;gap:10px;min-width:260px}
+.per-pop label{font-size:.78rem;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.per-pop .row2{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.per-pop .sel{height:34px;width:100%}
+/* hero numbers */
+.hero{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.hc{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:18px 18px 16px;display:flex;flex-direction:column;gap:4px;min-width:0;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.hc .l{font-size:.82rem;color:var(--muted);font-weight:500}
+.hc .v{font:700 clamp(1.5rem,2.3vw,2rem) var(--f-display);letter-spacing:-.03em;font-variant-numeric:tabular-nums;white-space:nowrap;line-height:1.1}
+.hc .s{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:.76rem;color:var(--faint)}
+.hc.main{background:var(--ink);border-color:var(--ink);color:#fff}
+.hc.main .l,.hc.main .s{color:rgba(255,255,255,.7)}
+.hc.main .delta.up{background:rgba(31,184,116,.22);color:#7BE3B4}.hc.main .delta.down{background:rgba(255,106,77,.22);color:#FFB3A3}.hc.main .delta.flat{background:rgba(255,255,255,.12);color:rgba(255,255,255,.75)}
+/* key-value rows */
+.kv{display:flex;flex-direction:column}
+.kv>div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:.9rem}
+.kv>div:last-child{border-bottom:0}
+.kv dt,.kv>div>span:first-child{color:var(--muted)}
+.kv b{font-variant-numeric:tabular-nums}
+.big-f{font:700 2rem var(--f-display);letter-spacing:-.03em;line-height:1.1}
+/* plain lists */
+.rows{display:flex;flex-direction:column}
+.rw{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);min-width:0;cursor:pointer}
+.rw:last-child{border-bottom:0}
+.rw .t{flex:1;min-width:0}
+.rw .t b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rw .t small{color:var(--muted);font-size:.78rem}
+.rw .r{text-align:right;font-variant-numeric:tabular-nums;font-size:.86rem;white-space:nowrap}
+.rw .r small{display:block;color:var(--faint);font-size:.74rem}
+.rw:hover .t b{text-decoration:underline}
+.empty-s{color:var(--muted);font-size:.88rem;padding:6px 0}
+/* share bars */
+.shr{display:flex;flex-direction:column;gap:12px}
+.shr>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;font-size:.88rem}
+.shr .bar{grid-column:1/-1;height:8px;border-radius:99px;background:var(--soft2);overflow:hidden}
+.shr .bar i{display:block;height:100%;border-radius:99px}
+.shr em{font-style:normal;color:var(--muted);font-variant-numeric:tabular-nums}
+.shr small{grid-column:1/-1;color:var(--faint);font-size:.76rem;margin-top:-1px}
+.shr{gap:16px}
+.more-link{align-self:flex-start;border:0;background:none;padding:0;color:var(--blue);font-weight:600;font-size:.88rem}
+/* students */
+.st-chips{display:flex;gap:6px;flex-wrap:wrap}
+.st-chips .chipb b{font-weight:600;color:var(--muted);margin-left:4px}
+.st-chips .chipb[aria-pressed="true"] b{color:rgba(255,255,255,.7)}
+table.clients td small.sub{display:block;color:var(--faint);font-size:.74rem}
+.price b{font-variant-numeric:tabular-nums}
+/* student card */
+.facts4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.facts4>div{background:var(--soft);border-radius:12px;padding:12px 14px;min-width:0}
+.facts4 small{display:block;color:var(--muted);font-size:.76rem}
+.facts4 b{display:block;font:700 1.35rem var(--f-display);letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.facts4 span{display:block;color:var(--faint);font-size:.74rem}
+details.more{border-top:1px solid var(--line);padding-top:10px}
+details.more summary{cursor:pointer;font-weight:600;font-size:.9rem}
+.hist .rw{cursor:default}.hist .rw:hover .t b{text-decoration:none}
+@media (max-width:1180px){ .hero{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:900px){ .nav-group{display:none} .per-pop{left:auto;right:0} }
+@media (max-width:560px){ .hc .v{font-size:1.45rem} .per-pop{position:fixed;left:16px;right:16px;top:auto} }
 </style>
 </head>
 <body>
@@ -1399,7 +1489,7 @@ function barChart(host, o) {
   const { max, step } = niceMax(Math.max(...tot) * 1.05);
   const svg = S("svg", { viewBox: `0 0 ${W} ${H}`, height: H }, host);
   const y = v => pad.t + ih - v / max * ih;
-  for (let v = 0; v <= max + 1e-9; v += step) { S("line", { x1: pad.l, x2: W - pad.r, y1: y(v), y2: y(v), class: v === 0 ? "axis-l" : "grid-l" }, svg); const tx = S("text", { x: pad.l - 8, y: y(v) + 3.5, "text-anchor": "end" }, svg); tx.textContent = (o.fmt || eurK)(v); }
+  for (let v = 0; v <= max + 1e-9; v += step) { S("line", { x1: pad.l, x2: W - pad.r, y1: y(v), y2: y(v), class: v === 0 ? "axis-l" : "grid-l" }, svg); const tx = S("text", { x: pad.l - 8, y: y(v) + 3.5, "text-anchor": "end" }, svg); tx.textContent = (o.yfmt || o.fmt || eurK)(v); }
   const slot = iw / n, bw = Math.max(3, Math.min(34, slot * .66));
   const every = Math.ceil(n / Math.max(3, Math.floor(iw / 46)));
   for (let i = 0; i < n; i++) {
@@ -1729,7 +1819,7 @@ const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const viewsEl = document.getElementById("views");
 const layer = document.getElementById("layer");
 const AVC = ["--blue", "--coral", "--lime", "--violet", "--teal", "--pink", "--sun"];
-const avatar = c => { const p = c.name.split(" "); const ini = (p[0][0] || "") + (p.length > 1 ? p[p.length - 1][0] : ""); return `<span class="av" style="background:var(${AVC[hashStr(c.name) % AVC.length]})">${esc(ini.toUpperCase())}</span>`; };
+const avatar = c => { const p = (c.name.replace(/\(.*?\)/g, "").trim() || c.name).split(/\s+/); const ini = (p[0][0] || "") + (p.length > 1 ? p[p.length - 1][0] : ""); return `<span class="av" style="background:var(${AVC[hashStr(c.name) % AVC.length]})">${esc(ini.toUpperCase())}</span>`; };
 const who = (plural = true) => tr(plural ? P.who : P.who1);
 const Who = (plural = true) => { const w = who(plural); return w[0].toUpperCase() + w.slice(1); };
 const stLabel = s => s === "lapsed" && P.oneoff ? t("st_past") : s === "active" && P.oneoff ? L("Recent", "Recente") : t("st_" + s);
@@ -1762,35 +1852,61 @@ const L = (en, it) => LANG === "it" ? it : en;
 
 /* ================= overview ================= */
 VIEWS.overview = el => {
-  const r = rangeFor(PERIOD), S1 = periodStats(r.a, r.b), S0 = r.prev ? periodStats(r.prev.a, r.prev.b) : null;
-  const pname = periodName(), cmp = prevName();
-  let h = vhead(tr(P.name) + " · " + pname, t("nav_overview"), L(`How the business is doing, at a glance.${cmp ? " Compared with the " + cmp + "." : ""}`, `Come va l'attività, a colpo d'occhio.${cmp ? " Confronto con: " + cmp + "." : ""}`));
-  h += periodBar();
-  h += profileBanner();
-  if (!hasData()) { el.innerHTML = h + emptyState(L("Nothing to analyse yet", "Ancora niente da analizzare"), L(`Add ${who()} and payments by hand or import them from a spreadsheet. Every chart on this page fills itself in from there.`, `Aggiungi ${who()} e pagamenti a mano o importali da un foglio di calcolo. Tutti i grafici si compilano da lì.`)); return; }
-  const kp = lensKpis(r);
-  h += kpiCards(kp);
-  h += lensPanelsHtml();
-  h += `<div class="lens-h"><span class="eyebrow">${L("Every business", "Ogni attività")}</span><h3>${L("Revenue, channels and next steps", "Ricavi, canali e prossimi passi")}</h3></div>`;
-  h += `<div class="grid">
-    <div class="panel c8"><div class="ph"><div><h3>${t("revTrend")}</h3><p>${M.from > 0 ? L("Monthly revenue since the records start, with a 6-month forecast.", "Ricavi mensili da quando iniziano i dati, con previsione a 6 mesi.") : t("revTrendSub")}</p></div><div class="legend"><span><i style="background:var(--blue)"></i>${t("actual")}</span><span><i class="dash" style="border-color:var(--slate)"></i>${t("lastYear")}</span><span><i class="dash" style="border-color:var(--blue)"></i>${t("forecast")}</span></div></div><div id="ovRev"></div></div>
-    <div class="stack c4"><div class="panel" id="goalP"></div><div class="panel" id="impactP"></div></div>
-    <div class="panel c4"><div class="ph"><div><h3>${t("channelMix")}</h3><p>${t("period")}</p></div></div><div class="donut-wrap"><div id="ovDonut"></div><div class="legend" id="ovDonutL"></div></div></div>
-    <div class="panel c4"><div class="ph"><div><h3>${t("topInsights")}</h3><p>${L("Top three, from the AI analyst", "I primi tre, dall'analista AI")}</p></div></div><div class="list" id="ovIns"></div><button class="btn ghost sm" data-go="insights">${t("seeAll")} →</button></div>
-    <div class="panel c4"><div class="ph"><div><h3>${t("upcoming")}</h3><p>${t("upcomingSub")}</p></div></div><div class="list" id="ovUp"></div></div>
+  const r = rangeFor(PERIOD), S1 = periodStats(r.a, r.b), S0 = r.prev ? periodStats(r.prev.a, r.prev.b) : null, cmp = prevName();
+  let h = vhead(Cap(periodName()), t("nav_overview"), cmp ? L(`Changes are against the ${cmp}.`, `Le variazioni sono rispetto a: ${cmp}.`) : "", periodBar());
+  if (!hasData()) { el.innerHTML = h + profileBanner() + emptyState(L("Nothing to analyse yet", "Ancora niente da analizzare"), L(`Add ${who()} and payments by hand or import them from a spreadsheet. Every chart on this page fills itself in from there.`, `Aggiungi ${who()} e pagamenti a mano o importali da un foglio di calcolo. Tutti i grafici si compilano da lì.`)); return; }
+  const fk = monthlyCosts(), ck = costsIn(r.a, r.b), ck0 = r.prev ? costsIn(r.prev.a, r.prev.b) : 0;
+  const w1 = workIn(r.a, r.b), w0 = r.prev ? workIn(r.prev.a, r.prev.b) : null, visit = isVisit();
+  const active = DB.clients.filter(c => c.status === "active").length;
+  const lensDelta = (a, b) => b ? window.lensDelta(a, b) : ""; // no badge when there is nothing to compare with
+  const hc = (cls, l, v, s) => `<div class="hc ${cls}"><span class="l">${esc(l)}</span><span class="v">${v}</span><span class="s">${s}</span></div>`;
+  h += `<div class="hero">
+    ${hc("main", L("Revenue", "Incassato"), eur(S1.rev), lensDelta(S1.rev, S0?.rev) + " " + esc(L(`${nf(S1.paying)} paying ${who()}`, `${nf(S1.paying)} ${who()} paganti`)))}
+    ${fk ? hc("", L("Net of fixed costs", "Netto dei costi fissi"), eur(S1.rev - ck), lensDelta(S1.rev - ck, S0 ? S0.rev - ck0 : null) + " " + esc(L(`after ${eur(ck)} of costs`, `dopo ${eur(ck)} di costi`)))
+      : hc("", L(`New ${who()}`, `Nuovi ${who()}`), nf(S1.newC), lensDelta(S1.newC, S0?.newC))}
+    ${hc("", visit ? Cap(unit()) : L(`Active ${who()}`, `${Who()} attivi`), nf(visit ? w1.les : active), visit ? lensDelta(w1.les, w0?.les) : esc(L(`${nf(S1.newC)} new in the period`, `${nf(S1.newC)} nuovi nel periodo`)))}
+    ${hc("", visit ? L("Per booking", "Per prenotazione") : L(`${Cap(unit())} held`, `${Cap(unit())} svolte`), visit ? (w1.les ? eur(S1.rev / w1.les) : "—") : nf(w1.les), visit ? "" : lensDelta(w1.les, w0?.les) + " " + esc(w1.days ? L(`${nf(w1.days)} days worked · ${eur(S1.rev / w1.days)} a day`, `${nf(w1.days)} giorni lavorati · ${eur(S1.rev / w1.days)} al giorno`) : ""))}
   </div>`;
-  el.innerHTML = h; bindPeriodBar(el);
-  drawKpis(el, kp); drawLensPanels(el);
-  revenueChart($("#ovRev", el));
-  goalPanel($("#goalP", el)); impactPanel($("#impactP", el));
-  const cs = channelStats(r.a, r.b, r.months).filter(c => c.newPaid > 0).sort((a, b) => b.newPaid - a.newPaid);
-  const tot = sum(cs.map(c => c.newPaid));
-  donut($("#ovDonut", el), cs.map(c => ({ name: c.name, value: c.newPaid, color: col(c.i), sub: Who() })), [nf(tot), L("new " + who(), "nuovi " + who())]);
-  $("#ovDonutL", el).innerHTML = cs.slice(0, 7).map(c => `<span><span style="display:inline-flex;gap:6px;align-items:center;min-width:0"><i style="background:${col(c.i)}"></i>${esc(c.name)}</span><em>${pct(c.newPaid / (tot || 1))}</em></span>`).join("");
-  const ins = buildInsights().slice(0, 3);
-  $("#ovIns", el).innerHTML = ins.length ? ins.map(i => `<div class="li"><span class="tag ${"t-" + i.tag}" style="font:500 .62rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;padding:3px 7px;border-radius:6px">${esc(tagName(i.tag))}</span><div style="min-width:0"><div class="nm" style="white-space:normal">${esc(i.title)}</div></div><b class="mono" style="font-size:.8rem;white-space:nowrap">${esc(i.impact?.[1] || "")}</b></div>`).join("") : `<p class="muted-p">${L("Insights appear once there are about 15 paying " + who() + ".", "Gli insight compaiono con circa 15 " + who() + " paganti.")}</p>`;
-  upcomingList($("#ovUp", el), 5);
+  const me = monthEndFc(), mon = tr(I.monthNames)[NOW.getMonth()];
+  h += `<div class="grid">
+    <div class="panel c8"><div class="ph"><div><h3>${L("Revenue month by month", "Incassi mese per mese")}</h3><p>${L("Paid in each month", "Quanto è entrato ogni mese")}${fk ? L(`, before ${eur(fk)} of fixed costs a month`, `, prima dei ${eur(fk)} di costi fissi al mese`) : ""}</p></div></div><div id="ovRev"></div></div>
+    <div class="panel c4"><div class="ph"><div><h3>${L(`${Cap(mon)} so far`, `${Cap(mon)} finora`)}</h3><p>${L("Forecast from your working days left", "Previsione sui giorni di lavoro rimasti")}</p></div></div>
+      <div><span class="big-f">${eur(me.fc)}</span><p class="muted-p" style="margin-top:2px">${L("expected by the end of the month", "previsti a fine mese")}</p></div>
+      <div class="kv">${[[L("Paid so far", "Incassato finora"), eur(me.so)], [L("Days worked", "Giorni lavorati"), nf(me.wd)], [L("Per day worked", "Per giorno lavorato"), me.wd ? eur(me.so / me.wd) : "—"], [L("Working days left", "Giorni di lavoro rimasti"), nf(me.left)], ...(fk ? [[L("Net after fixed costs", "Netto dopo costi fissi"), eur(me.fc - fk)]] : [])].map(([a, b]) => `<div><span>${esc(a)}</span><b>${b}</b></div>`).join("")}</div>
+      <button class="more-link" data-go="revenue">${L("Revenue details", "Dettagli ricavi")} →</button></div>
+    <div class="panel c6"><div class="ph"><div><h3>${visit ? t("upcoming") : L("To get back in touch", "Da ricontattare")}</h3><p>${visit ? t("upcomingSub") : L(`${Cap(who())} who have not come for 6 weeks or more`, `${Cap(who())} che non vengono da almeno 6 settimane`)}</p></div></div><div class="rows" id="ovA"></div></div>
+    <div class="panel c6"><div class="ph"><div><h3>${L(`New ${who()}`, `Nuovi ${who()}`)}</h3><p>${L("Who started in the period", "Chi ha iniziato nel periodo")}</p></div></div><div class="rows" id="ovN"></div></div>
+    <div class="panel c6"><div class="ph"><div><h3>${L("Where the money comes from", "Da dove arrivano gli incassi")}</h3><p>${L(`By type of ${unit(false)}, in the period`, `Per tipo di ${unit(false)}, nel periodo`)}</p></div></div><div class="shr" id="ovC"></div></div>
+    <div class="panel c6"><div class="ph"><div><h3>${L(`Top ${who()}`, `${Who()} che rendono di più`)}</h3><p>${L("Paid in the period", "Incassato nel periodo")}</p></div></div><div class="rows" id="ovT"></div><button class="more-link" data-view="clients">${L("See all", "Vedi tutti")} →</button></div>
+  </div>`;
+  el.innerHTML = h;
+  // revenue by month, from where the records start
+  const f0 = M.from > 0 ? Math.max(0, Math.min(NM - 6, M.from)) : NM - 12, ms = [...Array(NM - f0)].map((_, k) => f0 + k);
+  barChart($("#ovRev", el), { labels: ms.map(i => Cap(monthLabel(i, ms.length > 12))), series: [{ name: L("Revenue", "Incassato"), color: cssv("--blue"), values: ms.map(i => M.rev[i]) }], fmt: eur, yfmt: eurK, h: 260, tipTitle: k => Cap(monthLabel(ms[k], true)) + (ms[k] === NM - 1 ? " · " + t("mtd") : "") });
+  const row = (c, right, sub) => `<div class="rw" data-client="${c.id}">${avatar(c)}<div class="t"><b>${esc(c.name)}</b><small>${sub}</small></div><div class="r">${right}</div></div>`;
+  const none = txt => `<p class="empty-s">${esc(txt)}</p>`;
+  if (visit) upcomingList($("#ovA", el), 6);
+  else {
+    const q = DB.clients.filter(c => c.first && c.status === "risk").sort((a, b) => b.last - a.last).slice(0, 6);
+    $("#ovA", el).innerHTML = q.length ? q.map(c => { const pr = priceOf(c); return row(c, `${fdate(c.last, { day: "numeric", month: "long" })}<small>${Math.round((NOW - c.last) / DAY / 7)} ${L("weeks ago", "settimane fa")}</small>`, esc(chName(c.ch)) + (pr ? " · " + eur(pr.cur) + " " + L(`a ${unit(false)}`, `a ${unit(false)}`) : "")); }).join("") : none(L("No one: everyone came recently.", "Nessuno: tutti sono venuti di recente."));
+  }
+  const nw = DB.clients.filter(c => c.first && inR(c.first, r.a, r.b)).sort((a, b) => b.first - a.first);
+  $("#ovN", el).innerHTML = nw.length ? nw.slice(0, 6).map(c => row(c, `${nf(LX().att[c.id])} ${unit(LX().att[c.id] !== 1)}<small>${eur(c.spent)}</small>`, `${L("since", "dal")} ${fdate(c.first, { day: "numeric", month: "short" })} · ${esc(chName(c.ch))}`)).join("") + (nw.length > 6 ? `<p class="empty-s">${L(`and ${nw.length - 6} more`, `e altri ${nw.length - 6}`)}</p>` : "") : none(L("No one new in this period.", "Nessuno nuovo in questo periodo."));
+  // revenue by service, with how many lessons and the average price of one
+  const bySv = new Map(); for (const x of DB.txns) if (inR(x.d, r.a, r.b) && x.st !== "refund" && x.a) { const k = x.k === "ext" ? "ext" : x.s, o = bySv.get(k) || { v: 0, n: 0, p: [] }; o.v += x.a; o.n++; if (k !== "ext") o.p.push(lessonPrice(x)); bySv.set(k, o); }
+  const svs = [...bySv.entries()].sort((a, b) => b[1].v - a[1].v), tot = sum(svs.map(x => x[1].v)) || 1;
+  $("#ovC", el).innerHTML = svs.length ? svs.slice(0, 6).map(([k, o]) => `<div><span>${esc(k === "ext" ? L("Extras", "Extra") : tr(P.services[k]?.n) || "—")}</span><em>${eur(o.v)} · ${pct(o.v / tot)}</em><div class="bar"><i style="width:${(o.v / tot * 100).toFixed(1)}%;background:${k === "ext" ? "var(--pink)" : col(k)}"></i></div>${k === "ext" ? "" : `<small>${nf(o.n)} ${["pack", "sub"].includes(P.services[k]?.kind) ? (o.n === 1 ? L("payment", "pagamento") : L("payments", "pagamenti")) : unit(o.n !== 1)} · ${L("average", "media")} ${eur(avg(o.p))} ${L(`a ${unit(false)}`, `a ${unit(false)}`)}</small>`}</div>`).join("") : none(L("No payments in this period.", "Nessun pagamento in questo periodo."));
+  const sp = new Map(); for (const x of DB.txns) if (inR(x.d, r.a, r.b) && x.st !== "refund") sp.set(x.c, (sp.get(x.c) || 0) + x.a);
+  const top = [...sp.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+  $("#ovT", el).innerHTML = top.length ? top.map(([id, v]) => { const c = DB.clients[id], pr = priceOf(c); return row(c, `<b>${eur(v)}</b><small>${pct(v / tot)}</small>`, esc(chName(c.ch)) + (pr && !visit ? " · " + eur(pr.cur) + " " + L(`a ${unit(false)}`, `a ${unit(false)}`) : "")); }).join("") : none(L("No payments in this period.", "Nessun pagamento in questo periodo."));
 };
+// what a client pays for one lesson or session: now, at the start, on average
+function lessonPrice(x) { const s = P.services[x.s]; if (!s || x.k !== "svc") return x.a; if (s.kind === "pack") return x.a / (s.sessions || 1); if (s.kind === "sub") return x.a / ((s.perWeek || 1) * 4.33); return x.a; }
+function priceOf(c) {
+  const tx = c.txIdx.map(i => DB.txns[i]).filter(x => x && x.k === "svc" && x.a > 0 && x.st !== "refund" && !P.services[x.s]?.trial).sort((a, b) => a.d - b.d);
+  if (!tx.length) return null;
+  return { cur: lessonPrice(tx[tx.length - 1]), first: lessonPrice(tx[0]), avg: avg(tx.map(lessonPrice)) };
+}
 
 function revenueChart(host, h = 330) {
   const f0 = M.from > 0 ? Math.min(NM - 12, M.from - 1) : 0; // records that start recently: begin the chart just before them
@@ -1846,20 +1962,24 @@ VIEWS.clients = el => {
   const due = plansDue().length;
   const right = `<div class="filters">${due ? `<button class="btn ghost" data-act="recordPlans" title="${esc(L("Adds this month's payment for every active plan not yet paid", "Aggiunge il pagamento del mese per ogni abbonamento attivo non ancora pagato"))}">${icon(IC.euro)}${L(`Record ${due} plan payments`, `Registra ${due} abbonamenti`)}</button>` : ""}<button class="btn main" data-act="addClient">${icon(IC.plus)}${t("add")}</button></div>`;
   let h = vhead(DB.clients.length + " " + t("clientsCount"), Who(), L(`Every ${who(false)} in one place: where they came from, what they bought, when to call them back.`, `Tutti i ${who()} in un posto: da dove arrivano, cosa hanno comprato, quando richiamarli.`), right);
-  h += `<div class="panel"><div class="filters">
-    <label class="search">${icon(IC.search)}<input id="cq" type="search" placeholder="${esc(t("search"))}" value="${esc(APP.q)}" aria-label="${esc(t("search"))}"></label>
-    <select class="sel" id="cst" aria-label="${esc(t("status"))}"><option value="">${t("allSt")}</option>${["active", ...(P.oneoff ? [] : ["risk"]), "lapsed", "lead"].map(s => `<option value="${s}" ${APP.fSt === s ? "selected" : ""}>${esc(stLabel(s))}</option>`).join("")}</select>
-    <select class="sel" id="cch" aria-label="${esc(t("channel"))}"><option value="">${t("allCh")}</option>${P.channels.map((c, i) => `<option value="${i}" ${APP.fCh === String(i) ? "selected" : ""}>${esc(tr(c.n))}</option>`).join("")}</select>
-    <select class="sel" id="csg" aria-label="${esc(t("segment"))}"><option value="">${t("allSeg")}</option>${P.segments.map((c, i) => `<option value="${i}" ${APP.fSeg === String(i) ? "selected" : ""}>${esc(tr(c.n))}</option>`).join("")}</select>
+  const cnt = { "": DB.clients.length }; DB.clients.forEach(c => cnt[c.status] = (cnt[c.status] || 0) + 1);
+  const sts = ["", "active", ...(P.oneoff ? [] : ["risk"]), "lapsed", "lead"].filter(s => s === "" || cnt[s]);
+  const chUsed = P.channels.map((c, i) => i).filter(i => DB.clients.some(c => c.ch === i)), segUsed = P.segments.map((c, i) => i).filter(i => DB.clients.some(c => c.seg === i));
+  h += `<div class="panel"><div class="filters" style="justify-content:space-between">
+    <div class="st-chips" role="group" aria-label="${esc(t("status"))}">${sts.map(s => `<button type="button" class="chipb" data-fst="${s}" aria-pressed="${APP.fSt === s}">${esc(s ? stLabel(s) : L("All", "Tutti"))}<b>${nf(cnt[s] || 0)}</b></button>`).join("")}</div>
+    <div class="filters">
+    ${chUsed.length > 1 ? `<select class="sel" id="cch" aria-label="${esc(t("channel"))}"><option value="">${t("allCh")}</option>${chUsed.map(i => `<option value="${i}" ${APP.fCh === String(i) ? "selected" : ""}>${esc(tr(P.channels[i].n))}</option>`).join("")}</select>` : ""}
+    ${segUsed.length > 1 ? `<select class="sel" id="csg" aria-label="${esc(t("segment"))}"><option value="">${t("allSeg")}</option>${segUsed.map(i => `<option value="${i}" ${APP.fSeg === String(i) ? "selected" : ""}>${esc(tr(P.segments[i].n))}</option>`).join("")}</select>` : ""}
+    <label class="search">${icon(IC.search)}<input id="cq" type="search" placeholder="${esc(t("search"))}" value="${esc(APP.q)}" aria-label="${esc(t("search"))}"></label></div>
   </div><div class="tablewrap"><table class="clients"><thead><tr>
     ${tableCols().map(c => `<th${c.num ? ' class="num"' : ""}><button data-sort="${c.k}" ${APP.sort.k === c.k ? `data-dir="${APP.sort.dir}"` : ""}>${esc(c.lab)}</button></th>`).join("")}
   </tr></thead><tbody id="ctb"></tbody></table></div><div class="pager" id="cpg"></div></div>`;
   el.innerHTML = h;
   drawTable(el);
   let tmr; $("#cq", el).addEventListener("input", e => { clearTimeout(tmr); tmr = setTimeout(() => { APP.q = e.target.value; APP.page = 0; drawTable(el); }, 120); });
-  $("#cst", el).onchange = e => { APP.fSt = e.target.value; APP.page = 0; drawTable(el); };
-  $("#cch", el).onchange = e => { APP.fCh = e.target.value; APP.page = 0; drawTable(el); };
-  $("#csg", el).onchange = e => { APP.fSeg = e.target.value; APP.page = 0; drawTable(el); };
+  $$("[data-fst]", el).forEach(b => b.onclick = () => { APP.fSt = b.dataset.fst; APP.page = 0; $$("[data-fst]", el).forEach(x => x.setAttribute("aria-pressed", x === b)); drawTable(el); });
+  if ($("#cch", el)) $("#cch", el).onchange = e => { APP.fCh = e.target.value; APP.page = 0; drawTable(el); };
+  if ($("#csg", el)) $("#csg", el).onchange = e => { APP.fSeg = e.target.value; APP.page = 0; drawTable(el); };
   $$("[data-sort]", el).forEach(b => b.onclick = () => { const k = b.dataset.sort; APP.sort = { k, dir: APP.sort.k === k && APP.sort.dir === "desc" ? "asc" : "desc" }; $$("[data-sort]", el).forEach(x => x.removeAttribute("data-dir")); b.dataset.dir = APP.sort.dir; drawTable(el); });
 };
 function drawTable(el) {
@@ -1868,7 +1988,7 @@ function drawTable(el) {
   const cols = tableCols(), k = APP.sort.k, dir = APP.sort.dir === "asc" ? 1 : -1;
   const sc = cols.find(x => x.k === k) || cols.find(x => x.k === "spent"), val = sc.val;
   rows.sort((a, b) => { const x = val(a), y = val(b); return (typeof x === "string" ? x.localeCompare(y) : x - y) * dir; });
-  const per = 20, pages = Math.max(1, Math.ceil(rows.length / per)); APP.page = Math.min(APP.page, pages - 1);
+  const per = 50, pages = Math.max(1, Math.ceil(rows.length / per)); APP.page = Math.min(APP.page, pages - 1);
   const slice = rows.slice(APP.page * per, APP.page * per + per);
   $("#ctb", el).innerHTML = slice.length ? slice.map(c => `<tr data-client="${c.id}" tabindex="0">${cols.map(x => `<td${x.num ? ' class="num"' : ""}>${x.cell(c)}</td>`).join("")}</tr>`).join("") : `<tr><td colspan="${cols.length}" style="text-align:center;padding:30px;color:var(--muted)">${L("No one matches these filters.", "Nessuno corrisponde a questi filtri.")}</td></tr>`;
   $("#cpg", el).innerHTML = `<span>${nf(rows.length)} ${t("shown")} · ${eur(sum(rows.map(r => r.spent)))}</span><div><button class="btn ghost sm" id="pp" ${APP.page === 0 ? "disabled" : ""}>${t("prev")}</button><span style="align-self:center" class="mono">${APP.page + 1}/${pages}</span><button class="btn ghost sm" id="pn" ${APP.page >= pages - 1 ? "disabled" : ""}>${t("next")}</button></div>`;
@@ -1886,7 +2006,11 @@ function openClient(id) {
   const tx = c.txIdx.map(i => DB.txns[i]).sort((a, b) => b.d - a.d);
   const bk = DB.books.filter(b => b.c === c.id);
   const months = c.first ? Math.max(1, Math.round((NOW - c.first) / DAY / 30.44)) : 0;
-  const z = new Array(12).fill(0); for (const x of tx) { const k = monthIdx(x.d) - (NM - 12); if (k >= 0 && k < 12) z[k] += x.a; }
+  const m0 = c.first ? Math.max(NM - 17, Math.min(monthIdx(c.first), NM - 5)) : NM - 11, nmo = NM - m0;
+  const z = new Array(nmo).fill(0), zl = new Array(nmo).fill(0);
+  for (const x of tx) { const k = monthIdx(x.d) - m0; if (k >= 0 && k < nmo && x.st !== "refund") z[k] += x.a; }
+  for (const b of bk) { const k = monthIdx(b.d) - m0; if (k >= 0 && k < nmo && !b.ns && !isTrial(b.s)) zl[k]++; }
+  const showL = !isVisit() && zl.some(v => v);
   const progress = profProgress(c);
   layer.innerHTML = `<div class="scrim" data-close></div><aside class="drawer" role="dialog" aria-modal="true" aria-label="${esc(c.name)}">
     <div class="dh">${avatar(c)}<div style="min-width:0"><h3>${esc(c.name)}</h3><div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">${pill(c.status)}<span class="chip">${esc(segName(c.seg))}</span>${c.subActive ? `<span class="chip"><i style="background:var(--lime)"></i>${esc(tr(P.services[c.sub]?.n) || "")}</span>` : ""}</div></div><button class="x" data-close aria-label="Close">${icon(IC.x)}</button></div>
@@ -1894,15 +2018,15 @@ function openClient(id) {
       ${drawerMinis(c, bk)}
       ${progress}
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn main sm" data-act="addPay">${icon(IC.euro)}${t("addPay")}</button><button class="btn ghost sm" data-act="logSess">${icon(IC.cal)}${L("Log " + unit(false), "Registra " + unit(false))}</button><button class="btn ghost sm" data-act="editClient">${icon(IC.edit)}${L("Edit", "Modifica")}</button>${c.subActive ? `<button class="btn ghost sm" data-act="endPlan">${L("End plan", "Chiudi abbonamento")}</button>` : ""}<button class="btn ghost sm" data-act="delClient" style="margin-left:auto">${icon(IC.trash)}<span>${L("Delete", "Elimina")}</span></button></div>
-      <div><span class="eyebrow">${t("profile")}</span><dl class="facts" style="margin:8px 0 0">
+      ${c.first ? `<div><span class="eyebrow">${showL ? L(`${Cap(unit())} per month`, `${Cap(unit())} al mese`) : L("Spend per month", "Spesa al mese")}</span><div id="cSpend" style="margin-top:6px"></div></div>` : ""}
+      <details class="more"><summary>${L("Contact and details", "Contatti e dettagli")}</summary><dl class="facts" style="margin:8px 0 0">
         ${[[t("email"), c.email || "—"], [t("phone"), c.phone || "—"], [t("origin"), c.origin || "—"], [t("channel"), chName(c.ch)], [L("First contact", "Primo contatto"), fdate(c.created)], ...(isVisit() ? [] : [[L("Client for", "Cliente da"), months ? months + " " + L("months", "mesi") : "—"]]), ...P.fields.map(f => [tr(f.n), fieldValue(c, f)])].map(([a, b]) => `<div><dt>${esc(a)}</dt><dd>${esc(b)}</dd></div>`).join("")}
-      </dl></div>
-      ${c.first ? `<div><span class="eyebrow">${L("Spend, last 12 months", "Spesa, ultimi 12 mesi")}</span><div id="cSpend" style="margin-top:6px"></div></div>` : ""}
+      </dl></details>
       <div><span class="eyebrow">${t("history")}</span><div class="timeline">${tx.length ? tx.slice(0, 40).map(x => `<div class="tl"><i style="background:${x.k === "ext" ? "var(--pink)" : col(x.s)}"></i><div style="min-width:0"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(itemName(x))}</div><small>${fdate(x.d)} · ${esc(trMethod(x.m))}${x.st === "pending" ? " · " : ""}${x.st === "pending" ? `<span class="pill pending">${L("Pending", "Da incassare")}</span>` : ""}</small></div><span class="amt">${eur(x.a)}</span></div>`).join("") : `<p class="muted-p">${L("No purchases yet. This is still a lead.", "Nessun acquisto. È ancora un contatto.")}</p>`}</div></div>
       <div><label class="eyebrow" for="cnote">${t("notes")}</label><textarea id="cnote" class="note" placeholder="${esc(t("notesPh"))}" style="margin-top:8px">${esc(c.note || "")}</textarea></div>
     </div></aside>`;
   document.body.style.overflow = "hidden";
-  if (c.first) barChart($("#cSpend"), { labels: z.map((_, i) => monthLabel(NM - 12 + i)), series: [{ name: t("spent"), color: cssv("--blue"), values: z }], h: 130 });
+  if (c.first) barChart($("#cSpend"), { labels: z.map((_, i) => monthLabel(m0 + i)), ...(showL ? { fmt: v => nf(v), yfmt: v => nf(v) } : {}), series: [showL ? { name: Cap(unit()), color: cssv("--blue"), values: zl } : { name: t("spent"), color: cssv("--blue"), values: z }], h: 130 });
   const note = $("#cnote"); let nt;
   note.addEventListener("input", () => { clearTimeout(nt); nt = setTimeout(() => { c.note = note.value; persistClient(c); }, 700); });
   note.addEventListener("blur", () => { if (c.note !== note.value) { c.note = note.value; persistClient(c); toast(t("saved")); } });
@@ -2059,26 +2183,23 @@ function deleteClient(c) {
 }
 function afterChange() { computeMonthly(); renderView(); }
 
-/* time filters for the overview: quick periods, any single month, or a custom range */
+/* time filters: quick periods, plus any single month or a custom range under "Other" */
 function periodBar() {
-  const quick = [["mtd", L("This month", "Questo mese")], ["lm", L("Last month", "Mese scorso")], ["30", L("30 days", "30 giorni")], ["90", L("90 days", "90 giorni")], ["12", L("12 months", "12 mesi")], ["all", L("All", "Tutto")]];
+  const quick = [["mtd", L("This month", "Questo mese")], ["lm", L("Last month", "Mese scorso")], ["90", L("3 months", "3 mesi")], ["12", L("12 months", "12 mesi")], ["all", L("All", "Tutto")]];
   const first = Math.max(0, M.from >= 0 ? M.from : 0), months = []; for (let i = NM - 1; i >= first; i--) { const d = monthDate(i); months.push([`m:${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`, Cap(fdate(d, { month: "long", year: "numeric" }))]); }
-  const cus = PERIOD.startsWith("r:") ? [PERIOD.slice(2, 12), PERIOD.slice(13)] : [isoDay(rangeFor(PERIOD).a), isoDay(NOW)];
+  const other = !quick.some(([v]) => v === PERIOD), cus = PERIOD.startsWith("r:") ? [PERIOD.slice(2, 12), PERIOD.slice(13)] : [isoDay(rangeFor(PERIOD).a), isoDay(NOW)];
   return `<div class="per-bar" role="group" aria-label="${esc(L("Period", "Periodo"))}">${quick.map(([v, l]) => `<button type="button" class="chipb" data-per="${v}" aria-pressed="${PERIOD === v}">${esc(l)}</button>`).join("")}
-    <select class="sel" id="perM" aria-label="${esc(L("Pick a month", "Scegli un mese"))}"><option value="">${esc(L("A month…", "Un mese…"))}</option>${months.map(([v, l]) => `<option value="${v}" ${PERIOD === v ? "selected" : ""}>${esc(l)}</option>`).join("")}</select>
-    <span class="per-r"><input type="date" class="sel" id="perA" value="${cus[0]}" aria-label="${esc(L("From", "Dal"))}"><span>–</span><input type="date" class="sel" id="perB" value="${cus[1]}" max="${isoDay(NOW)}" aria-label="${esc(L("To", "Al"))}"><button type="button" class="btn ghost sm" id="perGo" aria-pressed="${PERIOD.startsWith("r:")}">${esc(L("Apply", "Applica"))}</button></span></div>`;
+    <details class="per-more"><summary class="chipb" aria-pressed="${other}">${esc(other ? Cap(periodName()) : L("Other…", "Altro…"))}</summary><div class="per-pop">
+      <label>${esc(L("A month", "Un mese"))}<select class="sel" id="perM"><option value="">—</option>${months.map(([v, l]) => `<option value="${v}" ${PERIOD === v ? "selected" : ""}>${esc(l)}</option>`).join("")}</select></label>
+      <div class="row2"><label>${esc(L("From", "Dal"))}<input type="date" class="sel" id="perA" value="${cus[0]}"></label><label>${esc(L("To", "Al"))}<input type="date" class="sel" id="perB" value="${cus[1]}" max="${isoDay(NOW)}"></label><button type="button" class="btn main sm" id="perGo">${esc(L("Apply", "Applica"))}</button></div>
+    </div></details></div>`;
 }
-function bindPeriodBar(el) {
-  const set = p => { PERIOD = p; renderTop(); renderView(); };
-  $$("[data-per]", el).forEach(b => b.onclick = () => set(b.dataset.per));
-  const m = $("#perM", el); if (m) m.onchange = () => m.value && set(m.value);
-  const go = $("#perGo", el); if (go) go.onclick = () => { const a = $("#perA", el).value, b = $("#perB", el).value; if (a && b) set(`r:${a < b ? a : b}:${a < b ? b : a}`); };
-}
+function bindPeriodBar() { } // the bar is handled by the document listeners in 07-main
 
 /* ================= revenue ================= */
 VIEWS.revenue = el => {
   const r = rangeFor(PERIOD), S1 = periodStats(r.a, r.b);
-  let h = vhead(eur(S1.rev) + " · " + periodName(), t("nav_revenue"), L("What sells, how people pay, and which months carry the year.", "Cosa si vende, come si paga e quali mesi reggono l'anno."));
+  let h = vhead(eur(S1.rev) + " · " + periodName(), t("nav_revenue"), L("What sells, how people pay, and which months carry the year.", "Cosa si vende, come si paga e quali mesi reggono l'anno."), periodBar());
   if (!hasData()) { el.innerHTML = h + emptyState(L("No payments yet", "Ancora nessun pagamento"), L("Record a payment from a client's card or import past payments.", "Registra un pagamento dalla scheda cliente o importa i pagamenti passati.")); return; }
   const hasSub = P.services.some(s => s.kind === "sub") && sum(M.mrr) > 0;
   const me = monthEndFc(), wi = workIn(r.a, r.b), U = Cap(unit()), mon = tr(I.monthNames)[NOW.getMonth()], fk = monthlyCosts(), ck = costsIn(r.a, r.b);
@@ -2130,7 +2251,7 @@ function seasonHeat(el) {
 /* ================= marketing ================= */
 VIEWS.marketing = el => {
   const r = rangeFor(PERIOD), cs = channelStats(r.a, r.b, r.months);
-  let h = vhead(periodName(), t("nav_marketing"), L(`Which channels bring ${who()} who stay and spend, and what each one really costs.`, `Quali canali portano ${who()} che restano e spendono, e quanto costa davvero ognuno.`));
+  let h = vhead(periodName(), t("nav_marketing"), L(`Which channels bring ${who()} who stay and spend, and what each one really costs.`, `Quali canali portano ${who()} che restano e spendono, e quanto costa davvero ognuno.`), periodBar());
   if (!hasData()) { el.innerHTML = h + emptyState(L("No channel data yet", "Ancora nessun dato sui canali"), L("Each client you add carries the channel they came from. Add a few to compare channels.", "Ogni cliente che aggiungi porta con sé il canale da cui arriva. Aggiungine alcuni per confrontarli.")); return; }
   h += `<div class="grid">
     <div class="panel c5"><div class="ph"><div><h3>${t("funnel")}</h3><p>${t("funnelSub")}</p></div></div><div class="funnel" id="mkF"></div></div>
@@ -2167,10 +2288,11 @@ VIEWS.retention = el => {
     <div class="panel c6"><div class="ph"><div><h3>${P.oneoff ? L("Repeat rate by channel", "Tasso di ritorno per canale") : t("churn")}</h3><p>${P.oneoff ? L("Share of paying " + who() + " who bought again", "Quota di " + who() + " paganti che hanno riacquistato") : L("Share of last month's active " + who() + " who did not come back", "Quota di " + who() + " attivi il mese scorso che non sono tornati")}</p></div></div><div id="rtC"></div></div>
     <div class="panel c6"><div class="ph"><div><h3>${t("atRisk")}</h3><p>${P.oneoff ? L("Past " + who() + " who spent the most: ask for a review or a referral", "Ex " + who() + " che hanno speso di più: chiedi recensione o passaparola") : t("atRiskSub")}</p></div></div><div class="list" id="rtR"></div></div>
   </div>`;
+  h += `<div style="margin-top:28px">${lensPanelsHtml()}</div>`;
   el.innerHTML = h;
   drawCohort($("#cohT", el));
   $$("#coh button", el).forEach(b => b.onclick = () => { APP.cohortMode = b.dataset.m; renderView(); });
-  lineChart($("#rtA", el), { labels: M.active.map((_, i) => monthLabel(i, true)), series: [{ name: L("Active", "Attivi"), color: cssv("--violet"), values: M.active, area: 1 }], fmt: v => nf(v), h: 230 });
+  const a0 = M.from || 0; lineChart($("#rtA", el), { labels: M.active.slice(a0).map((_, i) => monthLabel(a0 + i, true)), series: [{ name: L("Active", "Attivi"), color: cssv("--violet"), values: M.active.slice(a0), area: 1 }], fmt: v => nf(v), h: 230 });
   const st = [["active", "--lime"], ["risk", "--sun"], ["lapsed", "--slate"], ["lead", "--blue"]].filter(([s]) => counts[s]);
   donut($("#rtD", el), st.map(([s, c]) => ({ name: stLabel(s), value: counts[s], color: cssv(c), sub: Who() })), [nf(counts.active), L("active now", "attivi ora")]);
   $("#rtDL", el).innerHTML = st.map(([s, c]) => `<span><span style="display:inline-flex;gap:6px;align-items:center"><i style="background:var(${c})"></i>${esc(stLabel(s))}</span><em>${nf(counts[s])}</em></span>`).join("");
@@ -2183,9 +2305,10 @@ VIEWS.retention = el => {
   const risk = (P.oneoff ? DB.clients.filter(c => c.status === "lapsed" && !c.review) : DB.clients.filter(c => c.status === "risk")).sort((a, b) => b.spent - a.spent).slice(0, 7);
   $("#rtR", el).innerHTML = risk.length ? risk.map(c => `<div class="li" data-client="${c.id}" style="cursor:pointer">${avatar(c)}<div style="min-width:0"><div class="nm">${esc(c.name)}</div><small>${L("Last seen", "Ultima volta")} ${fdate(c.last)} · ${esc(chName(c.ch))}</small></div><span class="mono" style="font-weight:600">${eur(c.spent)}</span></div>`).join("") : `<p class="muted-p">${L("Nobody at risk right now.", "Nessuno a rischio in questo momento.")}</p>`;
   retentionExtras(el);
+  drawLensPanels(el);
 };
 function drawCohort(el) {
-  const rows = cohorts(APP.cohortMode), maxK = 12;
+  const rows = cohorts(APP.cohortMode).filter(r => r.n !== 0), maxK = Math.min(12, Math.max(1, ...rows.map(r => r.cells.length)));
   const maxRev = Math.max(1, ...rows.flatMap(r => r.cells.filter(v => v != null)));
   el.innerHTML = `<table class="cohort"><thead><tr><th>${L("First paid", "Primo pagamento")}</th><th>${Who()}</th>${[...Array(maxK)].map((_, k) => `<th style="text-align:center">M${k}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr><td class="lab">${monthLabel(r.m0, true)}</td><td class="n">${r.n}</td>${[...Array(maxK)].map((_, k) => { const v = r.cells[k]; if (v == null || !r.n) return `<td style="background:#fff"></td>`; const x = APP.cohortMode === "rev" ? v / maxRev : v; const dark = x > .55; return `<td style="background:color-mix(in srgb, var(--violet) ${Math.round(6 + x * 90)}%, #fff);color:${dark ? "#fff" : "var(--ink)"}">${APP.cohortMode === "rev" ? eurK(v) : Math.round(v * 100) + "%"}</td>`; }).join("")}</tr>`).join("")}</tbody></table>`;
 }
@@ -2193,7 +2316,7 @@ function drawCohort(el) {
 /* ================= schedule ================= */
 VIEWS.schedule = el => {
   const r = rangeFor(PERIOD), S1 = periodStats(r.a, r.b);
-  let h = vhead(nf(S1.books) + " " + L("bookings", "prenotazioni") + " · " + periodName(), t("nav_schedule"), L("When demand peaks, where the gaps are, and how full the calendar runs.", "Quando la domanda è al massimo, dove sono i buchi e quanto è pieno il calendario."));
+  let h = vhead(nf(S1.books) + " " + L("bookings", "prenotazioni") + " · " + periodName(), t("nav_schedule"), L("When demand peaks, where the gaps are, and how full the calendar runs.", "Quando la domanda è al massimo, dove sono i buchi e quanto è pieno il calendario."), periodBar());
   if (!DB.books.length && !(DB.upcoming || []).length) { el.innerHTML = h + emptyState(L("No sessions logged", "Nessuna sessione registrata"), L("Sessions are logged with each payment, or one by one from a client's card.", "Le sessioni si registrano con ogni pagamento, o una per volta dalla scheda cliente.")); return; }
   const ut = untimed(); // dates without times: by weekday only
   const hd = ut ? (() => { const g = Array.from({ length: 7 }, () => [0]); for (const x of DB.books) if (inR(x.d, r.a, r.b)) g[(x.d.getDay() + 6) % 7][0]++; return { H0: 0, H1: 0, grid: g }; })() : heatData(r.a, r.b), flat = hd.grid.flat(), max = Math.max(1, ...flat);
@@ -3031,15 +3154,18 @@ function tableCols() {
       ...(rf ? [{ k: "rating", lab: "★", num: 1, val: c => +c.f[rf.k] || 0, cell: c => +c.f[rf.k] > 0 ? `<span style="color:var(--sun)">${"★".repeat(+c.f[rf.k])}</span>` : `<span class="faint">—</span>` }] : []),
       spent, status];
   }
-  const kf = keyField(), X = LX();
-  return [name,
-    { k: "first", lab: L("Since", "Dal"), val: c => +(c.first || 0), cell: c => fdate(c.first, { month: "short", year: "numeric" }) },
-    { k: "stay", lab: L("Months", "Mesi"), num: 1, val: c => c.first ? tenure(c) : -1, cell: c => c.first ? nf(Math.max(1, Math.round(tenure(c)))) : "—" },
+  const kf = keyField(), X = LX(), kfUsed = kf && DB.clients.some(c => c.f[kf.k]);
+  const perM = c => c.first && X.att[c.id] ? X.att[c.id] / Math.max(1, (Math.min(+NOW, +(c.last || NOW)) - c.first) / DAY / 30.44) : 0;
+  const nameCh = { ...name, cell: c => `<div class="who">${avatar(c)}<div><b>${esc(c.name)}</b><small>${esc(chName(c.ch))}</small></div></div>` };
+  return [nameCh,
+    { k: "price", lab: L(`Per ${unit(false)}`, `A ${unit(false)}`), num: 1, val: c => priceOf(c)?.cur || 0, cell: c => { const p = priceOf(c); return p ? `<span class="price"><b>${eur(p.cur)}</b>${Math.abs(p.cur - p.first) >= 1 ? `<small class="sub">${L("was", "prima")} ${eur(p.first)}</small>` : ""}</span>` : "—"; } },
+    { k: "first", lab: L("Started", "Iniziato"), val: c => +(c.first || 0), cell: c => c.first ? fdate(c.first, { day: "numeric", month: "short", year: "numeric" }) + `<small class="sub">${((m) => m + " " + (m === 1 ? L("month", "mese") : L("months", "mesi")))(Math.max(1, Math.round(tenure(c))))}</small>` : "—" },
     { k: "n", lab: Cap(unit()), num: 1, val: c => X.att[c.id], cell: c => nf(X.att[c.id]) },
+    { k: "perm", lab: L("A month", "Al mese"), num: 1, val: perM, cell: c => perM(c) ? nf(perM(c), 1) : "—" },
     ...(hasPack() ? [{ k: "credit", lab: L("Left", "Rimaste"), val: c => { const x = creditLeft(c); return x ? x.left : -1; }, cell: c => { const x = creditLeft(c); return x && c.status !== "lapsed" ? `<span class="cr" title="${esc(L(`${x.used} used, ${x.booked} booked, ${x.left} left`, `${x.used} usate, ${x.booked} prenotate, ${x.left} rimaste`))}"><b>${x.left + x.booked}</b>/${x.total}<i><u style="width:${((x.used / x.total) * 100).toFixed(0)}%"></u></i></span>` : `<span class="faint">—</span>`; } }] : []),
-    ...(kf ? [{ k: "kf", lab: tr(kf.n), val: c => fieldValue(c, kf), cell: c => esc(fieldValue(c, kf)) }] : []),
+    ...(kfUsed ? [{ k: "kf", lab: tr(kf.n), val: c => fieldValue(c, kf), cell: c => esc(fieldValue(c, kf)) }] : []),
     { k: "last", lab: L(`Last ${unit(false)}`, `Ultima ${unit(false)}`), val: c => +(c.last || 0), cell: c => fdate(c.last, { day: "numeric", month: "short" }) },
-    ch, spent, status];
+    spent, status];
 }
 
 /* ---------- client card: the few numbers that matter for this kind of client ---------- */
@@ -3054,10 +3180,14 @@ function drawerMinis(c, bk) {
       rf ? [+c.f[rf.k] > 0 ? "★ " + c.f[rf.k] : "—", L("Review", "Recensione")] : [nf(c.n), L("Purchases", "Acquisti")]];
   } else {
     const cr = hasPack() ? creditLeft(c) : null;
-    m = [[eur(c.spent), t("spent")], [c.first ? nf(Math.max(1, Math.round(tenure(c)))) : "—", L("Months with you", "Mesi con te")], [nf(X.att[c.id]), Cap(unit()) + (ns ? " · " + ns + " " + L("missed", "saltate") : "")],
-      cr && c.status !== "lapsed" ? [nf(cr.left), L("Left in the package", "Rimaste nel pacchetto")] : [nf(purchasesOf(c)), L("Purchases", "Acquisti")]];
+    const pr = priceOf(c), mo = c.first ? Math.max(1, Math.round(tenure(c))) : 0, n = X.att[c.id] || 0;
+    const sp = (Math.min(+NOW, +(c.last || NOW)) - (c.first || NOW)) / DAY / 30.44;
+    m = [[pr ? eur(pr.cur) : "—", L(`Per ${unit(false)}`, `A ${unit(false)}`), pr && Math.abs(pr.cur - pr.first) >= 1 ? L("was ", "prima ") + eur(pr.first) : ""],
+      [c.first ? fdate(c.first, { day: "numeric", month: "short", year: "2-digit" }) : "—", L("Started", "Iniziato"), mo ? mo + " " + L(mo === 1 ? "month" : "months", mo === 1 ? "mese" : "mesi") : ""],
+      [nf(n), Cap(unit()), n && c.first ? nf(n / Math.max(1, sp), 1) + " " + L("a month", "al mese") + (ns ? " · " + ns + " " + L("missed", "saltate") : "") : ""],
+      cr && c.status !== "lapsed" ? [nf(cr.left), L("Left in the package", "Rimaste nel pacchetto"), eur(c.spent) + " " + L("paid", "pagati")] : [eur(c.spent), L("Paid in total", "Pagato in totale"), c.last ? L("last ", "ultima ") + fdate(c.last, { day: "numeric", month: "short" }) : ""]];
   }
-  return `<div class="minis m4">${m.map(([v, l]) => `<div class="mini"><b>${esc(v)}</b><small>${esc(l)}</small></div>`).join("")}</div>`;
+  return `<div class="facts4">${m.map(([v, l, s]) => `<div><small>${esc(l)}</small><b>${esc(v)}</b>${s ? `<span>${esc(s)}</span>` : ""}</div>`).join("")}</div>`;
 }
 
 /* ---------- insights that only make sense for one kind of business ---------- */
@@ -4077,7 +4207,7 @@ VIEWS.data = el => {
   const demo = !STORE.active;
   const used = { svc: new Set(), ext: new Set(), ch: new Set(DB.clients.map(c => c.ch)) };
   DB.txns.forEach(x => used[x.k === "ext" ? "ext" : "svc"].add(x.s)); DB.books.forEach(b => used.svc.add(b.s));
-  let h = vhead(demo ? L("Demo workspace", "Spazio demo") : L("Saved workspace", "Spazio salvato"), t("dataTitle"), t("dataSub"));
+  let h = vhead(demo ? L("Demo workspace", "Spazio demo") : L("Saved workspace", "Spazio salvato"), t("dataTitle"), t("dataSub")) + profileBanner();
   if (demo && P.realData) h += `<div class="note-box" style="background:var(--lime-s)">${icon(IC.info)}<div><b>${Cap(realLabel())}.</b> ${L("Imported from the lesson tracker export. Changes here last until you switch: to keep working on these numbers, create the client workspace, which starts with the same lessons.", "Importati dall'export del tracker lezioni. Le modifiche durano finché non cambi spazio: per lavorarci sopra, crea lo spazio cliente, che parte con le stesse lezioni.")} ${STORE.db ? `<button class="btn main sm" data-act="newWs" style="margin-top:8px">${icon(IC.plus)}${L("Create the client workspace", "Crea lo spazio cliente")}</button>` : ""}</div></div>`;
   else if (demo) h += `<div class="note-box" style="background:var(--sun-s)">${icon(IC.info)}<div><b>${L("You are looking at simulated data.", "Stai guardando dati simulati.")}</b> ${L("Changes here last until you switch. To keep a real professional's numbers, create a client workspace from the Clients menu at the top.", "Le modifiche durano finché non cambi spazio. Per tenere i numeri reali di un professionista, crea uno spazio cliente dal menu Clienti in alto.")} ${STORE.db ? `<button class="btn main sm" data-act="newWs" style="margin-top:8px">${icon(IC.plus)}${P.profile ? L("Start with real data", "Parti con i dati reali") : L("New client workspace", "Nuovo spazio cliente")}</button>` : ""}</div></div>`;
   const ws = demo ? { name: bizName(), prof: P.id, cur: CUR, goal: P.goal, start: P.consultStart ? isoDay(P.consultStart) : "", capacity: P.capacity } : STORE.meta;
@@ -4209,9 +4339,10 @@ function showCsv(kind, data) {
 /* ================= shell ================= */
 APP.demoNames = {};
 const bizName = () => STORE.active ? (STORE.meta?.name || "—") : demoName();
-const NAV = ["overview", "today", "clients", "revenue", "marketing", "retention", "schedule", "|", "insights", "simulator", "report", "|", "data"];
+// the four pages used every day, then the deeper analysis, then data
+const NAV = ["overview", "today", "clients", "revenue", "#analysis", "retention", "marketing", "schedule", "insights", "simulator", "report", "|", "data"];
 function renderNav() {
-  $("#nav").innerHTML = NAV.map(v => v === "|" ? `<div class="sep"></div>` : `<button type="button" data-view="${v}" aria-current="${APP.view === v}">${icon(NAV_ICONS[v])}<span>${v === "clients" ? Who() : v === "retention" && isVisit() ? L("Reviews & returns", "Recensioni e ritorni") : t("nav_" + v)}</span></button>`).join("");
+  $("#nav").innerHTML = NAV.map(v => v === "|" ? `<div class="sep"></div>` : v === "#analysis" ? `<div class="nav-group">${L("Analysis", "Analisi")}</div>` : `<button type="button" data-view="${v}" aria-current="${APP.view === v}">${icon(NAV_ICONS[v])}<span>${v === "clients" ? Who() : v === "retention" && isVisit() ? L("Reviews & returns", "Recensioni e ritorni") : t("nav_" + v)}</span></button>`).join("");
 }
 function crumb() {
   const prof = tr(P.name);
@@ -4309,6 +4440,8 @@ document.addEventListener("click", e => {
   const v = e.target.closest("[data-view]"); if (v) return go(v.dataset.view);
   const g = e.target.closest("[data-go]"); if (g) return go(g.dataset.go);
   const p = e.target.closest("#period [data-p]"); if (p) { PERIOD = p.dataset.p; renderTop(); renderView(); return; }
+  const pr = e.target.closest("[data-per]"); if (pr) { PERIOD = pr.dataset.per; renderTop(); renderView(); return; }
+  if (e.target.closest("#perGo")) { const a = $("#perA").value, b = $("#perB").value; if (a && b) { PERIOD = `r:${a < b ? a : b}:${a < b ? b : a}`; renderTop(); renderView(); } return; }
   const l = e.target.closest("#lang [data-l]"); if (l) { LANG = l.dataset.l; try { localStorage.setItem("clientela.lang", LANG); } catch (err) { } if (!STORE.active) { /* demo names follow language */ } renderTop(); renderView(); return; }
   if (e.target.closest("#profBtn")) return openPicker();
   const a = e.target.closest("[data-act]")?.dataset.act;
@@ -4352,6 +4485,8 @@ function recordPlans() {
   openDemo(okDemo ? demoId : "tour");
   STORE.init();
 })();
+
+document.addEventListener("change", e => { if (e.target.id === "perM" && e.target.value) { PERIOD = e.target.value; renderTop(); renderView(); } });
 
 </script>
 </body>
