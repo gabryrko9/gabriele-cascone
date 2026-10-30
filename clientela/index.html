@@ -1269,9 +1269,9 @@ function refreshClient(db, c, initial) {
    The public build ships with no profiles: client names never live in public code.
    Profiles are added by the private build or imported from a profile file (kept in this browser). */
 const PROFILES = [];
-const PROFILE_KEYS = ["who", "who1", "names", "oneoff", "baseNew", "growth", "repeat", "upgrade", "reviewRate", "capacity", "elasticity", "holdDays", "churn", "renew", "freq", "summerChurn", "trialRate", "season", "hours", "days", "services", "extras", "channels", "originLabel", "origins", "segments", "fields", "corp", "methods", "portal", "cur", "real", "trialFirst"];
+const PROFILE_KEYS = ["who", "who1", "names", "oneoff", "baseNew", "growth", "repeat", "upgrade", "reviewRate", "capacity", "elasticity", "holdDays", "churn", "renew", "freq", "summerChurn", "trialRate", "season", "hours", "days", "services", "extras", "channels", "originLabel", "origins", "segments", "fields", "corp", "methods", "portal", "cur", "real", "trialFirst", "week"];
 // what a saved workspace keeps from its profile, so it works even where the profile is not installed
-const EXT_KEYS = ["who", "who1", "oneoff", "holdDays", "freq", "elasticity", "hours", "days", "originLabel", "origins", "segments", "fields", "corp", "methods", "portal", "trialFirst"];
+const EXT_KEYS = ["who", "who1", "oneoff", "holdDays", "freq", "elasticity", "hours", "days", "originLabel", "origins", "segments", "fields", "corp", "methods", "portal", "trialFirst", "week"];
 const profileById = id => PROFILES.find(p => p.id === id);
 function profBase(profId, profileId) {
   const base = PROF.find(p => p.id === profId) || PROF[0];
@@ -1658,9 +1658,27 @@ function monthEndFc() {
   const perPrev = prev.length ? sum(prev.map(i => M.rev[i])) / sum(prev.map(i => W.n[i])) : 0;
   const perDay = wd >= 3 ? so / wd : perPrev || (wd ? so / wd : 0);
   const ratioPrev = prev.length ? sum(prev.map(i => W.n[i])) / sum(prev.map(i => daysIn(monthDate(i).getFullYear(), monthDate(i).getMonth()))) : 0;
+  if (P.week) return { so, wd, perDay, ...weekLeft(perDay), el, tot, prevDays: W.n[m - 1], byWeek: true };
   const ratio = el >= 7 && wd ? wd / el : ratioPrev;
   const left = Math.round((tot - el) * ratio);
   return { so, wd, perDay, left, fc: so + left * perDay, el, tot, prevDays: W.n[m - 1] };
+}
+// with a weekly schedule (most sessions per weekday, 0 = day off): the days still to work this month,
+// each worth what that weekday brought recently, never more than the day's limit allows
+function weekLeft(perDay) {
+  const wk = P.week, src = workSource(), since = +NOW - 91 * DAY, byDay = new Map();
+  for (const x of src) if (+x.d >= since) { const k = dayKey(x.d); const o = byDay.get(k) || { w: (x.d.getDay() + 6) % 7, n: 0 }; o.n++; byDay.set(k, o); }
+  const revDay = new Map(); for (const x of DB.txns) if (+x.d >= since && x.st !== "refund") revDay.set(dayKey(x.d), (revDay.get(dayKey(x.d)) || 0) + x.a);
+  const perW = [...Array(7)].map((_, w) => { const ds = [...byDay.entries()].filter(([, o]) => o.w === w); return ds.length ? sum(ds.map(([k]) => revDay.get(k) || 0)) / ds.length : 0; });
+  const perLes = (() => { let r = 0, n = 0; for (const [k, o] of byDay) { r += revDay.get(k) || 0; n += o.n; } return n ? r / n : 0; })();
+  const today = dayKey(NOW), doneToday = src.some(x => dayKey(x.d) === today);
+  let left = 0, add = 0; const d = new Date(TODAY);
+  for (; d.getMonth() === NOW.getMonth(); d.setDate(d.getDate() + 1)) {
+    if (dayKey(d) === today && doneToday) continue;
+    const w = (d.getDay() + 6) % 7; if (!(wk[w] > 0)) continue;
+    left++; add += Math.min(perW[w] || perDay, wk[w] * perLes || Infinity);
+  }
+  return { left, fc: M.rev[NM - 1] + add };
 }
 
 /* ================= app state ================= */
@@ -2009,7 +2027,7 @@ VIEWS.revenue = el => {
   const me = monthEndFc(), wi = workIn(r.a, r.b), U = Cap(unit()), mon = tr(I.monthNames)[NOW.getMonth()];
   const kp = (c, lab, val, hint) => `<div class="kpi" style="--kc:var(${c})"><span class="lab"><i></i>${esc(lab)}</span><span class="val">${val}</span><span class="hint">${hint}</span></div>`;
   h += `<div class="kpis">
-    ${kp("--blue", L(`End of ${mon} (forecast)`, `Fine ${mon} (previsione)`), eur(me.fc), L(`${eur(me.so)} so far · about ${nf(me.left)} working ${me.left === 1 ? "day" : "days"} left`, `${eur(me.so)} finora · circa ${nf(me.left)} ${me.left === 1 ? "giorno" : "giorni"} di lavoro ${me.left === 1 ? "rimasto" : "rimasti"}`))}
+    ${kp("--blue", L(`End of ${mon} (forecast)`, `Fine ${mon} (previsione)`), eur(me.fc), !me.left ? L(`${eur(me.so)} so far · no working days left this month`, `${eur(me.so)} finora · nessun giorno di lavoro rimasto nel mese`) : L(`${eur(me.so)} so far · ${me.byWeek ? "" : "about "}${nf(me.left)} working ${me.left === 1 ? "day" : "days"} left`, `${eur(me.so)} finora · ${me.byWeek ? "" : "circa "}${nf(me.left)} ${me.left === 1 ? "giorno" : "giorni"} di lavoro ${me.left === 1 ? "rimasto" : "rimasti"}`))}
     ${kp("--lime", L(`Days worked in ${mon}`, `Giorni lavorati a ${mon}`), nf(me.wd), L(`of ${nf(me.el)} days so far` + (me.prevDays != null ? ` · last month ${nf(me.prevDays)}` : ""), `su ${nf(me.el)} giorni trascorsi` + (me.prevDays != null ? ` · mese scorso ${nf(me.prevDays)}` : "")))}
     ${kp("--violet", L("Per day worked", "Per giorno lavorato"), wi.days ? eur(S1.rev / wi.days) : "—", L(`${periodName()} · ${nf(wi.days)} days · ${mon} ${eur(me.perDay)}`, `${periodName()} · ${nf(wi.days)} giorni · ${mon} ${eur(me.perDay)}`))}
     ${kp("--sun", L(`${U} per day worked`, `${U} per giorno lavorato`), wi.days ? nf(wi.les / wi.days, 1) : "—", L(`${nf(wi.les)} ${unit()} · ${periodName()}`, `${nf(wi.les)} ${unit()} · ${periodName()}`))}
@@ -3046,7 +3064,8 @@ VIEWS.today = el => {
     ? [[nf(ents.length), Cap(unit())], [nf(sum(ents.map(e => e.c.size || 1))), Who()], [nf(miss.length), "No-show"]]
     : [[nf(came.length), L("Came", "Presenti")], [nf(miss.length), L("Missed", "Assenti")], [nf(plan.length), past ? L("To mark", "Da segnare") : L("Booked", "Prenotate")]];
   h += `<div class="panel"><div class="minis">${sm.map(([v, l]) => `<div class="mini"><b>${v}</b><small>${esc(l)}</small></div>`).join("")}</div>`;
-  if (!ents.length) h += `<p class="muted-p" style="margin:0">${isVisit() ? L(`No ${unit()} on this day.`, `Nessun ${unit(false)} in questo giorno.`) : L(`No ${unit()} booked on this day. Add who came below.`, `Nessuna ${unit(false)} prenotata in questo giorno. Aggiungi qui sotto chi è venuto.`)}</p>`;
+  if (!ents.length && P.week && !(P.week[(day.getDay() + 6) % 7] > 0)) h += `<p class="muted-p" style="margin:0">${L("Day off.", "Giorno libero.")}</p>`;
+  else if (!ents.length) h += `<p class="muted-p" style="margin:0">${isVisit() ? L(`No ${unit()} on this day.`, `Nessun ${unit(false)} in questo giorno.`) : L(`No ${unit()} booked on this day. Add who came below.`, `Nessuna ${unit(false)} prenotata in questo giorno. Aggiungi qui sotto chi è venuto.`)}</p>`;
   h += `<div class="day-list">${ents.map((e, i) => dayRow(e, i, past)).join("")}</div>`;
   if (isVisit()) h += `<div><button class="btn main" data-act="dayBook">${icon(IC.plus)}${L("New booking for this day", "Nuova prenotazione per questo giorno")}</button></div>`;
   h += `</div>`;
@@ -3234,7 +3253,7 @@ function openDemo(key) {
     P.services = P.services.map((s, i) => ({ id: "s" + i, ...s })); P.extras = P.extras.map((x, i) => ({ id: "e" + i, ...x })); P.channels = P.channels.map((c, i) => ({ id: "h" + i, ...c }));
     P.realData = importTracker(prof.real) || { error: true };
     const wk = new Map(); for (const b of DB.books) { const d = dayStart(b.d); d.setDate(d.getDate() - (d.getDay() + 6) % 7); wk.set(+d, (wk.get(+d) || 0) + 1); }
-    P.capacity = Math.max(P.capacity || 0, ...wk.values());
+    P.capacity = P.week ? sum(P.week) : Math.max(P.capacity || 0, ...wk.values());
     computeMonthly(); SIM.ext = null; renderTop(); renderView(); return;
   }
   // pick a simulated history that reads like a typical business (steady growth, visible effect of the consulting)
