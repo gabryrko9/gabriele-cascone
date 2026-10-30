@@ -1269,9 +1269,9 @@ function refreshClient(db, c, initial) {
    The public build ships with no profiles: client names never live in public code.
    Profiles are added by the private build or imported from a profile file (kept in this browser). */
 const PROFILES = [];
-const PROFILE_KEYS = ["who", "who1", "names", "oneoff", "baseNew", "growth", "repeat", "upgrade", "reviewRate", "capacity", "elasticity", "holdDays", "churn", "renew", "freq", "summerChurn", "trialRate", "season", "hours", "days", "services", "extras", "channels", "originLabel", "origins", "segments", "fields", "corp", "methods", "portal", "cur", "real"];
+const PROFILE_KEYS = ["who", "who1", "names", "oneoff", "baseNew", "growth", "repeat", "upgrade", "reviewRate", "capacity", "elasticity", "holdDays", "churn", "renew", "freq", "summerChurn", "trialRate", "season", "hours", "days", "services", "extras", "channels", "originLabel", "origins", "segments", "fields", "corp", "methods", "portal", "cur", "real", "trialFirst"];
 // what a saved workspace keeps from its profile, so it works even where the profile is not installed
-const EXT_KEYS = ["who", "who1", "oneoff", "holdDays", "freq", "elasticity", "hours", "days", "originLabel", "origins", "segments", "fields", "corp", "methods", "portal"];
+const EXT_KEYS = ["who", "who1", "oneoff", "holdDays", "freq", "elasticity", "hours", "days", "originLabel", "origins", "segments", "fields", "corp", "methods", "portal", "trialFirst"];
 const profileById = id => PROFILES.find(p => p.id === id);
 function profBase(profId, profileId) {
   const base = PROF.find(p => p.id === profId) || PROF[0];
@@ -1636,6 +1636,33 @@ function impactStats() {
   };
 }
 
+/* days worked: a day with at least one session held (or, where no sessions are logged, a paid service) */
+const dayKey = d => d.getFullYear() * 400 + d.getMonth() * 32 + d.getDate();
+function workSource() { return DB.books.some(b => !b.ns && !isTrialSvc(b.s)) ? DB.books.filter(b => !b.ns && !isTrialSvc(b.s)) : DB.txns.filter(x => x.k === "svc" && x.st !== "refund"); }
+function workDays() {
+  return memo("wd", () => {
+    const sets = Array.from({ length: NM }, () => new Set()), les = new Array(NM).fill(0);
+    for (const x of workSource()) { const mi = monthIdx(x.d); if (mi < 0 || mi >= NM) continue; sets[mi].add(dayKey(x.d)); les[mi]++; }
+    return { n: sets.map(s => s.size), les };
+  });
+}
+function workIn(a, b) {
+  const s = new Set(); let les = 0;
+  for (const x of workSource()) if (inR(x.d, a, b)) { s.add(dayKey(x.d)); les++; }
+  return { days: s.size, les };
+}
+// this month's end: what is in so far, plus the days likely still worked at this month's pace per day
+function monthEndFc() {
+  const m = NM - 1, W = workDays(), so = M.rev[m], wd = W.n[m], el = NOW.getDate(), tot = daysIn(NOW.getFullYear(), NOW.getMonth());
+  const prev = [m - 1, m - 2, m - 3].filter(i => i >= 0 && W.n[i] > 0);
+  const perPrev = prev.length ? sum(prev.map(i => M.rev[i])) / sum(prev.map(i => W.n[i])) : 0;
+  const perDay = wd >= 3 ? so / wd : perPrev || (wd ? so / wd : 0);
+  const ratioPrev = prev.length ? sum(prev.map(i => W.n[i])) / sum(prev.map(i => daysIn(monthDate(i).getFullYear(), monthDate(i).getMonth()))) : 0;
+  const ratio = el >= 7 && wd ? wd / el : ratioPrev;
+  const left = Math.round((tot - el) * ratio);
+  return { so, wd, perDay, left, fc: so + left * perDay, el, tot, prevDays: W.n[m - 1] };
+}
+
 /* ================= app state ================= */
 const APP = { view: "overview", sort: { k: "spent", dir: "desc" }, page: 0, q: "", fSt: "", fCh: "", fSeg: "", cohortMode: "pct" };
 const VIEWS = {};
@@ -1979,7 +2006,16 @@ VIEWS.revenue = el => {
   let h = vhead(eur(S1.rev) + " · " + periodName(), t("nav_revenue"), L("What sells, how people pay, and which months carry the year.", "Cosa si vende, come si paga e quali mesi reggono l'anno."));
   if (!hasData()) { el.innerHTML = h + emptyState(L("No payments yet", "Ancora nessun pagamento"), L("Record a payment from a client's card or import past payments.", "Registra un pagamento dalla scheda cliente o importa i pagamenti passati.")); return; }
   const hasSub = P.services.some(s => s.kind === "sub") && sum(M.mrr) > 0;
+  const me = monthEndFc(), wi = workIn(r.a, r.b), U = Cap(unit()), mon = tr(I.monthNames)[NOW.getMonth()];
+  const kp = (c, lab, val, hint) => `<div class="kpi" style="--kc:var(${c})"><span class="lab"><i></i>${esc(lab)}</span><span class="val">${val}</span><span class="hint">${hint}</span></div>`;
+  h += `<div class="kpis">
+    ${kp("--blue", L(`End of ${mon} (forecast)`, `Fine ${mon} (previsione)`), eur(me.fc), L(`${eur(me.so)} so far · about ${nf(me.left)} working ${me.left === 1 ? "day" : "days"} left`, `${eur(me.so)} finora · circa ${nf(me.left)} ${me.left === 1 ? "giorno" : "giorni"} di lavoro ${me.left === 1 ? "rimasto" : "rimasti"}`))}
+    ${kp("--lime", L(`Days worked in ${mon}`, `Giorni lavorati a ${mon}`), nf(me.wd), L(`of ${nf(me.el)} days so far` + (me.prevDays != null ? ` · last month ${nf(me.prevDays)}` : ""), `su ${nf(me.el)} giorni trascorsi` + (me.prevDays != null ? ` · mese scorso ${nf(me.prevDays)}` : "")))}
+    ${kp("--violet", L("Per day worked", "Per giorno lavorato"), wi.days ? eur(S1.rev / wi.days) : "—", L(`${periodName()} · ${nf(wi.days)} days · ${mon} ${eur(me.perDay)}`, `${periodName()} · ${nf(wi.days)} giorni · ${mon} ${eur(me.perDay)}`))}
+    ${kp("--sun", L(`${U} per day worked`, `${U} per giorno lavorato`), wi.days ? nf(wi.les / wi.days, 1) : "—", L(`${nf(wi.les)} ${unit()} · ${periodName()}`, `${nf(wi.les)} ${unit()} · ${periodName()}`))}
+  </div>`;
   h += `<div class="grid">
+    <div class="panel c12"><div class="ph"><div><h3>${L("Month by month", "Mese per mese")}</h3><p>${L("Days worked, and what each day worked brings", "Giorni lavorati e quanto rende ogni giorno di lavoro")}</p></div></div><div id="rvDay"></div><div class="tablewrap"><table><thead><tr><th>${L("Month", "Mese")}</th><th class="num">${L("Days worked", "Giorni lavorati")}</th><th class="num">${esc(U)}</th><th class="num">${t("revenue")}</th><th class="num">${L("Per day worked", "Per giorno lavorato")}</th><th class="num">${L(`Per ${unit(false)}`, `Per ${unit(false)}`)}</th></tr></thead><tbody id="rvDayT"></tbody></table></div></div>
     <div class="panel c8"><div class="ph"><div><h3>${t("revByService")}</h3><p>${t("revByServiceSub")}</p></div></div><div id="rvStack"></div><div class="legend" id="rvLeg"></div></div>
     <div class="panel c4"><div class="ph"><div><h3>${t("methods")}</h3><p>${t("period")}</p></div></div><div class="donut-wrap"><div id="rvM"></div><div class="legend" id="rvML"></div></div></div>
     <div class="panel c7"><div class="ph"><div><h3>${t("topServices")}</h3><p>${t("period")}</p></div></div><div class="tablewrap"><table><thead><tr><th>${t("service")}</th><th>${t("count")}</th><th>${t("avgPrice")}</th><th>${t("revenue")}</th><th>${t("share")}</th></tr></thead><tbody id="rvT"></tbody></table></div></div>
@@ -1988,7 +2024,7 @@ VIEWS.revenue = el => {
     ${hasSub ? `<div class="panel c6"><div class="ph"><div><h3>${t("mrr")}</h3><p>${t("mrrSub")}</p></div><b class="mono">${eur(M.mrr[NM - 2])}/${L("mo", "mese")}</b></div><div id="rvMrr"></div></div>` : ""}
   </div>`;
   el.innerHTML = h;
-  const n = PERIOD === "all" ? NM : 12, from = NM - n;
+  const n0 = PERIOD === "all" ? NM : 12, from = Math.max(NM - n0, M.from > 0 ? Math.min(NM - 6, M.from) : 0), n = NM - from; // records that start recently: begin where they start
   const series = P.services.map((s, i) => ({ name: tr(s.n), color: col(i), values: M.svc[i].slice(from) })).filter(s => sum(s.values) > 0);
   series.push({ name: t("extras"), color: cssv("--pink"), values: M.ext.slice(from) });
   barChart($("#rvStack", el), { labels: M.rev.slice(from).map((_, i) => monthLabel(from + i, n > 12)), series, stacked: true, h: 260, tipTitle: i => monthLabel(from + i, true) });
@@ -2003,6 +2039,9 @@ VIEWS.revenue = el => {
   $("#rvPT", el).textContent = eur(sum(pend.map(x => x.a)));
   $("#rvP", el).innerHTML = pend.length ? pend.slice(0, 7).map(x => { const c = DB.clients[x.c]; const age = Math.round((NOW - x.d) / DAY); return `<div class="li" data-client="${c.id}" style="cursor:pointer">${avatar(c)}<div style="min-width:0"><div class="nm">${esc(c.name)}</div><small>${esc(itemName(x))} · ${age} ${L("days ago", "giorni fa")}</small></div><span class="mono" style="font-weight:600">${eur(x.a)}</span></div>`; }).join("") : `<p class="muted-p">${t("nothingPending")}</p>`;
   seasonHeat($("#rvSeason", el));
+  const W = workDays(), d0 = Math.max(0, M.from, NM - 12), ms = [...Array(NM - d0)].map((_, k) => d0 + k);
+  barChart($("#rvDay", el), { labels: ms.map(i => monthLabel(i, ms.length > 12 || monthDate(d0).getFullYear() !== NOW.getFullYear())), series: [{ name: L("Per day worked", "Per giorno lavorato"), color: cssv("--violet"), values: ms.map(i => W.n[i] ? M.rev[i] / W.n[i] : 0) }], fmt: eur, h: 200, tipTitle: k => monthLabel(ms[k], true) + " · " + nf(W.n[ms[k]]) + " " + L("days worked", "giorni lavorati") });
+  $("#rvDayT", el).innerHTML = [...ms].reverse().map(i => { const cur = i === NM - 1, n = W.n[i]; return `<tr><td>${esc(Cap(monthLabel(i, true)))}${cur ? ` <small class="muted-p">${L("so far · forecast", "finora · previsione")} ${eur(me.fc)}</small>` : ""}</td><td class="num">${n ? nf(n) : "—"}</td><td class="num">${nf(W.les[i])}</td><td class="num"><b>${eur(M.rev[i])}</b></td><td class="num">${n ? eur(M.rev[i] / n) : "—"}</td><td class="num">${W.les[i] ? eur(M.rev[i] / W.les[i]) : "—"}</td></tr>`; }).join("");
   if (hasSub) lineChart($("#rvMrr", el), { labels: M.mrr.slice(NM - 12).map((_, i) => monthLabel(NM - 12 + i)), series: [{ name: "MRR", color: cssv("--lime"), values: M.mrr.slice(NM - 12, NM - 1).concat([null]), area: 1 }], h: 200 });
 };
 const periodName = () => ({ "30": L("last 30 days", "ultimi 30 giorni"), "90": L("last 90 days", "ultimi 90 giorni"), "12": L("last 12 months", "ultimi 12 mesi"), all: L("last 24 months", "ultimi 24 mesi") }[PERIOD]);
@@ -3055,7 +3094,7 @@ function dayRow(e, i, past) {
   const pend = c.txIdx.map(k => DB.txns[k]).filter(x => x.st === "pending"), owed = sum(pend.map(x => x.a));
   const cr = !isVisit() && hasPack() && !isTrial(e.s) ? creditLeft(c) : null;
   const rf = ratingField(), stars = isVisit() && rf && st === "came" ? `<span class="stars" role="group" aria-label="${esc(L("Review stars", "Stelle recensione"))}">${[1, 2, 3, 4, 5].map(v => `<button type="button" data-a="star" data-v="${v}" class="${+c.f[rf.k] >= v ? "on" : ""}" aria-label="${v}">★</button>`).join("")}</span>` : "";
-  const sub = [tr(P.services[e.s]?.n), isVisit() && (c.size || 1) > 1 ? `${c.size} ${L("people", "persone")}` : "", cr ? (cr.left <= 1 ? `<b class="warn">${L(`${cr.left} left: offer the next package`, `${cr.left} rimaste: proponi il prossimo pacchetto`)}</b>` : L(`${cr.left} left`, `${cr.left} rimaste`)) : "", isTrial(e.s) ? `<b class="warn">${L("free trial: follow up today", "prova gratuita: ricontatta oggi")}</b>` : ""].filter(Boolean).join(" · ");
+  const sub = [tr(P.services[e.s]?.n), isVisit() && (c.size || 1) > 1 ? `${c.size} ${L("people", "persone")}` : "", cr ? (cr.left <= 1 ? `<b class="warn">${L(`${cr.left} left: offer the next package`, `${cr.left} rimaste: proponi il prossimo pacchetto`)}</b>` : L(`${cr.left} left`, `${cr.left} rimaste`)) : "", isTrial(e.s) && !c.first ? `<b class="warn">${L("free trial: follow up today", "prova gratuita: ricontatta oggi")}</b>` : ""].filter(Boolean).join(" · ");
   const acts = st === "plan"
     ? (past ? `<button class="btn ghost sm ok" data-a="came">${L("Came", "C'era")}</button><button class="btn ghost sm" data-a="miss">${L("Missed", "Assente")}</button>` : `<span class="pill lead">${L("Booked", "Prenotato")}</span>`)
     : `<span class="pill ${st === "came" ? "active" : "risk"}">${st === "came" ? L("Came", "C'era") : L("Missed", "Assente")}</span>${st === "came" ? `<button class="btn ghost sm" data-a="miss">${L("Missed", "Assente")}</button>` : `<button class="btn ghost sm" data-a="came">${L("Came", "C'era")}</button>`}`;
@@ -3805,16 +3844,16 @@ function importTracker(text) {
   const school = (() => { const n = T0.students.filter(s => srcKind(s.src) === "school" && s.note).map(s => s.note.split(/\s+-\s+|,/)[0].trim()); const c = {}; n.forEach(x => c[x] = (c[x] || 0) + 1); return Object.keys(c).sort((a, b) => c[b] - c[a])[0] || ""; })();
   const median = xs => { const s = [...xs].sort((a, b) => a - b); return s.length ? Math.round(s[Math.floor(s.length / 2)]) : 0; };
   const findSvc = test => P.services.findIndex(s => !s.trial && test(tr(s.n)));
-  const svcFor = (src, group) => {
+  const svcFor = src => {
     const k = srcKind(src), sc = school ? new RegExp(reEsc(school), "i") : null;
     let i = k === "platform" ? findSvc(n => new RegExp(reEsc(src), "i").test(n))
       : k === "private" ? findSvc(n => /privat/i.test(n) && !isGroupName(n))
-      : k === "school" ? findSvc(n => (/scuol|school/i.test(n) || sc?.test(n)) && isGroupName(n) === group)
+      : k === "school" ? findSvc(n => /scuol|school/i.test(n) || !!sc?.test(n))
       : findSvc(n => n.toLowerCase() === src.toLowerCase());
     if (i < 0) {
       const ps = T0.lessons.filter(l => l.src === src).map(l => l.a);
       const n = k === "platform" ? L(`Lesson on ${src}`, `Lezione su ${src}`) : k === "private" ? L("Private lesson", "Lezione privata")
-        : k === "school" ? (group ? L(`Kids group at ${school || "the school"}`, `Gruppo bambini ${school ? "alla scuola " + school : "a scuola"}`) : L(`Lesson at ${school || "the school"}`, `Lezione ${school ? "alla scuola " + school : "a scuola"}`))
+        : k === "school" ? L(`Lessons at ${school || "the school"}`, `Lezioni ${school ? "alla scuola " + school : "a scuola"}`)
         : src || L("Lesson", "Lezione");
       P.services.push({ id: "s" + Date.now().toString(36) + P.services.length, n, p: median(ps), kind: "oneoff" }); newSettings = true; i = P.services.length - 1;
     }
@@ -3833,7 +3872,8 @@ function importTracker(text) {
   const modeField = P.fields.find(f => f.k === "mode");
   const byName = new Map(DB.clients.map(c => [c.name.trim().toLowerCase(), c]));
   const at = d => new Date(d + "T00:00");
-  let nNew = 0, nUpd = 0, nLes = 0, moved = 0; const touched = [], reset = new Set();
+  let nNew = 0, nUpd = 0, nLes = 0, moved = 0, nTrial = 0;
+  const trialFor = () => { let i = P.services.findIndex(s => s.trial); if (i < 0) { P.services.push({ id: "s" + Date.now().toString(36) + "t", n: L("Free trial", "Prova gratuita"), p: 0, kind: "oneoff", trial: true }); newSettings = true; i = P.services.length - 1; } return i; }; const touched = [], reset = new Set();
   for (const p of people) { const c = byName.get(p.name.toLowerCase()); if (c) reset.add(c.id); }
   clearHistory(reset);
   for (const p of people) {
@@ -3844,8 +3884,9 @@ function importTracker(text) {
     if (!c) { c = addClient({ name: p.name, origin: srcKind(src0) === "platform" ? "Online · " + src0 : "—", ch: chFor(src0), seg: group && segGroup >= 0 ? segGroup : 0, f, created: at(p.start), note }); nNew++; }
     else { nUpd++; if (at(p.start) < c.created) c.created = at(p.start); for (const k in f) if (!c.f[k]) c.f[k] = f[k]; if (!c.note && note) c.note = note; }
     if (new Set(p.lessons.map(l => srcKind(l.src))).size > 1) moved++;
+    if (P.trialFirst) { addSession(c, { d: at(p.start), s: trialFor(), ns: 0 }, true); nTrial++; } // the tracker has no trial dates: placed on the start day
     for (const l of p.lessons) {
-      const s = svcFor(l.src || p.src, group), d = at(l.d);
+      const s = svcFor(l.src || p.src), d = at(l.d);
       addPayment(c, { k: "svc", s, a: l.a, d, m: srcKind(l.src) === "platform" ? l.src : "Other", st: "paid" });
       addSession(c, { d, s, ns: 0 }, true); nLes++;
     }
@@ -3859,7 +3900,7 @@ function importTracker(text) {
   }
   computeMonthly();
   const ds = T0.lessons.map(l => l.d).sort();
-  return { tracker: true, nNew, nUpd, nLes, people: people.length, gone: people.filter(p => p.gone).length, moved, from: ds[0], to: ds[ds.length - 1], cur: T0.home, curNote, total: sum(T0.lessons.map(l => l.a)) };
+  return { tracker: true, nNew, nUpd, nLes, nTrial, people: people.length, gone: people.filter(p => p.gone).length, moved, from: ds[0], to: ds[ds.length - 1], cur: T0.home, curNote, total: sum(T0.lessons.map(l => l.a)) };
 }
 // lessons stored without a time (the tracker has dates only)
 const untimed = () => { const b = DB.books; if (b.length < 5) return false; let z = 0; for (const x of b) if (!x.d.getHours() && !x.d.getMinutes()) z++; return z / b.length > .8; };
