@@ -567,6 +567,14 @@ pre.csv{margin:0;background:var(--soft);border-radius:12px;padding:12px;font:400
 .day-n{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .day-n small{color:var(--muted);font-size:.78rem}
 .day-n .warn{color:var(--coral);font-weight:600}
+.tap-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.tap{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);text-align:left;cursor:pointer;font:inherit;color:inherit;min-width:0;transition:border-color .15s,background .15s}
+.tap:hover{border-color:var(--ink)}.tap:active{transform:scale(.98)}
+.tap>span{flex:1;min-width:0;display:flex;flex-direction:column}
+.tap b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tap small{color:var(--muted);font-size:.76rem}
+.tap>i{color:var(--muted);display:flex}.tap>i svg{width:16px;height:16px}
+@media (max-width:560px){.tap-grid{grid-template-columns:1fr 1fr}.tap .av{display:none}}
 .day-a{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
 .btn.ok{border-color:var(--lime);background:var(--lime-s)}
 .lnk{border:0;background:none;padding:0;font:inherit;font-weight:700;text-align:left;color:var(--ink);cursor:pointer}
@@ -3236,7 +3244,28 @@ function setAttendance(e, came) {
   } else e.ref.ns = came ? 0 : 1;
   refreshClient(DB, c); persistClient(c); afterChange();
 }
-function dayTime(day) { const d = new Date(day); const now = new Date(); if (sameDay(d, now)) d.setHours(now.getHours(), 0, 0, 0); else d.setHours(10, 0, 0, 0); return d; }
+// pay-per-lesson students: a lesson is also a payment, at the price they pay now
+function chargeFor(c, s) {
+  const sv = P.services[s]; if (!sv || sv.trial || ["pack", "sub"].includes(sv.kind)) return null;
+  const last = c.txIdx.map(i => DB.txns[i]).filter(x => x && x.k === "svc" && x.a > 0 && !P.services[x.s]?.trial).pop();
+  return { a: priceOf(c)?.cur || priceFor(c, "svc", s), m: last?.m || methodsList()[0] };
+}
+function removeTxn(tx) {
+  DB.txns = DB.txns.filter(x => x !== tx); DB.txns.forEach((x, i) => x.id = i);
+  DB.clients.forEach(c => c.txIdx = []); DB.txns.forEach(x => DB.clients[x.c].txIdx.push(x.id));
+}
+function removeLesson(e) {
+  const c = e.c;
+  if (e.kind === "plan") DB.upcoming = DB.upcoming.filter(u => u !== e.ref);
+  else {
+    DB.books = DB.books.filter(b => b !== e.ref);
+    const tx = c.txIdx.map(i => DB.txns[i]).find(x => x.k === "svc" && x.s === e.s && sameDay(x.d, e.d));
+    if (tx) removeTxn(tx);
+  }
+  refreshClient(DB, c); persistClient(c); afterChange();
+}
+const dayPaid = (c, day) => sum(c.txIdx.map(i => DB.txns[i]).filter(x => x.st !== "refund" && sameDay(x.d, day)).map(x => x.a));
+function dayTime(day) { const d = new Date(day); if (untimed()) { d.setHours(0, 0, 0, 0); return d; } const now = new Date(); if (sameDay(d, now)) d.setHours(now.getHours(), 0, 0, 0); else d.setHours(10, 0, 0, 0); return d; }
 
 VIEWS.today = el => {
   const day = APP.day ? new Date(APP.day) : dayStart(new Date()), past = dayStart(day) <= dayStart(new Date());
@@ -3245,20 +3274,22 @@ VIEWS.today = el => {
   const nav = `<div class="filters day-nav"><button class="btn ghost sm" data-day="-1" aria-label="${esc(L("Previous day", "Giorno prima"))}">‹</button><input type="date" class="sel" id="dayPick" value="${isoDay(day)}" aria-label="${esc(L("Day", "Giorno"))}"><button class="btn ghost sm" data-day="1" aria-label="${esc(L("Next day", "Giorno dopo"))}">›</button>${isToday ? "" : `<button class="btn ghost sm" data-day="0">${L("Today", "Oggi")}</button>`}</div>`;
   let h = vhead(L("Day register", "Registro del giorno"), Cap(title), isVisit()
     ? L(`The ${unit()} of the day: mark who showed up and add the review stars after the ${unit(false)}. Every tap is saved.`, `I ${unit()} del giorno: segna chi si è presentato e aggiungi le stelle della recensione dopo il ${unit(false)}. Ogni tocco viene salvato.`)
-    : L(`The ${unit()} of the day: mark who came or missed it, and add anyone who came without a booking. Every tap is saved.`, `Le ${unit()} del giorno: segna chi c'era e chi è mancato, e aggiungi chi è venuto senza prenotare. Ogni tocco viene salvato.`), nav);
+    : L(`Pick the day and tap who had a ${unit(false)}. Every tap is saved.`, `Scegli il giorno e tocca chi ha fatto ${unit(false)}. Ogni tocco viene salvato.`), nav);
   const ents = dayEntries(day), came = ents.filter(e => e.kind === "book" && !e.ref.ns), miss = ents.filter(e => e.kind === "book" && e.ref.ns), plan = ents.filter(e => e.kind === "plan");
   const sm = isVisit()
     ? [[nf(ents.length), Cap(unit())], [nf(sum(ents.map(e => e.c.size || 1))), Who()], [nf(miss.length), "No-show"]]
-    : [[nf(came.length), L("Came", "Presenti")], [nf(miss.length), L("Missed", "Assenti")], [nf(plan.length), past ? L("To mark", "Da segnare") : L("Booked", "Prenotate")]];
+    : [[nf(came.length), Cap(unit())], [eur(sum(DB.txns.filter(x => x.st !== "refund" && sameDay(x.d, day)).map(x => x.a))), L("Earned", "Incassato")], [nf(miss.length), L("Missed", "Assenti")], ...(plan.length ? [[nf(plan.length), past ? L("To mark", "Da segnare") : L("Booked", "Prenotate")]] : [])];
   h += `<div class="panel"><div class="minis">${sm.map(([v, l]) => `<div class="mini"><b>${v}</b><small>${esc(l)}</small></div>`).join("")}</div>`;
   if (!ents.length && P.week && !(P.week[(day.getDay() + 6) % 7] > 0)) h += `<p class="muted-p" style="margin:0">${L("Day off.", "Giorno libero.")}</p>`;
-  else if (!ents.length) h += `<p class="muted-p" style="margin:0">${isVisit() ? L(`No ${unit()} on this day.`, `Nessun ${unit(false)} in questo giorno.`) : L(`No ${unit()} booked on this day. Add who came below.`, `Nessuna ${unit(false)} prenotata in questo giorno. Aggiungi qui sotto chi è venuto.`)}</p>`;
+  else if (!ents.length) h += `<p class="muted-p" style="margin:0">${isVisit() ? L(`No ${unit()} on this day.`, `Nessun ${unit(false)} in questo giorno.`) : L(`Nothing recorded yet. Tap the ${who()} below who had a ${unit(false)}.`, `Ancora niente. Tocca qui sotto gli ${who()} che hanno fatto ${unit(false)}.`)}</p>`;
   h += `<div class="day-list">${ents.map((e, i) => dayRow(e, i, past)).join("")}</div>`;
   if (isVisit()) h += `<div><button class="btn main" data-act="dayBook">${icon(IC.plus)}${L("New booking for this day", "Nuova prenotazione per questo giorno")}</button></div>`;
   h += `</div>`;
   if (!isVisit()) {
-    h += `<div class="panel"><div class="ph"><div><h3>${L(`Add a ${unit(false)}`, `Aggiungi una ${unit(false)}`)}</h3><p>${L(`${Cap(who())} who came without a booking, or to book for this day`, `${Cap(who())} venuti senza prenotare, o da prenotare per questo giorno`)}</p></div></div>
-      <label class="search" style="flex:none">${icon(IC.search)}<input id="dayQ" type="search" placeholder="${esc(t("search"))}" aria-label="${esc(t("search"))}"></label><div class="day-list" id="dayAdd"></div></div>`;
+    h += `<div class="panel"><div class="ph"><div><h3>${past ? L(`Who had a ${unit(false)}?`, `Chi ha fatto ${unit(false)}?`) : L(`Book a ${unit(false)}`, `Prenota una ${unit(false)}`)}</h3><p>${past ? L("One tap records the lesson and its payment at the student's price.", `Un tocco registra la ${unit(false)} e il pagamento al prezzo dello ${who(false)}.`) : L("One tap books them for this day.", "Un tocco li prenota per questo giorno.")}</p></div>
+      <label class="search" style="flex:none;min-width:180px">${icon(IC.search)}<input id="dayQ" type="search" placeholder="${esc(t("search"))}" aria-label="${esc(t("search"))}"></label></div>
+      <div class="tap-grid" id="dayAdd"></div>
+      <button class="btn ghost sm" data-act="dayNew" style="margin-top:12px">${icon(IC.plus)}${L(`New ${who(false)}`, `Nuovo ${who(false)}`)}</button></div>`;
   }
   el.innerHTML = h;
   const goDay = d => { APP.day = +dayStart(d); renderView(); };
@@ -3270,6 +3301,7 @@ VIEWS.today = el => {
     if (r && a) {
       const en = ents[+r.dataset.i];
       if (a === "came") setAttendance(en, true);
+      if (a === "del") { removeLesson(en); toast(L("Removed", "Tolta")); }
       if (a === "miss") setAttendance(en, false);
       if (a === "open") openClient(en.c.id);
       if (a === "pay") payModal(en.c);
@@ -3277,19 +3309,27 @@ VIEWS.today = el => {
       if (a === "star") { const rf = ratingField(); if (rf) { en.c.f[rf.k] = +e.target.closest("[data-v]").dataset.v; en.c.review = 1; persistClient(en.c); afterChange(); } }
     }
     if (e.target.closest("[data-act=dayBook]")) clientModal(null, { tdate: isoDay(day) });
+    if (e.target.closest("[data-act=dayNew]")) clientModal();
     const ad = e.target.closest("[data-add]");
     if (ad) {
-      const c = DB.clients[+ad.dataset.add], d = dayTime(day);
-      addSession(c, { d, s: currentSvc(c), ns: 0 }); persistClient(c); afterChange();
-      toast(L(`${c.name}: ${unit(false)} added`, `${c.name}: ${unit(false)} aggiunta`));
+      const c = DB.clients[+ad.dataset.add], d = dayTime(day), s = currentSvc(c), ch = past ? chargeFor(c, s) : null;
+      if (ch) addPayment(c, { k: "svc", s, a: ch.a, d, m: ch.m, st: "paid", logSession: true });
+      else addSession(c, { d, s, ns: 0 });
+      persistClient(c); afterChange();
+      toast(`${c.name}: ${unit(false)} ${L("added", "aggiunta")}${ch ? " · " + eur(ch.a) : ""}`);
     }
   };
   const q = $("#dayQ", el);
   if (q) {
     const draw = () => {
-      const s = q.value.trim().toLowerCase(), ids = new Set(ents.map(e => e.c.id));
-      const list = DB.clients.filter(c => c.first && !ids.has(c.id) && (s ? c.name.toLowerCase().includes(s) : c.status === "active")).sort((a, b) => (b.last || 0) - (a.last || 0)).slice(0, s ? 12 : 8);
-      $("#dayAdd", el).innerHTML = list.length ? list.map(c => { const cr = hasPack() ? creditLeft(c) : null; return `<div class="day-r">${avatar(c)}<div class="day-n"><b>${esc(c.name)}</b><small>${esc(tr(P.services[currentSvc(c)]?.n) || "")}${cr && c.status !== "lapsed" ? " · " + L(`${cr.left} left`, `${cr.left} rimaste`) : ""}</small></div><button class="btn ghost sm" data-add="${c.id}">${icon(IC.plus)}${past ? L("Came", "C'era") : L("Book", "Prenota")}</button></div>`; }).join("") : `<p class="muted-p" style="margin:0">${L("No one found.", "Nessuno trovato.")}</p>`;
+      const s = q.value.trim().toLowerCase(), ids = new Set(ents.map(e => e.c.id)), wd = day.getDay();
+      // regulars of this weekday first, then whoever came most recently
+      const onWd = new Map(); for (const b of DB.books) if (!b.ns && b.d.getDay() === wd && b.d > NOW - 120 * DAY) onWd.set(b.c, (onWd.get(b.c) || 0) + 1);
+      const list = DB.clients.filter(c => c.first && !ids.has(c.id) && (s ? c.name.toLowerCase().includes(s) : ["active", "risk"].includes(c.status)))
+        .sort((a, b) => (onWd.get(b.id) || 0) - (onWd.get(a.id) || 0) || (b.last || 0) - (a.last || 0)).slice(0, s ? 24 : 60);
+      $("#dayAdd", el).innerHTML = list.length ? list.map(c => { const sv = currentSvc(c), ch = chargeFor(c, sv), cr = hasPack() ? creditLeft(c) : null;
+        const sub = ch && past ? eur(ch.a) : tr(P.services[sv]?.n) || ""; return `<button type="button" class="tap" data-add="${c.id}">${avatar(c)}<span><b>${esc(c.name)}</b><small>${esc(sub)}${cr && c.status !== "lapsed" ? " · " + L(`${cr.left} left`, `${cr.left} rimaste`) : ""}</small></span><i>${icon(IC.plus)}</i></button>`; }).join("")
+        : `<p class="muted-p" style="margin:0">${s ? L("No one found.", "Nessuno trovato.") : L(`Everyone is already in the day.`, `Ci sono già tutti.`)}</p>`;
     };
     q.oninput = draw; draw();
   }
@@ -3300,11 +3340,12 @@ function dayRow(e, i, past) {
   const pend = c.txIdx.map(k => DB.txns[k]).filter(x => x.st === "pending"), owed = sum(pend.map(x => x.a));
   const cr = !isVisit() && hasPack() && !isTrial(e.s) ? creditLeft(c) : null;
   const rf = ratingField(), stars = isVisit() && rf && st === "came" ? `<span class="stars" role="group" aria-label="${esc(L("Review stars", "Stelle recensione"))}">${[1, 2, 3, 4, 5].map(v => `<button type="button" data-a="star" data-v="${v}" class="${+c.f[rf.k] >= v ? "on" : ""}" aria-label="${v}">★</button>`).join("")}</span>` : "";
-  const sub = [tr(P.services[e.s]?.n), isVisit() && (c.size || 1) > 1 ? `${c.size} ${L("people", "persone")}` : "", cr ? (cr.left <= 1 ? `<b class="warn">${L(`${cr.left} left: offer the next package`, `${cr.left} rimaste: proponi il prossimo pacchetto`)}</b>` : L(`${cr.left} left`, `${cr.left} rimaste`)) : "", isTrial(e.s) && !c.first ? `<b class="warn">${L("free trial: follow up today", "prova gratuita: ricontatta oggi")}</b>` : ""].filter(Boolean).join(" · ");
+  const paid = !isVisit() && e.kind === "book" ? dayPaid(c, e.d) : 0;
+  const sub = [tr(P.services[e.s]?.n), paid ? eur(paid) : "", isVisit() && (c.size || 1) > 1 ? `${c.size} ${L("people", "persone")}` : "", cr ? (cr.left <= 1 ? `<b class="warn">${L(`${cr.left} left: offer the next package`, `${cr.left} rimaste: proponi il prossimo pacchetto`)}</b>` : L(`${cr.left} left`, `${cr.left} rimaste`)) : "", isTrial(e.s) && !c.first ? `<b class="warn">${L("free trial: follow up today", "prova gratuita: ricontatta oggi")}</b>` : ""].filter(Boolean).join(" · ");
   const acts = st === "plan"
     ? (past ? `<button class="btn ghost sm ok" data-a="came">${L("Came", "C'era")}</button><button class="btn ghost sm" data-a="miss">${L("Missed", "Assente")}</button>` : `<span class="pill lead">${L("Booked", "Prenotato")}</span>`)
     : `<span class="pill ${st === "came" ? "active" : "risk"}">${st === "came" ? L("Came", "C'era") : L("Missed", "Assente")}</span>${st === "came" ? `<button class="btn ghost sm" data-a="miss">${L("Missed", "Assente")}</button>` : `<button class="btn ghost sm" data-a="came">${L("Came", "C'era")}</button>`}`;
-  return `<div class="day-r ${st}" data-i="${i}"><span class="when"><b>${esc(time)}</b></span>${avatar(c)}<div class="day-n"><button type="button" class="lnk" data-a="open">${esc(c.name)}</button><small>${sub}</small>${stars}</div><div class="day-a">${acts}${owed ? `<button class="btn ghost sm" data-a="collect" title="${esc(L("Mark open payments as paid", "Segna i pagamenti aperti come pagati"))}">${L("Collect", "Incassa")} ${eur(owed)}</button>` : ""}${!isVisit() ? `<button class="btn ghost sm" data-a="pay" aria-label="${esc(t("addPay"))}">${icon(IC.euro)}</button>` : ""}</div></div>`;
+  return `<div class="day-r ${st}" data-i="${i}">${time ? `<span class="when"><b>${esc(time)}</b></span>` : ""}${avatar(c)}<div class="day-n"><button type="button" class="lnk" data-a="open">${esc(c.name)}</button><small>${sub}</small>${stars}</div><div class="day-a">${acts}${owed ? `<button class="btn ghost sm" data-a="collect" title="${esc(L("Mark open payments as paid", "Segna i pagamenti aperti come pagati"))}">${L("Collect", "Incassa")} ${eur(owed)}</button>` : ""}${!isVisit() ? `<button class="btn ghost sm" data-a="pay" aria-label="${esc(t("addPay"))}">${icon(IC.euro)}</button><button class="btn ghost sm" data-a="del" aria-label="${esc(L("Remove", "Togli"))}" title="${esc(L("Remove", "Togli"))}">${icon(IC.x)}</button>` : ""}</div></div>`;
 }
 
 /* ================= persistence: saved workspaces in the artifact database =================
@@ -4175,7 +4216,8 @@ function bindBackupPanel(el) {
   $("#bkIn", host).onchange = async e => {
     const f = e.target.files[0]; if (!f) return; const box = $("#bkRes", host);
     try {
-      const res = await importBackup(JSON.parse(await f.text()));
+      const res = await startFromFile(JSON.parse(await f.text()));
+      if (res.started) return;
       box.innerHTML = `<div class="note-box" style="background:var(--lime-s)">${icon(IC.up)}<div><b>${L("Restored", "Ripristinato")}</b>: ${nf(res.nWs)} ${L("client workspaces", "spazi cliente")}, ${nf(res.nProf)} ${L("profiles", "profili")}. ${L("Find them in the Clients menu at the top.", "Li trovi nel menu Clienti in alto.")}</div></div>`;
       refreshPicker();
     } catch (err) { box.innerHTML = `<div class="note-box" style="background:var(--coral-s)">${icon(IC.info)}<div>${L("This file is not a Clientela backup.", "Questo file non è un backup di Clientela.")} ${esc(err?.message && err.message !== "format" ? err.message : "")}</div></div>`; }
@@ -4198,6 +4240,39 @@ function bindBackupPanel(el) {
     aiF.onsubmit = e => { e.preventDefault(); const k = ($("#aiKey", aiF)?.value || "").trim(); if (!/^sk-/.test(k)) { toast(L("That does not look like an Anthropic key.", "Non sembra una chiave Anthropic.")); return; } lsSet("clientela.ai", { key: k }); STORE.sample = ownKeySampler(); renderView(); toast(t("saved")); };
     const d = $("#aiDel", aiF); if (d) d.onclick = () => { lsSet("clientela.ai", null); STORE.sample = null; renderView(); };
   }
+}
+
+/* ---------- starter file: one client's profile and data, sent to them to use the tool on their own ----------
+   Opening it creates their space on this device (no account, no cloud) and lands on the day register. */
+async function startFromFile(obj) {
+  const res = await importBackup(obj);
+  const pr = obj && obj.start && profileById(obj.start);
+  if (!pr || !STORE.db) return res;
+  const ex = STORE.list.find(w => w.profile === pr.id);
+  if (ex) openWorkspace(ex.id);
+  else if (!await createWorkspace({ name: pr.name, prof: pr.prof, profile: pr.id, cur: pr.patch?.cur, goal: 0 })) return res;
+  APP.view = "today"; try { localStorage.setItem("clientela.view", "today"); } catch (e) { }
+  renderNav && renderNav(); renderView();
+  toast(L("Your data is ready. It stays on this device.", "I tuoi dati sono pronti. Restano su questo dispositivo."));
+  return { ...res, started: pr.name };
+}
+function showWelcome() {
+  if ($("#welcome")) return;
+  const wrap = document.createElement("div"); wrap.id = "welcome";
+  wrap.innerHTML = `<div class="scrim" style="z-index:77" data-wclose></div><div class="modal"><div class="modal-card" role="dialog" aria-modal="true" aria-label="Clientela">
+    <div class="dh"><h3>${L("Welcome to Clientela", "Ciao, questo è Clientela")}</h3><button class="x" type="button" data-wclose aria-label="Close">${icon(IC.x)}</button></div>
+    <div style="padding:20px 22px 24px;display:flex;flex-direction:column;gap:14px">
+      <p style="margin:0">${L("If you received a file with your data, open it here. Your students and lessons appear straight away and stay only on this device: no account, no cloud.", "Se hai ricevuto un file con i tuoi dati, aprilo qui. Studenti e lezioni compaiono subito e restano solo su questo dispositivo: niente account, niente cloud.")}</p>
+      <label class="btn main" style="cursor:pointer;justify-content:center">${icon(IC.file)}${L("Open the file I received", "Apri il file che ho ricevuto")}<input type="file" id="wIn" accept=".json,application/json" hidden></label>
+      <button class="btn ghost" type="button" data-wclose style="justify-content:center">${L("Just look at the demo", "Guarda solo la demo")}</button>
+      <div id="wRes"></div></div></div></div>`;
+  document.body.appendChild(wrap);
+  wrap.addEventListener("click", e => { if (e.target.closest("[data-wclose]")) wrap.remove(); });
+  $("#wIn", wrap).onchange = async e => {
+    const f = e.target.files[0]; if (!f) return;
+    try { const res = await startFromFile(JSON.parse(await f.text())); if (res.started || res.nWs) { wrap.remove(); if (!res.started) { toast(L("Restored. Pick your space from the Clients menu.", "Ripristinato. Scegli il tuo spazio dal menu Clienti.")); openPicker && openPicker(); } } else $("#wRes", wrap).innerHTML = `<p class="muted-p">${L("Profiles added. Pick one from the Clients menu.", "Profili aggiunti. Scegline uno dal menu Clienti.")}</p>`; }
+    catch (err) { $("#wRes", wrap).innerHTML = `<div class="note-box" style="background:var(--coral-s)">${icon(IC.info)}<div>${L("This file is not a Clientela file.", "Questo file non è un file di Clientela.")}</div></div>`; }
+  };
 }
 
 /* ================= data view ================= */
@@ -4484,6 +4559,8 @@ function recordPlans() {
   const okDemo = demoId.startsWith("@") ? !!profileById(demoId.slice(1)) : PROF.some(p => p.id === demoId);
   openDemo(okDemo ? demoId : "tour");
   STORE.init();
+  // first visit to the standalone page: offer to open a starter file
+  if (!last) setTimeout(() => { if (STANDALONE.on && STORE.db && !STORE.list.length) showWelcome(); }, 700);
 })();
 
 document.addEventListener("change", e => { if (e.target.id === "perM" && e.target.value) { PERIOD = e.target.value; renderTop(); renderView(); } });
