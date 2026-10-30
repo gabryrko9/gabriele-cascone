@@ -83,6 +83,7 @@ main{min-width:0;padding-left:max(28px,env(safe-area-inset-left,0px));padding-ri
 .seg button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(19,21,27,.14)}
 .demo-pill{display:inline-flex;align-items:center;gap:6px;font:500 .7rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--warn);background:var(--sun-s);padding:5px 10px;border-radius:999px;white-space:nowrap}
 .demo-pill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--sun)}
+.demo-pill.real{color:var(--good);background:var(--lime-s)}.demo-pill.real::before{background:var(--lime)}
 
 /* profession picker */
 .picker{position:fixed;inset:0;z-index:80;background:rgba(19,21,27,.32);display:grid;place-items:start center;padding:calc(80px + env(safe-area-inset-top,0px)) 16px 16px;overflow:auto}
@@ -613,7 +614,7 @@ let LANG = "en";
 const T = (en, it) => ({ en, it });
 const tr = x => x == null ? "" : (typeof x === "string" || typeof x === "number") ? String(x) : (x[LANG] ?? x.en);
 const I = {
-  yourBiz: T("Business", "Attività"), demo: T("Demo · simulated data", "Demo · dati simulati"),
+  yourBiz: T("Business", "Attività"), demo: T("Demo · simulated data", "Demo · dati simulati"), demoReal: T("Real data · preview", "Dati reali · anteprima"),
   footnote: T("One platform for every independent professional. Your clients, your numbers, clear decisions.", "Una piattaforma per ogni libero professionista. I tuoi clienti, i tuoi numeri, decisioni chiare."),
   nav_overview: T("Overview", "Panoramica"), nav_clients: T("Clients", "Clienti"), nav_revenue: T("Revenue", "Ricavi"),
   nav_marketing: T("Marketing", "Marketing"), nav_retention: T("Retention", "Fidelizzazione"), nav_schedule: T("Schedule", "Agenda"),
@@ -1268,7 +1269,7 @@ function refreshClient(db, c, initial) {
    The public build ships with no profiles: client names never live in public code.
    Profiles are added by the private build or imported from a profile file (kept in this browser). */
 const PROFILES = [];
-const PROFILE_KEYS = ["who", "who1", "names", "oneoff", "baseNew", "growth", "repeat", "upgrade", "reviewRate", "capacity", "elasticity", "holdDays", "churn", "renew", "freq", "summerChurn", "trialRate", "season", "hours", "days", "services", "extras", "channels", "originLabel", "origins", "segments", "fields", "corp", "methods", "portal", "cur"];
+const PROFILE_KEYS = ["who", "who1", "names", "oneoff", "baseNew", "growth", "repeat", "upgrade", "reviewRate", "capacity", "elasticity", "holdDays", "churn", "renew", "freq", "summerChurn", "trialRate", "season", "hours", "days", "services", "extras", "channels", "originLabel", "origins", "segments", "fields", "corp", "methods", "portal", "cur", "real"];
 // what a saved workspace keeps from its profile, so it works even where the profile is not installed
 const EXT_KEYS = ["who", "who1", "oneoff", "holdDays", "freq", "elasticity", "hours", "days", "originLabel", "origins", "segments", "fields", "corp", "methods", "portal"];
 const profileById = id => PROFILES.find(p => p.id === id);
@@ -1525,6 +1526,7 @@ function computeMonthly() {
     if (c.first) { const fi = monthIdx(c.first); if (fi >= 0 && fi < NM) M.newC[fi]++; }
   }
   M.act = act; M.active = act.map(s => s.size);
+  M.from = M.rev.findIndex(v => v > 0); // first month with revenue (real data can start recently)
   // forecast
   const pf = Math.max(.08, NOW.getDate() / daysIn(NOW.getFullYear(), NOW.getMonth()));
   const cur = M.rev[NM - 1] / pf;
@@ -1580,10 +1582,12 @@ function cohorts(mode) {
   return rows;
 }
 
+// the month before m with anyone coming (a month with nobody at all is a gap in the records, not churn)
+function prevAct(m) { for (let k = m - 1; k >= Math.max(0, m - 2); k--) if (M.act[k]?.size) return M.act[k]; return null; }
 function churnSeries() {
   const out = [];
   for (let m = NM - 12; m < NM; m++) {
-    const prev = M.act[m - 1], cur = M.act[m]; if (!prev || !prev.size) { out.push(null); continue; }
+    const prev = prevAct(m), cur = M.act[m]; if (!prev || !prev.size || !cur.size) { out.push(null); continue; }
     let lost = 0; for (const id of prev) if (!cur.has(id)) lost++;
     out.push(lost / prev.size);
   }
@@ -1683,7 +1687,7 @@ VIEWS.overview = el => {
   h += lensPanelsHtml();
   h += `<div class="lens-h"><span class="eyebrow">${L("Every business", "Ogni attività")}</span><h3>${L("Revenue, channels and next steps", "Ricavi, canali e prossimi passi")}</h3></div>`;
   h += `<div class="grid">
-    <div class="panel c8"><div class="ph"><div><h3>${t("revTrend")}</h3><p>${t("revTrendSub")}</p></div><div class="legend"><span><i style="background:var(--blue)"></i>${t("actual")}</span><span><i class="dash" style="border-color:var(--slate)"></i>${t("lastYear")}</span><span><i class="dash" style="border-color:var(--blue)"></i>${t("forecast")}</span></div></div><div id="ovRev"></div></div>
+    <div class="panel c8"><div class="ph"><div><h3>${t("revTrend")}</h3><p>${M.from > 0 ? L("Monthly revenue since the records start, with a 6-month forecast.", "Ricavi mensili da quando iniziano i dati, con previsione a 6 mesi.") : t("revTrendSub")}</p></div><div class="legend"><span><i style="background:var(--blue)"></i>${t("actual")}</span><span><i class="dash" style="border-color:var(--slate)"></i>${t("lastYear")}</span><span><i class="dash" style="border-color:var(--blue)"></i>${t("forecast")}</span></div></div><div id="ovRev"></div></div>
     <div class="stack c4"><div class="panel" id="goalP"></div><div class="panel" id="impactP"></div></div>
     <div class="panel c4"><div class="ph"><div><h3>${t("channelMix")}</h3><p>${t("period")}</p></div></div><div class="donut-wrap"><div id="ovDonut"></div><div class="legend" id="ovDonutL"></div></div></div>
     <div class="panel c4"><div class="ph"><div><h3>${t("topInsights")}</h3><p>${L("Top three, from the AI analyst", "I primi tre, dall'analista AI")}</p></div></div><div class="list" id="ovIns"></div><button class="btn ghost sm" data-go="insights">${t("seeAll")} →</button></div>
@@ -1703,19 +1707,20 @@ VIEWS.overview = el => {
 };
 
 function revenueChart(host, h = 330) {
-  const labels = []; for (let i = 0; i < NM + 6; i++) labels.push(monthLabel(i, true));
-  const actual = [...M.rev, ...new Array(6).fill(null)];
-  const ly = labels.map((_, i) => i >= 12 ? (M.rev[i - 12] ?? null) : null);
-  const si = P.consultStart ? monthIdx(P.consultStart) : -1;
+  const f0 = M.from > 0 ? Math.min(NM - 12, M.from - 1) : 0; // records that start recently: begin the chart just before them
+  const labels = []; for (let i = f0; i < NM + 6; i++) labels.push(monthLabel(i, true));
+  const actual = [...M.rev, ...new Array(6).fill(null)].slice(f0);
+  const ly = labels.map((_, j) => { const i = j + f0; return i >= 12 && i - 12 >= Math.max(0, M.from) ? (M.rev[i - 12] ?? null) : null; });
+  const si = P.consultStart ? monthIdx(P.consultStart) - f0 : -1;
   lineChart(host, {
-    labels, h, band: NM - 1,
+    labels, h, band: NM - 1 - f0,
     series: [
       { name: t("lastYear"), color: cssv("--slate"), values: ly, dash: 1, width: 1.6, noDot: 1 },
-      { name: t("forecast"), color: cssv("--blue"), values: M.fc, dash: 1, width: 2.2 },
+      { name: t("forecast"), color: cssv("--blue"), values: M.fc.slice(f0), dash: 1, width: 2.2 },
       { name: t("actual"), color: cssv("--blue"), values: actual, area: 1, width: 2.8 },
     ],
-    marker: si >= 0 && si < NM ? { i: si, label: L("Start", "Inizio") } : null,
-    tipTitle: i => monthLabel(i, true) + (i === NM - 1 ? " · " + t("mtd") : i >= NM ? " · " + t("forecast") : ""),
+    marker: si >= 0 && si < NM - f0 ? { i: si, label: L("Start", "Inizio") } : null,
+    tipTitle: j => { const i = j + f0; return monthLabel(i, true) + (i === NM - 1 ? " · " + t("mtd") : i >= NM ? " · " + t("forecast") : ""); },
   });
 }
 
@@ -2002,8 +2007,8 @@ VIEWS.revenue = el => {
 };
 const periodName = () => ({ "30": L("last 30 days", "ultimi 30 giorni"), "90": L("last 90 days", "ultimi 90 giorni"), "12": L("last 12 months", "ultimi 12 mesi"), all: L("last 24 months", "ultimi 24 mesi") }[PERIOD]);
 function seasonHeat(el) {
-  const years = [...new Set(M.rev.map((_, i) => monthDate(i).getFullYear()))];
-  const val = (y, m) => { const i = monthIdx(new Date(y, m, 1)); return i >= 0 && i < NM ? M.rev[i] : null; };
+  const years = [...new Set(M.rev.map((_, i) => i >= Math.max(0, M.from) ? monthDate(i).getFullYear() : null).filter(y => y != null))];
+  const val = (y, m) => { const i = monthIdx(new Date(y, m, 1)); return i >= Math.max(0, M.from) && i < NM ? M.rev[i] : null; };
   const max = Math.max(...M.rev, 1);
   el.innerHTML = `<div class="heat" style="grid-template-columns:44px repeat(12,minmax(30px,1fr));min-width:430px"><span></span>${tr(I.monthNames).map(m => `<span style="text-align:center">${m}</span>`).join("")}${years.map(y => `<span class="hl">${y}</span>${[...Array(12)].map((_, m) => { const v = val(y, m); const k = v == null ? 0 : v / max; return `<span class="cell" style="background:${v == null ? "transparent" : `color-mix(in srgb, var(--blue) ${Math.round(8 + k * 92)}%, #fff)`}" data-tip="${v == null ? "" : esc(tr(I.monthNames)[m] + " " + y + " · " + eur(v))}"></span>`; }).join("")}`).join("")}</div>`;
 }
@@ -2076,11 +2081,12 @@ VIEWS.schedule = el => {
   const r = rangeFor(PERIOD), S1 = periodStats(r.a, r.b);
   let h = vhead(nf(S1.books) + " " + L("bookings", "prenotazioni") + " · " + periodName(), t("nav_schedule"), L("When demand peaks, where the gaps are, and how full the calendar runs.", "Quando la domanda è al massimo, dove sono i buchi e quanto è pieno il calendario."));
   if (!DB.books.length && !(DB.upcoming || []).length) { el.innerHTML = h + emptyState(L("No sessions logged", "Nessuna sessione registrata"), L("Sessions are logged with each payment, or one by one from a client's card.", "Le sessioni si registrano con ogni pagamento, o una per volta dalla scheda cliente.")); return; }
-  const hd = heatData(r.a, r.b), flat = hd.grid.flat(), max = Math.max(1, ...flat);
+  const ut = untimed(); // dates without times: by weekday only
+  const hd = ut ? (() => { const g = Array.from({ length: 7 }, () => [0]); for (const x of DB.books) if (inR(x.d, r.a, r.b)) g[(x.d.getDay() + 6) % 7][0]++; return { H0: 0, H1: 0, grid: g }; })() : heatData(r.a, r.b), flat = hd.grid.flat(), max = Math.max(1, ...flat);
   let best = [0, 0, -1], worst = [0, 0, Infinity];
-  hd.grid.forEach((row, d) => row.forEach((v, hh) => { if (v > best[2]) best = [d, hh, v]; if (v < worst[2] && (P.days?.[d] ?? 1) >= .3 && (P.hours?.[hd.H0 + hh] || 0) > 0) worst = [d, hh, v]; }));
-  const slot = ([d, hh]) => tr(I.dayNames)[d] + " " + String(hd.H0 + hh).padStart(2, "0") + ":00";
-  const u = weeklyUtil(), avgU = avg(u.out.slice(-8)) / (P.capacity || 1);
+  hd.grid.forEach((row, d) => row.forEach((v, hh) => { if (v > best[2]) best = [d, hh, v]; if (v < worst[2] && (P.days?.[d] ?? 1) >= .3 && (ut || (P.hours?.[hd.H0 + hh] || 0) > 0)) worst = [d, hh, v]; }));
+  const slot = ([d, hh]) => ut ? Cap(tr(I.dayNames)[d]) : tr(I.dayNames)[d] + " " + String(hd.H0 + hh).padStart(2, "0") + ":00";
+  const u = weeklyUtil(), avgU = avg(u.out.filter(v => v > 0).slice(-8)) / (P.capacity || 1); // weeks off (holidays, gaps) do not count as empty capacity
   h += `<div class="kpis">
     <div class="kpi" style="--kc:var(--sun)"><span class="lab"><i></i>${t("util")}</span><span class="val">${pct(avgU)}</span><span class="hint">${L("avg of the last 8 weeks, capacity", "media ultime 8 settimane, capacità")} ${nf(P.capacity)}/${L("wk", "sett.")}</span></div>
     <div class="kpi" style="--kc:var(--coral)"><span class="lab"><i></i>${t("noshow")}</span><span class="val">${pct(S1.books ? S1.ns / S1.books : 0, 1)}</span><span class="hint">${nf(S1.ns)} ${L("missed in the period", "mancate nel periodo")}</span></div>
@@ -2088,12 +2094,13 @@ VIEWS.schedule = el => {
     <div class="kpi" style="--kc:var(--blue)"><span class="lab"><i></i>${t("quietest")}</span><span class="val" style="font-size:1.4rem">${worst[2] < Infinity ? slot(worst) : "—"}</span><span class="hint">${L("a slot to fill with an offer", "una fascia da riempire con un'offerta")}</span></div>
   </div>
   <div class="grid">
-    <div class="panel c8"><div class="ph"><div><h3>${t("heat")}</h3><p>${t("heatSub")}</p></div><div class="heat-scale">${L("fewer", "meno")}${[10, 35, 60, 85, 100].map(p => `<i style="background:color-mix(in srgb, var(--coral) ${p}%, #fff)"></i>`).join("")}${L("more", "più")}</div></div><div class="heat-scroll"><div class="heat" style="grid-template-columns:40px repeat(${hd.H1 - hd.H0 + 1},minmax(26px,1fr));min-width:${60 + (hd.H1 - hd.H0 + 1) * 28}px"><span></span>${[...Array(hd.H1 - hd.H0 + 1)].map((_, i) => `<span style="text-align:center">${hd.H0 + i}</span>`).join("")}${hd.grid.map((row, d) => `<span class="hl">${tr(I.dayNames)[d]}</span>${row.map((v, hh) => `<span class="cell" style="background:${v ? `color-mix(in srgb, var(--coral) ${Math.round(8 + v / max * 92)}%, #fff)` : "var(--soft)"}" data-tip="${esc(tr(I.dayNames)[d] + " " + (hd.H0 + hh) + ":00 · " + v)}"></span>`).join("")}`).join("")}</div></div></div>
+    ${ut ? `<div class="panel c8"><div class="ph"><div><h3>${L("Busiest days", "Giorni più pieni")}</h3><p>${L(`${Cap(unit())} by weekday. The records have dates but no times.`, `${Cap(unit())} per giorno della settimana. I dati hanno le date ma non gli orari.`)}</p></div></div><div id="scDays"></div></div>` : `<div class="panel c8"><div class="ph"><div><h3>${t("heat")}</h3><p>${t("heatSub")}</p></div><div class="heat-scale">${L("fewer", "meno")}${[10, 35, 60, 85, 100].map(p => `<i style="background:color-mix(in srgb, var(--coral) ${p}%, #fff)"></i>`).join("")}${L("more", "più")}</div></div><div class="heat-scroll"><div class="heat" style="grid-template-columns:40px repeat(${hd.H1 - hd.H0 + 1},minmax(26px,1fr));min-width:${60 + (hd.H1 - hd.H0 + 1) * 28}px"><span></span>${[...Array(hd.H1 - hd.H0 + 1)].map((_, i) => `<span style="text-align:center">${hd.H0 + i}</span>`).join("")}${hd.grid.map((row, d) => `<span class="hl">${tr(I.dayNames)[d]}</span>${row.map((v, hh) => `<span class="cell" style="background:${v ? `color-mix(in srgb, var(--coral) ${Math.round(8 + v / max * 92)}%, #fff)` : "var(--soft)"}" data-tip="${esc(tr(I.dayNames)[d] + " " + (hd.H0 + hh) + ":00 · " + v)}"></span>`).join("")}`).join("")}</div></div></div>`}
     <div class="panel c4"><div class="ph"><div><h3>${t("upcoming")}</h3><p>${t("upcomingSub")}</p></div></div><div class="list" id="scU"></div></div>
     <div class="panel c12"><div class="ph"><div><h3>${t("util")}</h3><p>${t("utilSub")}</p></div><div class="legend"><span><i style="background:var(--sun)"></i>${L("Sessions held", "Sessioni svolte")}</span><span><i class="dash" style="border-color:var(--ink)"></i>${L("Capacity", "Capacità")}</span></div></div><div id="scW"></div></div>
   </div>`;
   el.innerHTML = h;
   upcomingList($("#scU", el), 9);
+  if (ut) barChart($("#scDays", el), { labels: tr(I.dayNames).map(Cap), series: [{ name: Cap(unit()), color: cssv("--coral"), values: hd.grid.map(r => r[0]) }], fmt: nf0, h: 240 });
   lineChartWithBars($("#scW", el), u);
 };
 function lineChartWithBars(host, u) {
@@ -2123,8 +2130,8 @@ function buildInsights() {
   const attach = S1.svcN ? S1.extN / S1.svcN : 0, extraAvg = S1.extN ? S1.ext / S1.extN : avg(P.extras.map(e => e.p));
   if (P.extras.length) { const gain = S1.svcN * .1 * extraAvg; out.push({ tag: "opp", score: 8.5, title: attach < .005 ? L("No extras sold yet", "Nessun extra venduto finora") : L(`Only ${pct(attach, 0)} of purchases include an extra`, `Solo il ${pct(attach, 0)} degli acquisti include un extra`), text: L(`Offering ${P.extras.slice(0, 2).map(e => tr(e.n).toLowerCase()).join(" or ")} at booking time, and again at the end of the session, is the easiest revenue to add. Ten more ${who()} in every hundred is worth about ${eur(gain)} a year.`, `Proporre ${P.extras.slice(0, 2).map(e => tr(e.n).toLowerCase()).join(" o ")} al momento della prenotazione, e di nuovo a fine sessione, è il ricavo più facile da aggiungere. Dieci ${who()} in più ogni cento valgono circa ${eur(gain)} l'anno.`), impact: [L("+10 pp attach", "+10 pp extra"), "+" + eurK(gain)] }); }
   // 5. slow season
-  const byCal = new Array(12).fill(0).map((_, m) => { const v = []; for (let i = 0; i < NM - 1; i++) if (monthDate(i).getMonth() === m) v.push(M.rev[i]); return avg(v); });
-  const mean = avg(byCal), low = byCal.map((v, m) => [v, m]).sort((a, b) => a[0] - b[0]).slice(0, 3);
+  const byCal = new Array(12).fill(0).map((_, m) => { const v = []; for (let i = Math.max(0, M.from); i < NM - 1; i++) if (monthDate(i).getMonth() === m) v.push(M.rev[i]); return v.length ? avg(v) : 0; });
+  const mean = M.from >= 0 && NM - M.from >= 13 ? avg(byCal) : 0, low = byCal.map((v, m) => [v, m]).sort((a, b) => a[0] - b[0]).slice(0, 3);
   if (mean && low[0][0] < mean * .75) { const gap = sum(low.map(l => mean - l[0])) * .25; out.push({ tag: "idea", score: 7.5, title: L(`${low.map(l => tr(I.monthNames)[l[1]]).join(", ")} are your slow months`, `${low.map(l => tr(I.monthNames)[l[1]]).join(", ")} sono i tuoi mesi lenti`), text: L(`They bring ${pct(1 - low[0][0] / mean)} less than an average month. A seasonal offer (gift cards before the holidays, a bundle, a themed ${P.oneoff ? "tour" : "programme"}) that closes a quarter of that gap adds about ${eur(gap)}.`, `Portano il ${pct(1 - low[0][0] / mean)} in meno di un mese medio. Un'offerta stagionale (buoni regalo, pacchetti, un ${P.oneoff ? "tour" : "percorso"} a tema) che chiude un quarto del divario aggiunge circa ${eur(gap)}.`), impact: [L("Quarter of the gap", "Un quarto del divario"), "+" + eurK(gap)] }); }
   // 6. pareto
   const sorted = [...paid].sort((a, b) => b.spent - a.spent), top = sorted.slice(0, Math.ceil(sorted.length * .2)), share = sum(top.map(c => c.spent)) / (sum(sorted.map(c => c.spent)) || 1);
@@ -2448,7 +2455,7 @@ function profileBanner() {
   if (STORE.active || !P.profile) return "";
   const pr = profileById(P.profile); if (!pr) return "";
   const site = pr.site ? `<a href="https://${esc(pr.site.replace(/^https?:\/\//, ""))}" target="_blank" rel="noopener">${esc(pr.site)}</a>` : "";
-  return `<div class="profile-note" style="--pc:${cssv(P.color)}"><span class="prof-ico">${icon(ICONS[P.id])}</span><div style="min-width:0"><b>${esc(pr.name)}</b><span class="ws-tag sim">${esc(stageLabel(pr))} · ${L("simulated data", "dati simulati")}</span><p>${[pr.owner, site].filter(Boolean).join(" · ")}${pr.owner || site ? ". " : ""}${esc(tr(pr.note))}</p></div>${STORE.db ? `<button class="btn main sm" data-act="newWs">${icon(IC.plus)}${L("Start with real data", "Parti con i dati reali")}</button>` : ""}</div>`;
+  return `<div class="profile-note" style="--pc:${cssv(P.color)}"><span class="prof-ico">${icon(ICONS[P.id])}</span><div style="min-width:0"><b>${esc(pr.name)}</b><span class="ws-tag sim">${esc(stageLabel(pr))} · ${P.realData ? realLabel() : L("simulated data", "dati simulati")}</span><p>${[pr.owner, site].filter(Boolean).join(" · ")}${pr.owner || site ? ". " : ""}${esc(tr(pr.note))}</p></div>${STORE.db ? `<button class="btn main sm" data-act="newWs">${icon(IC.plus)}${P.realData ? L("Create the client workspace", "Crea lo spazio cliente") : L("Start with real data", "Parti con i dati reali")}</button>` : ""}</div>`;
 }
 
 /* ================= monthly report: one page to send or print for the client ================= */
@@ -2486,7 +2493,7 @@ VIEWS.report = el => {
   const notesKey = String(m), notes = (STORE.active ? STORE.meta?.notes?.[notesKey] : APP.repNotes?.[(APP.demoKey || P.id) + ":" + notesKey]) || "";
   h += `<article class="report" id="report">
     <header class="rep-h"><div><span class="eyebrow">${L("Monthly report", "Report mensile")}</span><h1>${esc(name)}</h1><p>${esc(mName(a))}${m === NM - 1 ? " · " + L("month in progress", "mese in corso") : ""} · ${esc(tr(P.name))}</p></div><div class="rep-by"><div class="logo"><i></i><i></i><i></i><i></i></div><div><b>Gabriele Cascone</b><small>${L("Growth consulting", "Consulenza di crescita")}</small></div></div></header>
-    ${!STORE.active ? `<p class="rep-sim">${L("Simulated data, for illustration.", "Dati simulati, a scopo illustrativo.")}</p>` : ""}
+    ${!STORE.active && !P.realData ? `<p class="rep-sim">${L("Simulated data, for illustration.", "Dati simulati, a scopo illustrativo.")}</p>` : ""}
     <div class="rep-kpis">${kp.map(([l, v, p, y]) => `<div class="rkp"><small>${esc(l)}</small><b>${v}</b><div>${ch(p, L("vs prev. month", "vs mese prec."))}${ch(y, L("vs last year", "vs anno scorso"))}</div></div>`).join("")}</div>
     <div class="rep-grid">
       <section><h3>${L("Revenue, last 12 months", "Ricavi, ultimi 12 mesi")}</h3><div id="repRev"></div></section>
@@ -2686,7 +2693,7 @@ function renewalIn(a, b) {
     return tot ? ren / tot : null;
   });
 }
-function churnIn(a, b) { const v = []; for (let m = 1; m < NM; m++) { const d = monthDate(m); if (d < a || d > b) continue; const prev = M.act[m - 1], cur = M.act[m]; if (!prev.size) continue; let lost = 0; for (const id of prev) if (!cur.has(id)) lost++; v.push(lost / prev.size); } return v.length ? avg(v) : null; }
+function churnIn(a, b) { const v = []; for (let m = 1; m < NM; m++) { const d = monthDate(m); if (d < a || d > b) continue; const prev = prevAct(m), cur = M.act[m]; if (!prev || !prev.size || !cur.size) continue; let lost = 0; for (const id of prev) if (!cur.has(id)) lost++; v.push(lost / prev.size); } return v.length ? avg(v) : null; }
 // sessions in the first course of treatment (90 days from the first visit)
 function courseIn(a, b) {
   return memo("co" + +a + ":" + +b, () => { const X = LX(), v = []; for (const c of DB.clients) { if (!c.first || !inR(c.first, a, b) || NOW - c.first < 30 * DAY) continue; const lim = +c.first + 90 * DAY; v.push(X.act[c.id].filter(t => t <= lim).length - X.svcTx[c.id].filter(x => +x.d <= lim).length || 1); } return v.length ? avg(v) : null; });
@@ -2724,6 +2731,8 @@ const KDEF = {
   renewal: { c: "--sun", lab: () => L("Package renewals", "Rinnovi dei pacchetti"), f: v => v == null ? "—" : pct(v), rate: 1, calc: renewalIn, sp: null, hint: () => L("of packages that ended", "dei pacchetti finiti") },
   trialConv: { c: "--pink", lab: () => L("Free trial → paying", "Prova gratuita → pagante"), f: v => v == null ? "—" : pct(v), rate: 1, calc: (a, b) => { const s = trialStats(a, b); return s && s.n ? s.rate : null; }, sp: () => { const s = trialStats(START, NOW); return s ? ratioArr(s.byMc, s.byM) : null; } },
   churn: { c: "--coral", lab: () => L("Monthly churn", "Abbandono mensile"), f: v => v == null ? "—" : pct(v, 1), rate: 1, inv: 1, calc: churnIn, sp: () => { const z = new Array(NM).fill(0); churnSeries().forEach((v, i) => z[NM - 12 + i] = v || 0); return z; } },
+  held: { c: "--sun", lab: () => L(`${Cap(unit())} held`, `${Cap(unit())} svolte`), f: nf0, calc: (a, b) => { const s = PS(a, b); return s.books - s.ns; }, sp: () => M.books.map((v, i) => v - (M.noshow[i] || 0)) },
+  perUnit: { c: "--violet", lab: () => L(`Average per ${unit(false)}`, `Media per ${unit(false)}`), f: eur, calc: (a, b) => div(PS(a, b).rev, PS(a, b).svcN), sp: () => ratioArr(M.rev, M.books) },
   noshow: { c: "--coral", lab: () => L("No-shows", "Assenze"), f: v => v == null ? "—" : pct(v, 1), rate: 1, inv: 1, calc: (a, b) => div(PS(a, b).ns, PS(a, b).books), sp: () => ratioArr(M.noshow, M.books), hint: () => L(`of booked ${unit()}`, `delle ${unit()} prenotate`) },
   fill: { c: "--sun", lab: () => L("Places filled", "Posti occupati"), f: v => v == null ? "—" : pct(v), rate: 1, calc: fillIn, sp: () => LX().fb.map(v => P.capacity ? v / (P.capacity * 4.35) : 0), hint: () => L(`of ${nf(P.capacity)} places a week`, `di ${nf(P.capacity)} posti a settimana`) },
   course: { c: "--violet", lab: () => L(`${Cap(unit())} per course`, `${Cap(unit())} per percorso`), f: v => v == null ? "—" : nf(v, 1), calc: courseIn, sp: null, hint: () => L("first 90 days of treatment", "primi 90 giorni di trattamento") },
@@ -2731,7 +2740,9 @@ const KDEF = {
   ltv: { c: "--slate", lab: () => t("ltv"), f: eur, now: () => ({ v: lifetimeValue(), p: null, hint: L(`average per ${who(false)}, all time`, `media per ${who(false)}, da sempre`) }), sp: null },
 };
 function kpiKeys(list) {
-  return list.map(k => k === "trialConv" && trialSvc() < 0 ? (list.includes("churn") ? "stay" : "churn") : k === "improved" && !(resultsStats()?.n >= 3) ? "stay" : k === "reviews" && !ratingField() ? "extras" : k)
+  const shortStay = survival().maxK < 12; // under a year of history the expected stay is a guess
+  return list.map(k => k === "trialConv" && trialSvc() < 0 ? (list.includes("churn") ? "stay" : "churn") : k === "improved" && !(resultsStats()?.n >= 3) ? "stay" : k === "reviews" && !ratingField() ? "extras" : k === "renewal" && !hasPack() ? "held" : k)
+    .map(k => k === "stay" && shortStay ? "perUnit" : k)
     .filter((k, i, a) => a.indexOf(k) === i);
 }
 function lensKpis(r) {
@@ -2830,13 +2841,13 @@ const PANELS = {
       const s = survival(), since = P.consultStart ? survival(NOW, { key: "cs", fn: c => c.first >= P.consultStart }) : null;
       const showSince = since && since.n >= 8;
       const lead = s.n < 5 ? L(`Too few ${who()} yet to see how long they stay.`, `Ancora troppo pochi ${who()} per vedere quanto restano.`)
-        : (s.med != null ? L(`Half of your ${who()} stay longer than ${nf(s.med, 1)} months.`, `La metà dei tuoi ${who()} resta più di ${nf(s.med, 1)} mesi.`) : L(`More than half of your ${who()} are still with you after two years.`, `Più della metà dei tuoi ${who()} è ancora con te dopo due anni.`)) + " " + L(`${pct(1 - s.S[2])} stop within the first two months.`, `Il ${pct(1 - s.S[2])} si ferma entro i primi due mesi.`);
+        : (s.med != null ? L(`Half of your ${who()} stay longer than ${nf(s.med, 1)} months.`, `La metà dei tuoi ${who()} resta più di ${nf(s.med, 1)} mesi.`) : s.maxK < 24 ? L(`After ${s.maxK} months, ${pct(s.S[s.maxK])} of your ${who()} are still coming: the records do not go further back yet.`, `Dopo ${s.maxK} mesi il ${pct(s.S[s.maxK])} dei tuoi ${who()} viene ancora: i dati non vanno ancora più indietro.`) : L(`More than half of your ${who()} are still with you after two years.`, `Più della metà dei tuoi ${who()} è ancora con te dopo due anni.`)) + " " + L(`${pct(1 - s.S[2])} stop within the first two months.`, `Il ${pct(1 - s.S[2])} si ferma entro i primi due mesi.`);
       return ph(L(`How long ${who()} stay`, `Quanto restano ${gliWho()}`), L(`Share still coming, month by month after they start`, `Quota che continua a venire, mese per mese dall'inizio`), `<div class="legend"><span><i style="background:${cssv(P.color)}"></i>${L("All", "Tutti")}</span>${showSince ? `<span><i class="dash" style="border-color:var(--coral)"></i>${L("Since working together", "Da quando lavoriamo insieme")}</span>` : ""}</div>`) + `<p class="muted-p" style="margin:0 0 4px">${esc(lead)}</p><div class="lz-c"></div>`;
     },
     draw: h => {
       const s = survival(), K = 18, since = P.consultStart ? survival(NOW, { key: "cs", fn: c => c.first >= P.consultStart }) : null;
       const labels = [...Array(K + 1)].map((_, k) => k ? k + " " + L("mo", "m") : L("Start", "Inizio"));
-      const series = [{ name: L("All", "Tutti"), color: cssv(P.color), values: s.S.slice(0, K + 1), area: 1, width: 2.8 }];
+      const series = [{ name: L("All", "Tutti"), color: cssv(P.color), values: s.S.slice(0, K + 1).map((v, k) => k <= Math.max(1, s.maxK) ? v : null), area: 1, width: 2.8 }];
       if (since && since.n >= 8) { const maxK = Math.floor((NOW - P.consultStart) / MON); series.push({ name: L("Since working together", "Da quando lavoriamo insieme"), color: cssv("--coral"), values: since.S.slice(0, K + 1).map((v, k) => k <= maxK ? v : null), dash: 1, width: 2.2 }); }
       lineChart($(".lz-c", h), { labels, series, fmt: v => pct(v), max: 1, h: 240, tipTitle: i => i ? L(`After ${i} months`, `Dopo ${i} mesi`) : L("Start", "Inizio") });
     },
@@ -3039,7 +3050,7 @@ VIEWS.today = el => {
   }
 };
 function dayRow(e, i, past) {
-  const c = e.c, time = e.d.toLocaleTimeString(loc(), { hour: "2-digit", minute: "2-digit" });
+  const c = e.c, time = !e.d.getHours() && !e.d.getMinutes() && untimed() ? "" : e.d.toLocaleTimeString(loc(), { hour: "2-digit", minute: "2-digit" });
   const st = e.kind === "plan" ? "plan" : e.ref.ns ? "miss" : "came";
   const pend = c.txIdx.map(k => DB.txns[k]).filter(x => x.st === "pending"), owed = sum(pend.map(x => x.a));
   const cr = !isVisit() && hasPack() && !isTrial(e.s) ? creditLeft(c) : null;
@@ -3163,6 +3174,7 @@ async function openWorkspace(id) {
 function rebuildFromStore(first) {
   P = makeP(STORE.meta); CUR = STORE.meta.cur || "EUR";
   DB = buildDB(STORE.chunks); computeMonthly();
+  if (first && STORE.pendingImport) { const txt = STORE.pendingImport; STORE.pendingImport = null; const r = importTracker(txt); if (r && !r.error) APP.portalMsg = trackerMsg(r); }
   renderTop();
   if (first || !layer.children.length) renderView();
   else renderViewQuiet();
@@ -3178,6 +3190,14 @@ function openDemo(key) {
   APP.demoKey = vkey;
   try { localStorage.setItem("clientela.ws", "demo:" + vkey); } catch (e) { }
   CUR = prof.cur || "EUR";
+  if (prof.real) { // a profile with real data (a tracker export): no simulation
+    P = { ...prof, consultStart: null, goal: 0 }; delete P.real;
+    P.services = P.services.map((s, i) => ({ id: "s" + i, ...s })); P.extras = P.extras.map((x, i) => ({ id: "e" + i, ...x })); P.channels = P.channels.map((c, i) => ({ id: "h" + i, ...c }));
+    P.realData = importTracker(prof.real) || { error: true };
+    const wk = new Map(); for (const b of DB.books) { const d = dayStart(b.d); d.setDate(d.getDate() - (d.getDay() + 6) % 7); wk.set(+d, (wk.get(+d) || 0) + 1); }
+    P.capacity = Math.max(P.capacity || 0, ...wk.values());
+    computeMonthly(); SIM.ext = null; renderTop(); renderView(); return;
+  }
   // pick a simulated history that reads like a typical business (steady growth, visible effect of the consulting)
   const score = () => { const s = impactStats(); if (!s || !s.rev || s.rev[2] == null) return 9; const exp = M.rev[NM - 13] * M.g; return Math.abs(s.rev[2] - .17) + Math.abs(M.g - 1.15) + (s.rev[2] < .04 ? .6 : 0) + (s.newC[2] < 0 ? .2 : 0) + (exp > 0 ? Math.abs(Math.log(M.cur / exp)) * .5 : 0); };
   if (DEMO_VARIANT[vkey] == null) { let best = 0, bs = 99; for (let v = 0; v < 10; v++) { DB = generate(prof, v); computeMonthly(); const sc = score(); if (sc < bs) { bs = sc; best = v; } if (sc < .16) break; } DEMO_VARIANT[vkey] = best; }
@@ -3245,6 +3265,7 @@ async function createWorkspace(o) {
   const meta = defaultMeta(o);
   try { await STORE.db.doc(wsPath(id)).set(meta); } catch (e) { toast(e?.code === "quota_exceeded" ? L("Storage is full.", "Spazio pieno.") : L("Could not create the workspace. You may only have view access.", "Impossibile creare lo spazio. Potresti avere solo accesso in lettura.")); return null; }
   if (!STORE.list.some(w => w.id === id)) STORE.list.unshift({ id, ...meta });
+  STORE.pendingImport = (o.profile && profileById(o.profile)?.patch?.real) || null; // a profile with real data starts with it
   openWorkspace(id); return id;
 }
 async function deleteWorkspace() {
@@ -3578,7 +3599,7 @@ async function importBackup(obj) {
 }
 
 /* ================= import from a student portal export (CSV of students, packages, lessons) =================
-   The portal keeps students, packages and lessons in Supabase. Lucia exports the three tables
+   The portal keeps students, packages and lessons in Supabase. The professional exports the three tables
    as CSV (Table editor > table > Export > CSV) and drops them here. The portal is the source of
    truth: a student imported again gets their packages and lessons rebuilt, so re-importing every
    month never duplicates anything. The starting level is kept from the first import, so levels
@@ -3648,7 +3669,7 @@ function importPortal(texts) {
     if (s.level) { f.level1 = s.level; if (!f.level0) f.level0 = s.level; }
     if (modeField && mode) f.mode = mode === "prague" ? modeField.opts[0][0] : modeField.opts[1][0];
     let c = o.c;
-    if (!c) { c = addClient({ name: s.full_name || s.email, email: s.email || "", origin, ch: s.source === "site" ? chSite() : chOther(), seg: Math.min(seg, P.segments.length - 1), f, created, note: goal ? L("Goal: ", "Obiettivo: ") + goal : "" }); nNew++; }
+    if (!c) { c = addClient({ name: s.full_name || s.email, email: s.email || "", origin, ch: s.source === "site" ? chSite() : chOther(), seg: P.segments.length >= 5 ? Math.min(seg, P.segments.length - 1) : 0, f, created, note: goal ? L("Goal: ", "Obiettivo: ") + goal : "" }); nNew++; }
     else { Object.assign(c, { name: s.full_name || c.name, origin: c.origin && c.origin !== "—" ? c.origin : origin, f }); if (created < c.created) c.created = created; if (!c.note && goal) c.note = L("Goal: ", "Obiettivo: ") + goal; }
     stOf.set(sid, c); touched.add(c);
   }
@@ -3678,10 +3699,10 @@ function importPortal(texts) {
 }
 const portalSite = () => (STORE.active ? STORE.meta?.site : null) || profileById(P.profile || STORE.meta?.profile)?.site || L("the portal", "il portale");
 function portalPanelHtml() {
-  if (P.portal !== "lucia") return "";
+  if (!P.portal) return "";
   return `<div class="panel c12" id="portalP" style="border-color:var(--violet)"><div class="ph"><div><h3>${L("Import from the student portal", "Importa dal portale studenti")}</h3><p>${L("Students, packages and lessons from " + portalSite() + ", in one go. Import again each month: nothing is duplicated.", "Studenti, pacchetti e lezioni da " + portalSite() + ", in un colpo. Reimporta ogni mese: niente si duplica.")}</p></div></div>
-    <div class="grid" style="gap:14px;margin:0"><ol class="steps c6"><li>${L("Open Supabase, project of the portal, then <b>Table editor</b>.", "Apri Supabase, progetto del portale, poi <b>Table editor</b>.")}</li><li>${L("Open <b>students</b>, then <b>Export → Export table as CSV</b>. Do the same for <b>packages</b> and <b>lessons</b>.", "Apri <b>students</b>, poi <b>Export → Export table as CSV</b>. Fai lo stesso con <b>packages</b> e <b>lessons</b>.")}</li><li>${L("Drop the three files here together.", "Trascina qui i tre file insieme.")}</li></ol>
-    <label class="drop c6" id="pdrop">${icon(IC.file)}<b>${L("Drop students.csv, packages.csv, lessons.csv", "Trascina students.csv, packages.csv, lessons.csv")}</b><span class="btn ghost sm">${t("choose")}</span><input type="file" id="pIn" accept=".csv,text/csv" multiple hidden></label></div>
+    <div class="grid" style="gap:14px;margin:0"><ol class="steps c6"><li>${L("Open Supabase, project of the portal, then <b>Table editor</b>.", "Apri Supabase, progetto del portale, poi <b>Table editor</b>.")}</li><li>${L("Open <b>students</b>, then <b>Export → Export table as CSV</b>. Do the same for <b>packages</b> and <b>lessons</b>.", "Apri <b>students</b>, poi <b>Export → Export table as CSV</b>. Fai lo stesso con <b>packages</b> e <b>lessons</b>.")}</li><li>${L("Drop the three files here together.", "Trascina qui i tre file insieme.")}</li><li>${L("Or drop the <b>lesson tracker</b> export (one CSV with lessons and students): each lesson becomes a payment and a lesson held.", "Oppure trascina l'export del <b>tracker lezioni</b> (un solo CSV con lezioni e studenti): ogni lezione diventa un pagamento e una lezione svolta.")}</li></ol>
+    <label class="drop c6" id="pdrop">${icon(IC.file)}<b>${L("Drop the portal files or the tracker CSV", "Trascina i file del portale o il CSV del tracker")}</b><span class="btn ghost sm">${t("choose")}</span><input type="file" id="pIn" accept=".csv,text/csv" multiple hidden></label></div>
     <div id="pRes">${APP.portalMsg || ""}</div></div>`;
 }
 function bindPortalPanel(el) {
@@ -3689,7 +3710,12 @@ function bindPortalPanel(el) {
   const handle = async files => {
     const list = [...files].slice(0, 6); if (!list.length) return;
     const texts = await Promise.all(list.map(f => f.text ? f.text() : new Promise(r => { const rd = new FileReader(); rd.onload = () => r(String(rd.result)); rd.readAsText(f); })));
-    const res = importPortal(texts), box = $("#pRes", el);
+    const box = $("#pRes", el), trk = texts.map(importTrackerSafe).find(Boolean);
+    if (trk) {
+      if (trk.error) { box.innerHTML = `<div class="note-box" style="background:var(--coral-s)">${icon(IC.info)}<div>${esc(trk.error)}</div></div>`; return; }
+      APP.portalMsg = trackerMsg(trk); renderView(); return;
+    }
+    const res = importPortal(texts);
     if (res.error) { box.innerHTML = `<div class="note-box" style="background:var(--coral-s)">${icon(IC.info)}<div>${esc(res.error)}</div></div>`; return; }
     const miss = [!res.hasPk && "packages.csv", !res.hasLs && "lessons.csv"].filter(Boolean);
     APP.portalMsg = `<div class="note-box" style="background:var(--lime-s)">${icon(IC.up)}<div><b>${L("Portal imported", "Portale importato")}</b>: ${nf(res.students)} ${who()} (${nf(res.nNew)} ${L("new", "nuovi")}, ${nf(res.nUpd)} ${L("updated", "aggiornati")}), ${nf(res.nPay)} ${L("packages", "pacchetti")}, ${nf(res.nSess)} ${L("lessons", "lezioni")}.${miss.length ? " " + L("Missing: ", "Mancano: ") + miss.join(", ") + "." : ""}${STORE.active ? "" : " " + L("The simulated students were replaced. Create a client workspace to keep the real ones.", "Gli studenti simulati sono stati sostituiti. Crea uno spazio cliente per tenere quelli reali.")}</div></div>`;
@@ -3700,6 +3726,148 @@ function bindPortalPanel(el) {
   drop.addEventListener("dragleave", () => drop.classList.remove("over"));
   drop.addEventListener("drop", e => { e.preventDefault(); drop.classList.remove("over"); handle(e.dataTransfer.files); });
 }
+
+/* ================= import from a lesson tracker export (one CSV with sections) =================
+   The tracker writes one file with "=== LEZIONI ===" (date, student, source, price, currency,
+   price in the home currency), "=== STUDENTI ===" (start date, notes) and a per-student detail.
+   Every lesson is one payment and one lesson held. The detail section says which lessons belong
+   to which student, so a student who moved from a platform or a school to private lessons stays
+   one person. Students are matched by name: importing a newer export rebuilds their history and
+   never duplicates it. The tracker has no times, so lessons are stored at the start of the day. */
+const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+function trackerParse(text) {
+  const sec = {}; let cur = null;
+  for (const l of String(text).replace(/^﻿/, "").split(/\r?\n/)) {
+    const m = l.match(/^\s*===\s*(.+?)\s*===\s*$/); if (m) { cur = m[1].toUpperCase(); sec[cur] = []; continue; }
+    if (cur) sec[cur].push(l);
+  }
+  const lk = Object.keys(sec).find(k => /^(LEZIONI|LESSONS)$/.test(k)); if (!lk) return null;
+  const rows = parseCSV(sec[lk].join("\n")).filter(r => r.some(x => (x || "").trim())); if (!rows.length) return null;
+  const head = rows[0].map(h => (h || "").trim().toLowerCase()), col = re => head.findIndex(h => re.test(h));
+  const iD = col(/^(data|date)$/), iN = col(/^(studente|student|nome|name)$/), iS = col(/^(fonte|source)$/), iP = col(/^(prezzo|price)$/), iC = col(/^(valuta|currency)$/), iA = col(/^(prezzo|price)\s+[a-z]{3}$/);
+  if (iD < 0 || iN < 0 || iA < 0) return null;
+  const home = head[iA].slice(-3).toUpperCase();
+  const day = s => (s || "").trim().slice(0, 10), isDay = s => /^\d{4}-\d{2}-\d{2}$/.test(day(s));
+  const lessons = rows.slice(1).filter(r => isDay(r[iD]) && (r[iN] || "").trim()).map(r => ({ d: day(r[iD]), name: r[iN].trim(), src: (r[iS] || "").trim(), a: +r[iA] || 0, p: +r[iP] || 0, c: (r[iC] || "").trim() }));
+  const sk = Object.keys(sec).find(k => /^(STUDENTI|STUDENTS)$/.test(k)), students = [];
+  if (sk) {
+    const sr = parseCSV(sec[sk].join("\n")).filter(r => r.some(x => (x || "").trim()));
+    const h2 = (sr[0] || []).map(h => (h || "").trim().toLowerCase()), c2 = re => h2.findIndex(h => re.test(h));
+    const jN = c2(/^(nome|name|studente|student)$/), jS = c2(/^(fonte|source)$/), jD = c2(/inizio|start/), jT = c2(/^(note|notes)$/);
+    for (const r of sr.slice(1)) if (jN >= 0 && (r[jN] || "").trim()) students.push({ name: r[jN].trim(), src: (r[jS] || "").trim(), start: isDay(r[jD]) ? day(r[jD]) : null, note: (r[jT] || "").trim() });
+  }
+  const dk = Object.keys(sec).find(k => /DETTAGLIO|DETAIL/.test(k)), blocks = [];
+  if (dk) {
+    let b = null;
+    for (const l of sec[dk]) {
+      const m = l.match(/^\s*(?:studente|student)\s*:\s*(.*?)\s*\(([^()]*)\)\s*$/i);
+      if (m) { b = { name: m[1].trim(), src: m[2].trim(), left: new Map() }; blocks.push(b); continue; }
+      const r = l.split(","); if (!b || !isDay(r[0])) continue;
+      const k = day(r[0]) + "|" + (+r[r.length - 1] || 0).toFixed(2); b.left.set(k, (b.left.get(k) || 0) + 1);
+    }
+  }
+  return { home, lessons, students, blocks };
+}
+// who is who: one person per detail block, plus one per name for lessons of students no longer listed
+function trackerPeople(T0) {
+  const low = s => s.toLowerCase(), people = T0.blocks.map(b => ({ name: b.name, src: b.src, block: b, lessons: [] })), loose = new Map();
+  for (const l of T0.lessons) {
+    const k = l.d + "|" + l.a.toFixed(2), n = low(l.name);
+    const take = ok => people.find(p => p.block.left.get(k) > 0 && ok(low(p.name)));
+    const p = take(x => x === n) || take(x => x.startsWith(n + " ") || n.startsWith(x + " "));
+    if (p) { p.block.left.set(k, p.block.left.get(k) - 1); p.lessons.push(l); continue; }
+    if (!loose.has(n)) loose.set(n, { name: l.name, src: l.src, lessons: [], gone: true });
+    loose.get(n).lessons.push(l);
+  }
+  const all = [...people, ...loose.values()].filter(p => p.lessons.length);
+  for (const p of all) {
+    p.lessons.sort((a, b) => a.d < b.d ? -1 : 1);
+    const st = T0.students.find(s => low(s.name) === low(p.name) && low(s.src) === low(p.src));
+    p.start = st?.start && st.start < p.lessons[0].d ? st.start : p.lessons[0].d; p.note = st?.note || "";
+  }
+  // same first name for two people: the one who came later gets the source next to the name
+  const byName = new Map(); for (const p of all) { const k = low(p.name); byName.set(k, [...(byName.get(k) || []), p]); }
+  for (const g of byName.values()) if (g.length > 1) g.sort((a, b) => a.start < b.start ? -1 : 1).slice(1).forEach(p => p.name += ` (${p.src || p.lessons[0].src})`);
+  return all.sort((a, b) => a.start < b.start ? -1 : 1);
+}
+const srcKind = s => /preply|italki|verbling|cambly|platform|piattaform/i.test(s) ? "platform" : /privat|direct|dirett/i.test(s) ? "private" : /scuol|school|istitut|institute/i.test(s) ? "school" : "other";
+const isGroupName = s => /bambin|kids|children|grupp|group/i.test(s || "");
+function importTracker(text) {
+  const T0 = trackerParse(text); if (!T0) return null;
+  if (!T0.lessons.length) return { error: L("The file has no lessons.", "Il file non contiene lezioni.") };
+  const people = trackerPeople(T0), fresh = !STORE.active;
+  if (fresh) { DB = { clients: [], txns: [], books: [], upcoming: [] }; CUR = T0.home; }
+  let newSettings = false, curNote = "";
+  if (!fresh && STORE.meta.cur !== T0.home) {
+    if (!DB.txns.length) { saveMeta({ cur: T0.home }); CUR = T0.home; }
+    else curNote = L(`Amounts are in ${T0.home}, the workspace is in ${STORE.meta.cur}.`, `Gli importi sono in ${T0.home}, lo spazio è in ${STORE.meta.cur}.`);
+  }
+  const school = (() => { const n = T0.students.filter(s => srcKind(s.src) === "school" && s.note).map(s => s.note.split(/\s+-\s+|,/)[0].trim()); const c = {}; n.forEach(x => c[x] = (c[x] || 0) + 1); return Object.keys(c).sort((a, b) => c[b] - c[a])[0] || ""; })();
+  const median = xs => { const s = [...xs].sort((a, b) => a - b); return s.length ? Math.round(s[Math.floor(s.length / 2)]) : 0; };
+  const findSvc = test => P.services.findIndex(s => !s.trial && test(tr(s.n)));
+  const svcFor = (src, group) => {
+    const k = srcKind(src), sc = school ? new RegExp(reEsc(school), "i") : null;
+    let i = k === "platform" ? findSvc(n => new RegExp(reEsc(src), "i").test(n))
+      : k === "private" ? findSvc(n => /privat/i.test(n) && !isGroupName(n))
+      : k === "school" ? findSvc(n => (/scuol|school/i.test(n) || sc?.test(n)) && isGroupName(n) === group)
+      : findSvc(n => n.toLowerCase() === src.toLowerCase());
+    if (i < 0) {
+      const ps = T0.lessons.filter(l => l.src === src).map(l => l.a);
+      const n = k === "platform" ? L(`Lesson on ${src}`, `Lezione su ${src}`) : k === "private" ? L("Private lesson", "Lezione privata")
+        : k === "school" ? (group ? L(`Kids group at ${school || "the school"}`, `Gruppo bambini ${school ? "alla scuola " + school : "a scuola"}`) : L(`Lesson at ${school || "the school"}`, `Lezione ${school ? "alla scuola " + school : "a scuola"}`))
+        : src || L("Lesson", "Lezione");
+      P.services.push({ id: "s" + Date.now().toString(36) + P.services.length, n, p: median(ps), kind: "oneoff" }); newSettings = true; i = P.services.length - 1;
+    }
+    return i;
+  };
+  const chFor = src => {
+    const k = srcKind(src), sc = school ? new RegExp(reEsc(school), "i") : null;
+    let i = P.channels.findIndex(c => { const n = tr(c.n); return k === "platform" ? new RegExp(reEsc(src), "i").test(n) : k === "private" ? /privat|direct|dirett/i.test(n) : k === "school" ? /scuol|school/i.test(n) || !!sc?.test(n) : n.toLowerCase() === src.toLowerCase(); });
+    if (i < 0) {
+      const n = k === "private" ? L("Direct (private)", "Diretto (privato)") : k === "school" ? (school ? L(`${school} school`, `Scuola ${school}`) : L("School", "Scuola")) : src || L("Other / not recorded", "Altro / non registrato");
+      P.channels.push({ id: "h" + Date.now().toString(36) + P.channels.length, n, spend: 0, comm: 0 }); newSettings = true; i = P.channels.length - 1;
+    }
+    return i;
+  };
+  const segGroup = P.segments.findIndex(s => isGroupName(tr(s.n)));
+  const modeField = P.fields.find(f => f.k === "mode");
+  const byName = new Map(DB.clients.map(c => [c.name.trim().toLowerCase(), c]));
+  const at = d => new Date(d + "T00:00");
+  let nNew = 0, nUpd = 0, nLes = 0, moved = 0; const touched = [], reset = new Set();
+  for (const p of people) { const c = byName.get(p.name.toLowerCase()); if (c) reset.add(c.id); }
+  clearHistory(reset);
+  for (const p of people) {
+    const group = isGroupName(p.name) || isGroupName(p.note), src0 = p.lessons[0].src || p.src;
+    const f = {}; if (modeField && srcKind(src0) === "platform") f[modeField.k] = modeField.opts[1][0];
+    let c = byName.get(p.name.toLowerCase());
+    const note = [p.note, p.gone ? L("No longer in the tracker's student list.", "Non più nella lista studenti del tracker.") : ""].filter(Boolean).join(" · ");
+    if (!c) { c = addClient({ name: p.name, origin: srcKind(src0) === "platform" ? "Online · " + src0 : "—", ch: chFor(src0), seg: group && segGroup >= 0 ? segGroup : 0, f, created: at(p.start), note }); nNew++; }
+    else { nUpd++; if (at(p.start) < c.created) c.created = at(p.start); for (const k in f) if (!c.f[k]) c.f[k] = f[k]; if (!c.note && note) c.note = note; }
+    if (new Set(p.lessons.map(l => srcKind(l.src))).size > 1) moved++;
+    for (const l of p.lessons) {
+      const s = svcFor(l.src || p.src, group), d = at(l.d);
+      addPayment(c, { k: "svc", s, a: l.a, d, m: srcKind(l.src) === "platform" ? l.src : "Other", st: "paid" });
+      addSession(c, { d, s, ns: 0 }, true); nLes++;
+    }
+    touched.push(c);
+  }
+  DB.books.sort((a, b) => a.d - b.d);
+  for (const c of touched) refreshClient(DB, c);
+  if (!fresh) {
+    if (newSettings) { const clean = { services: P.services.map(s => ({ ...s, n: tr(s.n) })), channels: P.channels.map(c => ({ id: c.id, n: tr(c.n), spend: c.spend || 0, comm: c.comm || 0 })) }; saveMeta(clean); Object.assign(STORE.meta, clean); }
+    const ks = new Set(); for (const c of touched) ks.add(persistClient(c, true)); ks.forEach(k => k && queueWrite(k));
+  }
+  computeMonthly();
+  const ds = T0.lessons.map(l => l.d).sort();
+  return { tracker: true, nNew, nUpd, nLes, people: people.length, gone: people.filter(p => p.gone).length, moved, from: ds[0], to: ds[ds.length - 1], cur: T0.home, curNote, total: sum(T0.lessons.map(l => l.a)) };
+}
+// lessons stored without a time (the tracker has dates only)
+const untimed = () => { const b = DB.books; if (b.length < 5) return false; let z = 0; for (const x of b) if (!x.d.getHours() && !x.d.getMinutes()) z++; return z / b.length > .8; };
+const importTrackerSafe = txt => /^\s*===\s*(LEZIONI|LESSONS)\s*===/mi.test(txt) ? importTracker(txt) : null;
+function trackerMsg(r) {
+  return `<div class="note-box" style="background:var(--lime-s)">${icon(IC.up)}<div><b>${L("Lesson tracker imported", "Tracker lezioni importato")}</b>: ${nf(r.nLes)} ${L("lessons", "lezioni")} ${L("from", "dal")} ${fdate(new Date(r.from + "T12:00"), { day: "numeric", month: "short" })} ${L("to", "al")} ${fdate(new Date(r.to + "T12:00"), { day: "numeric", month: "short", year: "numeric" })}, ${nf(r.people)} ${who()} (${nf(r.nNew)} ${L("new", "nuovi")}, ${nf(r.nUpd)} ${L("updated", "aggiornati")}), ${eur(r.total)}.${r.curNote ? " " + esc(r.curNote) : ""}</div></div>`;
+}
+const realLabel = () => { const r = P.realData; return r?.to ? L("real data to ", "dati reali fino al ") + fdate(new Date(r.to + "T12:00"), { day: "numeric", month: "short", year: "numeric" }) : L("real data", "dati reali"); };
 
 /* ================= Data view: backup, devices and AI key ================= */
 const STANDALONE_URL = "https://gabryrko9.github.io/gabriele-cascone/clientela/";
@@ -3786,7 +3954,8 @@ VIEWS.data = el => {
   const used = { svc: new Set(), ext: new Set(), ch: new Set(DB.clients.map(c => c.ch)) };
   DB.txns.forEach(x => used[x.k === "ext" ? "ext" : "svc"].add(x.s)); DB.books.forEach(b => used.svc.add(b.s));
   let h = vhead(demo ? L("Demo workspace", "Spazio demo") : L("Saved workspace", "Spazio salvato"), t("dataTitle"), t("dataSub"));
-  if (demo) h += `<div class="note-box" style="background:var(--sun-s)">${icon(IC.info)}<div><b>${L("You are looking at simulated data.", "Stai guardando dati simulati.")}</b> ${L("Changes here last until you switch. To keep a real professional's numbers, create a client workspace from the Clients menu at the top.", "Le modifiche durano finché non cambi spazio. Per tenere i numeri reali di un professionista, crea uno spazio cliente dal menu Clienti in alto.")} ${STORE.db ? `<button class="btn main sm" data-act="newWs" style="margin-top:8px">${icon(IC.plus)}${P.profile ? L("Start with real data", "Parti con i dati reali") : L("New client workspace", "Nuovo spazio cliente")}</button>` : ""}</div></div>`;
+  if (demo && P.realData) h += `<div class="note-box" style="background:var(--lime-s)">${icon(IC.info)}<div><b>${Cap(realLabel())}.</b> ${L("Imported from the lesson tracker export. Changes here last until you switch: to keep working on these numbers, create the client workspace, which starts with the same lessons.", "Importati dall'export del tracker lezioni. Le modifiche durano finché non cambi spazio: per lavorarci sopra, crea lo spazio cliente, che parte con le stesse lezioni.")} ${STORE.db ? `<button class="btn main sm" data-act="newWs" style="margin-top:8px">${icon(IC.plus)}${L("Create the client workspace", "Crea lo spazio cliente")}</button>` : ""}</div></div>`;
+  else if (demo) h += `<div class="note-box" style="background:var(--sun-s)">${icon(IC.info)}<div><b>${L("You are looking at simulated data.", "Stai guardando dati simulati.")}</b> ${L("Changes here last until you switch. To keep a real professional's numbers, create a client workspace from the Clients menu at the top.", "Le modifiche durano finché non cambi spazio. Per tenere i numeri reali di un professionista, crea uno spazio cliente dal menu Clienti in alto.")} ${STORE.db ? `<button class="btn main sm" data-act="newWs" style="margin-top:8px">${icon(IC.plus)}${P.profile ? L("Start with real data", "Parti con i dati reali") : L("New client workspace", "Nuovo spazio cliente")}</button>` : ""}</div></div>`;
   const ws = demo ? { name: bizName(), prof: P.id, cur: CUR, goal: P.goal, start: P.consultStart ? isoDay(P.consultStart) : "", capacity: P.capacity } : STORE.meta;
   h += `<div class="grid">
     ${portalPanelHtml()}
@@ -3828,7 +3997,7 @@ VIEWS.data = el => {
     <div class="panel c12"><div class="ph"><div><h3>${t("connect")}</h3><p>${t("connectSub")}</p></div></div><div class="conn">
       ${[["Stripe / SumUp", L("Card payments arrive on their own", "I pagamenti con carta arrivano da soli")], ["Google Calendar", L("Sessions and no-shows from the calendar", "Sessioni e no-show dal calendario")], [L("Booking widget", "Widget prenotazioni"), L("Bookings from the website with channel tracking", "Prenotazioni dal sito con tracciamento canale")], ["Instagram & Google Business", L("Followers, views and reviews next to revenue", "Follower, visualizzazioni e recensioni accanto ai ricavi")], ["TripAdvisor / GetYourGuide", L("Partner bookings and commissions", "Prenotazioni e commissioni dei partner")], ["Excel / Google Sheets", L("Import above, today", "Import qui sopra, già oggi")]].map(([n, d], i) => `<div class="cn"><span class="st" style="${i === 5 ? "color:var(--good)" : ""}">${i === 5 ? L("Available", "Disponibile") : t("soon")}</span><b>${esc(n)}</b><small>${esc(d)}</small></div>`).join("")}
     </div></div>
-    ${demo ? `<div class="panel c12 soft"><div class="ph"><div><h3>${t("reset")}</h3><p>${L("Brings back the original simulated numbers for this profession.", "Ripristina i numeri simulati originali di questa professione.")}</p></div><button class="btn ghost sm" data-act="resetDemo">${t("reset")}</button></div></div>`
+    ${demo ? `<div class="panel c12 soft"><div class="ph"><div><h3>${t("reset")}</h3><p>${P.realData ? L("Brings back the lessons as imported, undoing changes made here.", "Riporta le lezioni come importate, annullando le modifiche fatte qui.") : L("Brings back the original simulated numbers for this profession.", "Ripristina i numeri simulati originali di questa professione.")}</p></div><button class="btn ghost sm" data-act="resetDemo">${t("reset")}</button></div></div>`
       : `<div class="panel c12 soft"><div class="ph"><div><h3>${L("Delete this workspace", "Elimina questo spazio")}</h3><p>${L("Removes the workspace and every client in it for good. Export first if you need a copy.", "Elimina per sempre lo spazio e tutti i suoi clienti. Esporta prima se ti serve una copia.")}</p></div><button class="btn ghost sm" data-act="delWs" style="color:var(--bad)"><span>${L("Delete workspace", "Elimina spazio")}</span></button></div></div>`}
   </div>`;
   el.innerHTML = h;
@@ -3916,7 +4085,7 @@ function renderNav() {
 function crumb() {
   const prof = tr(P.name);
   if (STORE.active) return prof + " › " + L("Real data", "Dati reali");
-  if (P.profile) { const pr = profileById(P.profile); return prof + " › " + (pr ? stageLabel(pr) + " · " : "") + L("simulated data", "dati simulati"); }
+  if (P.profile) { const pr = profileById(P.profile); return prof + " › " + (pr ? stageLabel(pr) + " · " : "") + (P.realData ? realLabel() : L("simulated data", "dati simulati")); }
   return prof + " › " + L("Example", "Esempio");
 }
 function renderTop() {
@@ -3929,7 +4098,7 @@ function renderTop() {
   btn.title = L("Change client or category", "Cambia cliente o categoria");
   $("#period").innerHTML = [["30", "p30"], ["90", "p90"], ["12", "p12"], ["all", "pall"]].map(([v, k]) => `<button type="button" data-p="${v}" aria-pressed="${PERIOD === v}">${t(k)}</button>`).join("");
   $$("#lang button").forEach(b => b.setAttribute("aria-pressed", b.dataset.l === LANG));
-  const pill = $(".demo-pill"); pill.hidden = STORE.active;
+  const pill = $(".demo-pill"); pill.hidden = STORE.active; pill.dataset.i = P.realData ? "demoReal" : "demo"; pill.textContent = t(pill.dataset.i); pill.classList.toggle("real", !!P.realData);
   let ss = $("#saveState"); if (!ss) { ss = document.createElement("span"); ss.id = "saveState"; ss.className = "save-state hide-sm"; pill.after(ss); savingEl = ss; }
   ss.hidden = !STORE.active; if (STORE.active && ss.dataset.on !== "1") ss.textContent = L("Saved", "Salvato");
   document.documentElement.lang = LANG;
@@ -3969,7 +4138,7 @@ function refreshPicker() {
   const curDemo = !STORE.active ? APP.demoKey : null;
   const opt = (attrs, pressed, title, sub, tag) => `<button type="button" class="ws-opt" ${attrs} aria-pressed="${pressed}" style="--pc:${pc}"><span class="prof-ico">${icon(ICONS[cat.id])}</span><span style="min-width:0;flex:1"><b>${esc(title)}</b><small>${esc(sub)}</small></span>${tag ? `<span class="ws-tag ${tag[0]}">${esc(tag[1])}</span>` : ""}</button>`;
   const rows = [
-    ...profs.map(pr => opt(`data-demo="@${esc(pr.id)}"`, curDemo === "@" + pr.id, pr.name, [pr.owner, pr.site].filter(Boolean).join(" · ") || stageLabel(pr), ["sim", stageLabel(pr) + " · " + L("simulated", "simulato")])),
+    ...profs.map(pr => opt(`data-demo="@${esc(pr.id)}"`, curDemo === "@" + pr.id, pr.name, [pr.owner, pr.site].filter(Boolean).join(" · ") || stageLabel(pr), pr.patch?.real ? ["real", stageLabel(pr) + " · " + L("real data", "dati reali")] : ["sim", stageLabel(pr) + " · " + L("simulated", "simulato")])),
     ...saved.map(w => opt(`data-ws="${esc(w.id)}"`, STORE.wsId === w.id, w.name, (w.profile && profileById(w.profile) ? profileById(w.profile).name + " · " : "") + L("updated", "aggiornato") + " " + fdate(w.updated ? new Date(w.updated) : null, { day: "numeric", month: "short" }), ["real", L("Real data", "Dati reali")])),
   ];
   const canSave = !!STORE.db;
