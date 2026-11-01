@@ -436,7 +436,11 @@ pre.csv{margin:0;background:var(--soft);border-radius:12px;padding:12px;font:400
 .ed-r,.ed-h{display:grid;grid-template-columns:minmax(0,1fr) 84px 130px 30px;gap:6px;align-items:center}
 .ed-r.ext{grid-template-columns:minmax(0,1fr) 84px 130px 30px}
 .ed-r.ch,.ed-h{grid-template-columns:minmax(0,1fr) 84px 70px 30px}
-.ed-r.cost,.ed-h.cost{grid-template-columns:minmax(0,1fr) 110px 30px}
+.ed-r.cost,.ed-h.cost{grid-template-columns:minmax(0,1fr) 90px 118px 118px 30px}
+@media (max-width:560px){.ed-r.cost,.ed-h.cost{grid-template-columns:1fr 1fr 30px}.ed-h.cost span:nth-child(n+3){display:none}.ed-r.cost .n{grid-column:1/-1}}
+.wk{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.wk label{display:flex;flex-direction:column;gap:4px;font-size:.78rem;color:var(--muted);text-align:center}
+.wk input{width:100%;text-align:center;font:600 1.05rem var(--f-display);padding:10px 4px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
 .ed-h{font:500 .64rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .ed-r input,.ed-r select{border:1.5px solid var(--line);border-radius:10px;padding:7px 9px;background:#fff;min-width:0;width:100%;font-size:.86rem}
 .ed-r input:focus,.ed-r select:focus{outline:none;border-color:var(--blue)}
@@ -686,6 +690,74 @@ details.more summary{cursor:pointer;font-weight:600;font-size:.9rem}
 @media (max-width:1180px){ .hero{grid-template-columns:repeat(2,minmax(0,1fr))} }
 @media (max-width:900px){ .nav-group{display:none} .per-pop{left:auto;right:0} }
 @media (max-width:560px){ .hc .v{font-size:1.45rem} .per-pop{position:fixed;left:16px;right:16px;top:auto} }
+
+/* start and price history in the student card */
+.pb{display:flex;flex-direction:column;gap:10px;border:1px solid var(--line);border-radius:14px;padding:14px}
+.ptl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.ptl li{display:flex;gap:12px;position:relative;padding:0 0 12px}
+.ptl li:last-child{padding-bottom:0}
+.ptl li>i{width:12px;height:12px;border-radius:50%;background:var(--blue);margin-top:4px;flex:none;position:relative;z-index:1;box-shadow:0 0 0 3px var(--bg)}
+.ptl li.s>i{background:var(--ink)}.ptl li.m>i{background:var(--soft2)}
+.ptl li:not(:last-child)::before{content:"";position:absolute;left:5px;top:10px;bottom:-4px;width:2px;background:var(--soft2)}
+.ptl b{display:block;font-weight:600}.ptl .per{font-weight:400;color:var(--muted);font-size:.82rem}
+.ptl small{color:var(--muted);font-size:.78rem}
+.pb .faint{color:var(--faint);font-size:.74rem}
+.pr-r{display:grid;grid-template-columns:minmax(0,1fr) 100px auto 30px;gap:8px;align-items:center;margin-bottom:6px}
+.pr-r input{padding:9px 10px;border:1px solid var(--line);border-radius:10px;font:inherit;background:var(--bg);color:var(--ink);min-width:0}
+.pr-r .cur{color:var(--muted);font-size:.8rem}
+
+/* students as cards */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:10px}
+.sc{display:flex;flex-direction:column;gap:10px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--bg);text-align:left;cursor:pointer;font:inherit;color:inherit;min-width:0;transition:transform .18s,box-shadow .18s,border-color .18s}
+.sc:hover,.sc:focus-visible{border-color:var(--ink);transform:translateY(-2px);box-shadow:0 10px 24px rgba(19,21,27,.08)}
+.sc-h{display:flex;align-items:center;gap:10px;min-width:0}
+.sc-h>b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-av{position:relative;flex:none;display:flex}
+.sc-av .dot{position:absolute;right:-2px;bottom:-2px;border:2px solid var(--bg);width:11px;height:11px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--slate);flex:none}
+.dot.active{background:var(--lime)}.dot.risk{background:var(--sun)}.dot.lapsed{background:var(--slate)}.dot.lead{background:var(--blue)}
+.chipb .dot{margin-right:2px}
+.sc-v{font:700 1.25rem var(--f-display);letter-spacing:-.02em;display:block;line-height:1.15}
+.sc-v .price{display:flex;flex-direction:column}.sc-v small,.sc-v .sub{display:block;font:400 .74rem var(--f-body,inherit);color:var(--faint);letter-spacing:0}
+.sc dl{margin:0;display:flex;flex-direction:column;gap:3px;font-size:.8rem;border-top:1px solid var(--soft2);padding-top:8px}
+.sc dl div{display:flex;justify-content:space-between;gap:8px;min-width:0}
+.sc dt{color:var(--muted);white-space:nowrap}.sc dd{margin:0;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc dd .sub,.sc dd small{display:none}.sc dd .pill{font-size:.7rem}
+.fld-menu{position:relative}.fld-menu summary{list-style:none}.fld-menu summary::-webkit-details-marker{display:none}
+.fld-pop{position:absolute;right:0;top:calc(100% + 6px);z-index:30;background:var(--bg);border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 40px rgba(19,21,27,.14);padding:12px 14px;display:flex;flex-direction:column;gap:9px;min-width:230px}
+.fld-pop label{display:flex;gap:9px;align-items:center;font-size:.88rem;cursor:pointer}
+.fld-pop small{color:var(--muted);font-size:.74rem;border-top:1px solid var(--soft2);padding-top:8px}
+@media (prefers-reduced-motion:no-preference){.sc{animation:fadeUp .4s cubic-bezier(.2,.8,.2,1) both}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (max-width:560px){.sgrid{grid-template-columns:1fr 1fr;gap:8px}.sc{padding:12px}.sc-h .av{width:28px;height:28px;font-size:.7rem}.fld-pop{right:auto;left:0}}
+
+/* overview: month forecast bar and calendar, gentle build-up */
+.mo{gap:14px}
+.fc-bar{height:12px;border-radius:99px;background:repeating-linear-gradient(-45deg,var(--blue-s) 0 6px,#F3F6FF 6px 12px);overflow:hidden}
+.fc-bar i{display:block;height:100%;width:0;border-radius:99px;background:var(--blue);transition:width 1s cubic-bezier(.2,.8,.2,1) .2s}
+.ov-go .fc-bar i{width:var(--w)}
+.lg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.78rem;color:var(--muted)}
+.lg span{display:inline-flex;align-items:center;gap:6px}.lg b{color:var(--ink);font-variant-numeric:tabular-nums}
+.lg i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.lg i.so,.lg i.done{background:var(--blue)}.lg i.todo{border:1.5px dashed var(--blue);background:var(--blue-s)}.lg i.off{background:var(--soft2)}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal .cw{font:600 .66rem var(--f-mono);color:var(--faint);text-align:center;padding-bottom:2px}
+.cd{height:24px;border-radius:6px;display:grid;place-items:center;font:500 .7rem var(--f-mono);color:var(--muted);background:var(--soft)}
+.cd.done{background:rgb(46 91 255 / var(--f,1));color:#fff}
+.cd.todo{background:var(--blue-s);border:1.5px dashed rgb(46 91 255 / .55);color:var(--blue)}
+.cd.off{background:transparent;color:var(--faint)}
+.cd.miss{background:var(--soft)}
+.cd.today{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--ink)}
+.shr .bar i{transition:width .9s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:no-preference){
+  .cd{animation:pop .35s cubic-bezier(.3,1.4,.5,1) both;animation-delay:calc(var(--i) * 18ms + .15s)}
+  #v-overview .hero>.hc,#v-overview .grid>.panel{animation:fadeUp .5s cubic-bezier(.2,.8,.2,1) both}
+  #v-overview .hero>.hc:nth-child(2){animation-delay:.05s}#v-overview .hero>.hc:nth-child(3){animation-delay:.1s}#v-overview .hero>.hc:nth-child(4){animation-delay:.15s}
+  #v-overview .grid>.panel:nth-child(2){animation-delay:.08s}#v-overview .grid>.panel:nth-child(3){animation-delay:.14s}#v-overview .grid>.panel:nth-child(4){animation-delay:.18s}#v-overview .grid>.panel:nth-child(n+5){animation-delay:.22s}
+  .rows .rw{animation:fadeUp .4s both}.rows .rw:nth-child(2){animation-delay:.04s}.rows .rw:nth-child(3){animation-delay:.08s}.rows .rw:nth-child(4){animation-delay:.12s}.rows .rw:nth-child(5){animation-delay:.16s}.rows .rw:nth-child(6){animation-delay:.2s}
+}
+@media (prefers-reduced-motion:reduce){.fc-bar i,.shr .bar i{transition:none}}
+@keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
 </style>
 </head>
 <body>
@@ -1374,7 +1446,7 @@ function refreshClient(db, c, initial) {
    The public build ships with no profiles: client names never live in public code.
    Profiles are added by the private build or imported from a profile file (kept in this browser). */
 const PROFILES = [];
-const PROFILE_KEYS = ["who", "who1", "names", "oneoff", "baseNew", "growth", "repeat", "upgrade", "reviewRate", "capacity", "elasticity", "holdDays", "churn", "renew", "freq", "summerChurn", "trialRate", "season", "hours", "days", "services", "extras", "channels", "originLabel", "origins", "segments", "fields", "corp", "methods", "portal", "cur", "real", "trialFirst", "week"];
+const PROFILE_KEYS = ["who", "who1", "names", "oneoff", "baseNew", "growth", "repeat", "upgrade", "reviewRate", "capacity", "elasticity", "holdDays", "churn", "renew", "freq", "summerChurn", "trialRate", "season", "hours", "days", "services", "extras", "channels", "originLabel", "origins", "segments", "fields", "corp", "methods", "portal", "cur", "real", "trialFirst", "week", "costs"];
 // what a saved workspace keeps from its profile, so it works even where the profile is not installed
 const EXT_KEYS = ["who", "who1", "oneoff", "holdDays", "freq", "elasticity", "hours", "days", "originLabel", "origins", "segments", "fields", "corp", "methods", "portal", "trialFirst", "week"];
 const profileById = id => PROFILES.find(p => p.id === id);
@@ -1806,15 +1878,17 @@ function weekLeft(perDay) {
   }
   return { left, fc: M.rev[NM - 1] + add };
 }
-// fixed monthly costs (taxes, insurance, rent): what falls in a range, day by day, from the month the records start
-const monthlyCosts = () => sum((P.costs || []).map(c => +c.a || 0));
+// fixed costs can start or stop in a given month (from / to as "YYYY-MM"), e.g. taxes that rise in January
+const ymKey = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
+const costActive = (c, k) => (!c.from || c.from <= k) && (!c.to || c.to >= k);
+const monthlyCosts = (d = NOW) => { const k = ymKey(d); return sum((P.costs || []).filter(c => costActive(c, k)).map(c => +c.a || 0)); };
 function costsIn(a, b) {
-  const k = monthlyCosts(); if (!k) return 0;
+  if (!(P.costs || []).length) return 0;
   const from = M.from >= 0 ? monthDate(M.from) : a, s = a > from ? a : from; if (b <= s) return 0;
   let tot = 0;
   for (let d = new Date(s.getFullYear(), s.getMonth(), 1); d <= b; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) {
     const mEnd = new Date(d.getFullYear(), d.getMonth() + 1, 1), x0 = Math.max(+d, +s), x1 = Math.min(+mEnd, +b);
-    if (x1 > x0) tot += k * (x1 - x0) / (mEnd - d);
+    if (x1 > x0) tot += monthlyCosts(d) * (x1 - x0) / (mEnd - d);
   }
   return tot;
 }
@@ -1868,19 +1942,23 @@ VIEWS.overview = el => {
   const active = DB.clients.filter(c => c.status === "active").length;
   const lensDelta = (a, b) => b ? window.lensDelta(a, b) : ""; // no badge when there is nothing to compare with
   const hc = (cls, l, v, s) => `<div class="hc ${cls}"><span class="l">${esc(l)}</span><span class="v">${v}</span><span class="s">${s}</span></div>`;
+  const num = (v, f = "eur") => `<span data-num="${v}" data-fmt="${f}">${f === "nf" ? nf(v) : eur(v)}</span>`;
   h += `<div class="hero">
-    ${hc("main", L("Revenue", "Incassato"), eur(S1.rev), lensDelta(S1.rev, S0?.rev) + " " + esc(L(`${nf(S1.paying)} paying ${who()}`, `${nf(S1.paying)} ${who()} paganti`)))}
-    ${fk ? hc("", L("Net of fixed costs", "Netto dei costi fissi"), eur(S1.rev - ck), lensDelta(S1.rev - ck, S0 ? S0.rev - ck0 : null) + " " + esc(L(`after ${eur(ck)} of costs`, `dopo ${eur(ck)} di costi`)))
-      : hc("", L(`New ${who()}`, `Nuovi ${who()}`), nf(S1.newC), lensDelta(S1.newC, S0?.newC))}
-    ${hc("", visit ? Cap(unit()) : L(`Active ${who()}`, `${Who()} attivi`), nf(visit ? w1.les : active), visit ? lensDelta(w1.les, w0?.les) : esc(L(`${nf(S1.newC)} new in the period`, `${nf(S1.newC)} nuovi nel periodo`)))}
-    ${hc("", visit ? L("Per booking", "Per prenotazione") : L(`${Cap(unit())} held`, `${Cap(unit())} svolte`), visit ? (w1.les ? eur(S1.rev / w1.les) : "—") : nf(w1.les), visit ? "" : lensDelta(w1.les, w0?.les) + " " + esc(w1.days ? L(`${nf(w1.days)} days worked · ${eur(S1.rev / w1.days)} a day`, `${nf(w1.days)} giorni lavorati · ${eur(S1.rev / w1.days)} al giorno`) : ""))}
+    ${hc("main", L("Revenue", "Incassato"), num(S1.rev), lensDelta(S1.rev, S0?.rev) + " " + esc(L(`${nf(S1.paying)} paying ${who()}`, `${nf(S1.paying)} ${who()} paganti`)))}
+    ${fk ? hc("", L("Net of fixed costs", "Netto dei costi fissi"), num(S1.rev - ck), lensDelta(S1.rev - ck, S0 ? S0.rev - ck0 : null) + " " + esc(L(`after ${eur(ck)} of costs`, `dopo ${eur(ck)} di costi`)))
+      : hc("", L(`New ${who()}`, `Nuovi ${who()}`), num(S1.newC, "nf"), lensDelta(S1.newC, S0?.newC))}
+    ${hc("", visit ? Cap(unit()) : L(`Active ${who()}`, `${Who()} attivi`), num(visit ? w1.les : active, "nf"), visit ? lensDelta(w1.les, w0?.les) : esc(L(`${nf(S1.newC)} new in the period`, `${nf(S1.newC)} nuovi nel periodo`)))}
+    ${hc("", visit ? L("Per booking", "Per prenotazione") : L(`${Cap(unit())} held`, `${Cap(unit())} svolte`), visit ? (w1.les ? num(S1.rev / w1.les) : "—") : num(w1.les, "nf"), visit ? "" : lensDelta(w1.les, w0?.les) + " " + esc(w1.days ? L(`${nf(w1.days)} days worked · ${eur(S1.rev / w1.days)} a day`, `${nf(w1.days)} giorni lavorati · ${eur(S1.rev / w1.days)} al giorno`) : ""))}
   </div>`;
   const me = monthEndFc(), mon = tr(I.monthNames)[NOW.getMonth()];
   h += `<div class="grid">
     <div class="panel c8"><div class="ph"><div><h3>${L("Revenue month by month", "Incassi mese per mese")}</h3><p>${L("Paid in each month", "Quanto è entrato ogni mese")}${fk ? L(`, before ${eur(fk)} of fixed costs a month`, `, prima dei ${eur(fk)} di costi fissi al mese`) : ""}</p></div></div><div id="ovRev"></div></div>
-    <div class="panel c4"><div class="ph"><div><h3>${L(`${Cap(mon)} so far`, `${Cap(mon)} finora`)}</h3><p>${L("Forecast from your working days left", "Previsione sui giorni di lavoro rimasti")}</p></div></div>
-      <div><span class="big-f">${eur(me.fc)}</span><p class="muted-p" style="margin-top:2px">${L("expected by the end of the month", "previsti a fine mese")}</p></div>
-      <div class="kv">${[[L("Paid so far", "Incassato finora"), eur(me.so)], [L("Days worked", "Giorni lavorati"), nf(me.wd)], [L("Per day worked", "Per giorno lavorato"), me.wd ? eur(me.so / me.wd) : "—"], [L("Working days left", "Giorni di lavoro rimasti"), nf(me.left)], ...(fk ? [[L("Net after fixed costs", "Netto dopo costi fissi"), eur(me.fc - fk)]] : [])].map(([a, b]) => `<div><span>${esc(a)}</span><b>${b}</b></div>`).join("")}</div>
+    <div class="panel c4 mo"><div class="ph"><div><h3>${Cap(NOW.toLocaleDateString(loc(), { month: "long" }))}</h3><p>${L("How the month is going", "Come sta andando il mese")}</p></div></div>
+      <div><span class="big-f">${num(me.fc)}</span><p class="muted-p" style="margin-top:2px">${L("expected by the end of the month", "previsti a fine mese")}${fk ? ` · ${L("net", "netto")} <b>${eur(me.fc - monthlyCosts())}</b>` : ""}</p></div>
+      <div class="fc-bar" role="img" aria-label="${esc(L(`${eur(me.so)} paid so far out of ${eur(me.fc)} expected`, `${eur(me.so)} incassati finora su ${eur(me.fc)} previsti`))}"><i style="--w:${me.fc ? Math.max(me.so ? 2 : 0, me.so / me.fc * 100).toFixed(1) : 0}%"></i></div>
+      <div class="lg"><span><i class="so"></i>${L("Paid", "Incassato")} <b>${eur(me.so)}</b></span><span><i class="todo"></i>${L("Still to come", "Ancora da fare")} <b>${eur(Math.max(0, me.fc - me.so))}</b></span></div>
+      ${calHtml()}
+      <p class="muted-p" style="margin:0;font-size:.8rem">${me.left ? L(`${nf(me.left)} working days left, each worth about ${eur(me.perDay)} (what a day brought recently).`, `${nf(me.left)} giorni di lavoro rimasti, ognuno vale circa ${eur(me.perDay)} (quanto ha reso un giorno di recente).`) : L("No working days left this month.", "Nessun giorno di lavoro rimasto questo mese.")}</p>
       <button class="more-link" data-go="revenue">${L("Revenue details", "Dettagli ricavi")} →</button></div>
     <div class="panel c6"><div class="ph"><div><h3>${visit ? t("upcoming") : L("To get back in touch", "Da ricontattare")}</h3><p>${visit ? t("upcomingSub") : L(`${Cap(who())} who have not come for 6 weeks or more`, `${Cap(who())} che non vengono da almeno 6 settimane`)}</p></div></div><div class="rows" id="ovA"></div></div>
     <div class="panel c6"><div class="ph"><div><h3>${L(`New ${who()}`, `Nuovi ${who()}`)}</h3><p>${L("Who started in the period", "Chi ha iniziato nel periodo")}</p></div></div><div class="rows" id="ovN"></div></div>
@@ -1890,7 +1968,11 @@ VIEWS.overview = el => {
   el.innerHTML = h;
   // revenue by month, from where the records start
   const f0 = M.from > 0 ? Math.max(0, Math.min(NM - 6, M.from)) : NM - 12, ms = [...Array(NM - f0)].map((_, k) => f0 + k);
-  barChart($("#ovRev", el), { labels: ms.map(i => Cap(monthLabel(i, ms.length > 12))), series: [{ name: L("Revenue", "Incassato"), color: cssv("--blue"), values: ms.map(i => M.rev[i]) }], fmt: eur, yfmt: eurK, h: 260, tipTitle: k => Cap(monthLabel(ms[k], true)) + (ms[k] === NM - 1 ? " · " + t("mtd") : "") });
+  barChart($("#ovRev", el), { labels: ms.map(i => Cap(monthLabel(i, ms.length > 12))), stacked: true, series: [{ name: L("Revenue", "Incassato"), color: cssv("--blue"), values: ms.map(i => M.rev[i]) }, { name: L("Forecast, still to come", "Previsione, ancora da fare"), color: cssv("--blue"), opacity: .22, values: ms.map(i => i === NM - 1 ? Math.max(0, me.fc - me.so) : 0) }], fmt: eur, yfmt: eurK, h: 330, tipTitle: k => Cap(monthLabel(ms[k], true)) + (ms[k] === NM - 1 ? " · " + t("mtd") : "") });
+  $$("#ovRev .growbar", el).forEach((r, k) => r.style.animationDelay = (k % ms.length) * 45 + "ms");
+  // numbers count up, bars fill: the page builds itself in the order it reads
+  $$("[data-num]", el).forEach(x => countUp(x, +x.dataset.num, x.dataset.fmt === "nf" ? v => nf(v) : eur));
+  requestAnimationFrame(() => requestAnimationFrame(() => { el.classList.add("ov-go"); $$(".shr .bar i", el).forEach(b => b.style.width = b.dataset.w); }));
   const row = (c, right, sub) => `<div class="rw" data-client="${c.id}">${avatar(c)}<div class="t"><b>${esc(c.name)}</b><small>${sub}</small></div><div class="r">${right}</div></div>`;
   const none = txt => `<p class="empty-s">${esc(txt)}</p>`;
   if (visit) upcomingList($("#ovA", el), 6);
@@ -1898,20 +1980,41 @@ VIEWS.overview = el => {
     const q = DB.clients.filter(c => c.first && c.status === "risk").sort((a, b) => b.last - a.last).slice(0, 6);
     $("#ovA", el).innerHTML = q.length ? q.map(c => { const pr = priceOf(c); return row(c, `${fdate(c.last, { day: "numeric", month: "long" })}<small>${Math.round((NOW - c.last) / DAY / 7)} ${L("weeks ago", "settimane fa")}</small>`, esc(chName(c.ch)) + (pr ? " · " + eur(pr.cur) + " " + L(`a ${unit(false)}`, `a ${unit(false)}`) : "")); }).join("") : none(L("No one: everyone came recently.", "Nessuno: tutti sono venuti di recente."));
   }
-  const nw = DB.clients.filter(c => c.first && inR(c.first, r.a, r.b)).sort((a, b) => b.first - a.first);
-  $("#ovN", el).innerHTML = nw.length ? nw.slice(0, 6).map(c => row(c, `${nf(LX().att[c.id])} ${unit(LX().att[c.id] !== 1)}<small>${eur(c.spent)}</small>`, `${L("since", "dal")} ${fdate(c.first, { day: "numeric", month: "short" })} · ${esc(chName(c.ch))}`)).join("") + (nw.length > 6 ? `<p class="empty-s">${L(`and ${nw.length - 6} more`, `e altri ${nw.length - 6}`)}</p>` : "") : none(L("No one new in this period.", "Nessuno nuovo in questo periodo."));
+  const nw = DB.clients.filter(c => startOf(c) && inR(startOf(c), r.a, r.b)).sort((a, b) => startOf(b) - startOf(a));
+  $("#ovN", el).innerHTML = nw.length ? nw.slice(0, 6).map(c => row(c, `${nf(LX().att[c.id])} ${unit(LX().att[c.id] !== 1)}<small>${eur(c.spent)}</small>`, `${L("since", "dal")} ${fdate(startOf(c), { day: "numeric", month: "short" })} · ${esc(chName(c.ch))}`)).join("") + (nw.length > 6 ? `<p class="empty-s">${L(`and ${nw.length - 6} more`, `e altri ${nw.length - 6}`)}</p>` : "") : none(L("No one new in this period.", "Nessuno nuovo in questo periodo."));
   // revenue by service, with how many lessons and the average price of one
   const bySv = new Map(); for (const x of DB.txns) if (inR(x.d, r.a, r.b) && x.st !== "refund" && x.a) { const k = x.k === "ext" ? "ext" : x.s, o = bySv.get(k) || { v: 0, n: 0, p: [] }; o.v += x.a; o.n++; if (k !== "ext") o.p.push(lessonPrice(x)); bySv.set(k, o); }
   const svs = [...bySv.entries()].sort((a, b) => b[1].v - a[1].v), tot = sum(svs.map(x => x[1].v)) || 1;
-  $("#ovC", el).innerHTML = svs.length ? svs.slice(0, 6).map(([k, o]) => `<div><span>${esc(k === "ext" ? L("Extras", "Extra") : tr(P.services[k]?.n) || "—")}</span><em>${eur(o.v)} · ${pct(o.v / tot)}</em><div class="bar"><i style="width:${(o.v / tot * 100).toFixed(1)}%;background:${k === "ext" ? "var(--pink)" : col(k)}"></i></div>${k === "ext" ? "" : `<small>${nf(o.n)} ${["pack", "sub"].includes(P.services[k]?.kind) ? (o.n === 1 ? L("payment", "pagamento") : L("payments", "pagamenti")) : unit(o.n !== 1)} · ${L("average", "media")} ${eur(avg(o.p))} ${L(`a ${unit(false)}`, `a ${unit(false)}`)}</small>`}</div>`).join("") : none(L("No payments in this period.", "Nessun pagamento in questo periodo."));
+  $("#ovC", el).innerHTML = svs.length ? svs.slice(0, 6).map(([k, o]) => `<div><span>${esc(k === "ext" ? L("Extras", "Extra") : tr(P.services[k]?.n) || "—")}</span><em>${eur(o.v)} · ${pct(o.v / tot)}</em><div class="bar"><i data-w="${(o.v / tot * 100).toFixed(1)}%" style="width:0;background:${k === "ext" ? "var(--pink)" : col(k)}"></i></div>${k === "ext" ? "" : `<small>${nf(o.n)} ${["pack", "sub"].includes(P.services[k]?.kind) ? (o.n === 1 ? L("payment", "pagamento") : L("payments", "pagamenti")) : unit(o.n !== 1)} · ${L("average", "media")} ${eur(avg(o.p))} ${L(`a ${unit(false)}`, `a ${unit(false)}`)}</small>`}</div>`).join("") : none(L("No payments in this period.", "Nessun pagamento in questo periodo."));
   const sp = new Map(); for (const x of DB.txns) if (inR(x.d, r.a, r.b) && x.st !== "refund") sp.set(x.c, (sp.get(x.c) || 0) + x.a);
   const top = [...sp.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
   $("#ovT", el).innerHTML = top.length ? top.map(([id, v]) => { const c = DB.clients[id], pr = priceOf(c); return row(c, `<b>${eur(v)}</b><small>${pct(v / tot)}</small>`, esc(chName(c.ch)) + (pr && !visit ? " · " + eur(pr.cur) + " " + L(`a ${unit(false)}`, `a ${unit(false)}`) : "")); }).join("") : none(L("No payments in this period.", "Nessun pagamento in questo periodo."));
 };
+// the month as a calendar: days worked, days still to work, days off. It shows where the forecast comes from
+function calHtml() {
+  const y = NOW.getFullYear(), m = NOW.getMonth(), n = daysIn(y, m), first = (new Date(y, m, 1).getDay() + 6) % 7, today = dayKey(NOW);
+  const les = new Map(); for (const x of workSource()) if (x.d.getFullYear() === y && x.d.getMonth() === m) les.set(dayKey(x.d), (les.get(dayKey(x.d)) || 0) + 1);
+  const wk = P.week, cap = wk ? Math.max(...wk) : Math.max(1, ...les.values()), dn = LANG === "it" ? ["L", "M", "M", "G", "V", "S", "D"] : ["M", "T", "W", "T", "F", "S", "S"];
+  let h = dn.map(d => `<span class="cw">${d}</span>`).join("") + "<span></span>".repeat(first);
+  for (let d = 1; d <= n; d++) {
+    const dt = new Date(y, m, d, 12), k = dayKey(dt), w = (dt.getDay() + 6) % 7, c = les.get(k) || 0, past = k < today, isT = k === today;
+    const st = c ? "done" : wk && !(wk[w] > 0) ? "off" : past ? "miss" : "todo";
+    const tip = fdate(dt, { weekday: "long", day: "numeric" }) + ": " + (c ? `${c} ${unit(c !== 1)}` : st === "off" ? L("day off", "giorno libero") : st === "miss" ? L(`no ${unit()}`, `nessuna ${unit(false)}`) : L("to work", "da lavorare"));
+    h += `<span class="cd ${st}${isT ? " today" : ""}" style="--i:${d};${c ? `--f:${Math.min(1, .35 + .65 * c / cap).toFixed(2)}` : ""}" title="${esc(tip)}">${d}</span>`;
+  }
+  return `<div class="cal" aria-label="${esc(L("Days of the month", "Giorni del mese"))}">${h}</div>
+    <div class="lg"><span><i class="done"></i>${L("Worked", "Lavorati")}</span><span><i class="todo"></i>${L("To work", "Da lavorare")}</span><span><i class="off"></i>${L("Off", "Liberi")}</span></div>`;
+}
 // what a client pays for one lesson or session: now, at the start, on average
 function lessonPrice(x) { const s = P.services[x.s]; if (!s || x.k !== "svc") return x.a; if (s.kind === "pack") return x.a / (s.sessions || 1); if (s.kind === "sub") return x.a / ((s.perWeek || 1) * 4.33); return x.a; }
+const paidLessons = c => c.txIdx.map(i => DB.txns[i]).filter(x => x && x.k === "svc" && x.a > 0 && x.st !== "refund" && !P.services[x.s]?.trial).sort((a, b) => a.d - b.d);
+// price history: what the student pays from each date. Set by hand in the student card, otherwise read from the payments
+function derivedPrices(c) { const out = []; for (const x of paidLessons(c)) { const p = Math.round(lessonPrice(x)); if (!out.length || out[out.length - 1].p !== p) out.push({ d: isoDay(x.d), p }); } return out; }
+const priceHistory = c => c.prices?.length ? [...c.prices].sort((a, b) => a.d.localeCompare(b.d)) : derivedPrices(c);
+const startOf = c => c.since ? new Date(c.since + "T00:00") : c.first;
 function priceOf(c) {
-  const tx = c.txIdx.map(i => DB.txns[i]).filter(x => x && x.k === "svc" && x.a > 0 && x.st !== "refund" && !P.services[x.s]?.trial).sort((a, b) => a.d - b.d);
+  const tx = paidLessons(c);
+  if (c.prices?.length) { const h = priceHistory(c), today = isoDay(NOW), now = h.filter(x => x.d <= today).pop() || h[0]; return { cur: now.p, first: h[0].p, avg: tx.length ? avg(tx.map(lessonPrice)) : now.p, set: true }; }
   if (!tx.length) return null;
   return { cur: lessonPrice(tx[tx.length - 1]), first: lessonPrice(tx[0]), avg: avg(tx.map(lessonPrice)) };
 }
@@ -1965,43 +2068,61 @@ function upcomingList(el, n) {
   el.innerHTML = up.map(u => { const c = DB.clients[u.c]; if (!c) return ""; return `<div class="li" data-client="${c.id}" style="cursor:pointer"><span class="when">${esc(tr(I.dayNames)[(u.d.getDay() + 6) % 7])}<b>${u.d.getDate()}</b></span><div style="min-width:0"><div class="nm">${esc(c.name)}</div><small>${esc(tr(P.services[u.s]?.n) || "")}${c.size > 1 ? " · " + c.size + " " + L("people", "persone") : ""}</small></div><span class="mono" style="font-size:.8rem">${String(u.d.getHours()).padStart(2, "0")}:${String(u.d.getMinutes()).padStart(2, "0")}</span></div>`; }).join("");
 }
 
-/* ================= clients ================= */
+/* ================= clients: cards with name and price; a table once many details are chosen ================= */
+const CARD_MAX = 3;
+const fieldsKey = () => "clientela.fields." + (isVisit() ? "v" : "r");
+function cardFields() {
+  const all = tableCols().slice(1);
+  let sel = null; try { sel = JSON.parse(localStorage.getItem(fieldsKey())); } catch (e) { }
+  if (!Array.isArray(sel)) sel = [all.some(c => c.k === "price") ? "price" : "spent"];
+  return { all, sel: sel.filter(k => all.some(c => c.k === k)) };
+}
 VIEWS.clients = el => {
   const due = plansDue().length;
   const right = `<div class="filters">${due ? `<button class="btn ghost" data-act="recordPlans" title="${esc(L("Adds this month's payment for every active plan not yet paid", "Aggiunge il pagamento del mese per ogni abbonamento attivo non ancora pagato"))}">${icon(IC.euro)}${L(`Record ${due} plan payments`, `Registra ${due} abbonamenti`)}</button>` : ""}<button class="btn main" data-act="addClient">${icon(IC.plus)}${t("add")}</button></div>`;
-  let h = vhead(DB.clients.length + " " + t("clientsCount"), Who(), L(`Every ${who(false)} in one place: where they came from, what they bought, when to call them back.`, `Tutti i ${who()} in un posto: da dove arrivano, cosa hanno comprato, quando richiamarli.`), right);
+  let h = vhead(DB.clients.length + " " + t("clientsCount"), Who(), L(`Tap a ${who(false)} to see start date, price history and lessons. Choose what else to show from the menu.`, `Tocca uno ${who(false)} per vedere inizio, storico prezzi e lezioni. Scegli dal menu cos'altro mostrare.`), right);
   const cnt = { "": DB.clients.length }; DB.clients.forEach(c => cnt[c.status] = (cnt[c.status] || 0) + 1);
   const sts = ["", "active", ...(P.oneoff ? [] : ["risk"]), "lapsed", "lead"].filter(s => s === "" || cnt[s]);
-  const chUsed = P.channels.map((c, i) => i).filter(i => DB.clients.some(c => c.ch === i)), segUsed = P.segments.map((c, i) => i).filter(i => DB.clients.some(c => c.seg === i));
+  const chUsed = P.channels.map((c, i) => i).filter(i => DB.clients.some(c => c.ch === i));
+  const F = cardFields(), sorts = [["name", "asc", L("Name", "Nome")], ...F.all.filter(c => c.k !== "status").map(c => [c.k, c.k === "first" ? "desc" : "desc", c.lab])];
   h += `<div class="panel"><div class="filters" style="justify-content:space-between">
-    <div class="st-chips" role="group" aria-label="${esc(t("status"))}">${sts.map(s => `<button type="button" class="chipb" data-fst="${s}" aria-pressed="${APP.fSt === s}">${esc(s ? stLabel(s) : L("All", "Tutti"))}<b>${nf(cnt[s] || 0)}</b></button>`).join("")}</div>
+    <div class="st-chips" role="group" aria-label="${esc(t("status"))}">${sts.map(s => `<button type="button" class="chipb" data-fst="${s}" aria-pressed="${APP.fSt === s}">${s ? `<i class="dot ${s}"></i>` : ""}${esc(s ? stLabel(s) : L("All", "Tutti"))}<b>${nf(cnt[s] || 0)}</b></button>`).join("")}</div>
     <div class="filters">
     ${chUsed.length > 1 ? `<select class="sel" id="cch" aria-label="${esc(t("channel"))}"><option value="">${t("allCh")}</option>${chUsed.map(i => `<option value="${i}" ${APP.fCh === String(i) ? "selected" : ""}>${esc(tr(P.channels[i].n))}</option>`).join("")}</select>` : ""}
-    ${segUsed.length > 1 ? `<select class="sel" id="csg" aria-label="${esc(t("segment"))}"><option value="">${t("allSeg")}</option>${segUsed.map(i => `<option value="${i}" ${APP.fSeg === String(i) ? "selected" : ""}>${esc(tr(P.segments[i].n))}</option>`).join("")}</select>` : ""}
+    <select class="sel" id="csort" aria-label="${esc(L("Sort", "Ordina"))}">${sorts.map(([k, d, l]) => `<option value="${k}:${d}" ${APP.sort.k === k ? "selected" : ""}>${esc(L("Sort: ", "Ordina: ") + l)}</option>`).join("")}</select>
+    <details class="fld-menu"><summary class="btn ghost sm">${icon(IC.edit)}${L("Show", "Mostra")} <b class="mono">${F.sel.length}</b></summary><div class="fld-pop">
+      ${F.all.map(c => `<label><input type="checkbox" data-fld="${c.k}" ${F.sel.includes(c.k) ? "checked" : ""}>${esc(c.lab)}</label>`).join("")}
+      <small>${L(`Up to ${CARD_MAX} details show as cards; more become a table.`, `Fino a ${CARD_MAX} dettagli vedi le schede; di più diventano una tabella.`)}</small></div></details>
     <label class="search">${icon(IC.search)}<input id="cq" type="search" placeholder="${esc(t("search"))}" value="${esc(APP.q)}" aria-label="${esc(t("search"))}"></label></div>
-  </div><div class="tablewrap"><table class="clients"><thead><tr>
-    ${tableCols().map(c => `<th${c.num ? ' class="num"' : ""}><button data-sort="${c.k}" ${APP.sort.k === c.k ? `data-dir="${APP.sort.dir}"` : ""}>${esc(c.lab)}</button></th>`).join("")}
-  </tr></thead><tbody id="ctb"></tbody></table></div><div class="pager" id="cpg"></div></div>`;
+  </div><div id="clist"></div><div class="pager" id="cpg"></div></div>`;
   el.innerHTML = h;
   drawTable(el);
   let tmr; $("#cq", el).addEventListener("input", e => { clearTimeout(tmr); tmr = setTimeout(() => { APP.q = e.target.value; APP.page = 0; drawTable(el); }, 120); });
   $$("[data-fst]", el).forEach(b => b.onclick = () => { APP.fSt = b.dataset.fst; APP.page = 0; $$("[data-fst]", el).forEach(x => x.setAttribute("aria-pressed", x === b)); drawTable(el); });
   if ($("#cch", el)) $("#cch", el).onchange = e => { APP.fCh = e.target.value; APP.page = 0; drawTable(el); };
-  if ($("#csg", el)) $("#csg", el).onchange = e => { APP.fSeg = e.target.value; APP.page = 0; drawTable(el); };
-  $$("[data-sort]", el).forEach(b => b.onclick = () => { const k = b.dataset.sort; APP.sort = { k, dir: APP.sort.k === k && APP.sort.dir === "desc" ? "asc" : "desc" }; $$("[data-sort]", el).forEach(x => x.removeAttribute("data-dir")); b.dataset.dir = APP.sort.dir; drawTable(el); });
+  $("#csort", el).onchange = e => { const [k, dir] = e.target.value.split(":"); APP.sort = { k, dir }; drawTable(el); };
+  $$("[data-fld]", el).forEach(b => b.onchange = () => { const sel = $$("[data-fld]", el).filter(x => x.checked).map(x => x.dataset.fld); try { localStorage.setItem(fieldsKey(), JSON.stringify(sel)); } catch (e) { } $(".fld-menu b", el).textContent = sel.length; drawTable(el); });
+  document.addEventListener("click", function off(e) { const m = $(".fld-menu", el); if (!m || !document.contains(m)) return document.removeEventListener("click", off); if (m.open && !m.contains(e.target)) m.open = false; });
 };
 function drawTable(el) {
   const q = APP.q.trim().toLowerCase();
   let rows = DB.clients.filter(c => (!APP.fSt || c.status === APP.fSt) && (APP.fCh === "" || c.ch === +APP.fCh) && (APP.fSeg === "" || c.seg === +APP.fSeg) && (!q || (c.name + " " + c.email + " " + c.origin + " " + c.phone).toLowerCase().includes(q)));
-  const cols = tableCols(), k = APP.sort.k, dir = APP.sort.dir === "asc" ? 1 : -1;
+  const cols = tableCols(), F = cardFields(), k = APP.sort.k, dir = APP.sort.dir === "asc" ? 1 : -1;
   const sc = cols.find(x => x.k === k) || cols.find(x => x.k === "spent"), val = sc.val;
   rows.sort((a, b) => { const x = val(a), y = val(b); return (typeof x === "string" ? x.localeCompare(y) : x - y) * dir; });
-  const per = 50, pages = Math.max(1, Math.ceil(rows.length / per)); APP.page = Math.min(APP.page, pages - 1);
-  const slice = rows.slice(APP.page * per, APP.page * per + per);
-  $("#ctb", el).innerHTML = slice.length ? slice.map(c => `<tr data-client="${c.id}" tabindex="0">${cols.map(x => `<td${x.num ? ' class="num"' : ""}>${x.cell(c)}</td>`).join("")}</tr>`).join("") : `<tr><td colspan="${cols.length}" style="text-align:center;padding:30px;color:var(--muted)">${L("No one matches these filters.", "Nessuno corrisponde a questi filtri.")}</td></tr>`;
-  $("#cpg", el).innerHTML = `<span>${nf(rows.length)} ${t("shown")} · ${eur(sum(rows.map(r => r.spent)))}</span><div><button class="btn ghost sm" id="pp" ${APP.page === 0 ? "disabled" : ""}>${t("prev")}</button><span style="align-self:center" class="mono">${APP.page + 1}/${pages}</span><button class="btn ghost sm" id="pn" ${APP.page >= pages - 1 ? "disabled" : ""}>${t("next")}</button></div>`;
-  $("#pp", el).onclick = () => { APP.page--; drawTable(el); };
-  $("#pn", el).onclick = () => { APP.page++; drawTable(el); };
+  const table = F.sel.length > CARD_MAX, fs = cols.filter(c => F.sel.includes(c.k));
+  const per = table ? 50 : 60, pages = Math.max(1, Math.ceil(rows.length / per)); APP.page = Math.min(APP.page, pages - 1);
+  const slice = rows.slice(APP.page * per, APP.page * per + per), none = L("No one matches these filters.", "Nessuno corrisponde a questi filtri.");
+  if (table) {
+    const tc = [cols[0], ...fs];
+    $("#clist", el).innerHTML = `<div class="tablewrap"><table class="clients"><thead><tr>${tc.map(c => `<th${c.num ? ' class="num"' : ""}><button data-sort="${c.k}" ${APP.sort.k === c.k ? `data-dir="${APP.sort.dir}"` : ""}>${esc(c.lab)}</button></th>`).join("")}</tr></thead><tbody>${slice.length ? slice.map(c => `<tr data-client="${c.id}" tabindex="0">${tc.map(x => `<td${x.num ? ' class="num"' : ""}>${x.cell(c)}</td>`).join("")}</tr>`).join("") : `<tr><td colspan="${tc.length}" style="text-align:center;padding:30px;color:var(--muted)">${none}</td></tr>`}</tbody></table></div>`;
+    $$("[data-sort]", el).forEach(b => b.onclick = () => { const k = b.dataset.sort; APP.sort = { k, dir: APP.sort.k === k && APP.sort.dir === "desc" ? "asc" : "desc" }; drawTable(el); });
+  } else {
+    const [top, ...rest] = fs;
+    $("#clist", el).innerHTML = slice.length ? `<div class="sgrid">${slice.map((c, i) => `<button type="button" class="sc" data-client="${c.id}" style="animation-delay:${Math.min(i, 30) * 14}ms"><span class="sc-h"><span class="sc-av">${avatar(c)}<i class="dot ${c.status}" title="${esc(stLabel(c.status))}"></i></span><b>${esc(c.name)}</b></span>${top ? `<span class="sc-v">${top.cell(c)}</span>` : ""}${rest.length ? `<dl>${rest.map(f => `<div><dt>${esc(f.lab)}</dt><dd>${f.cell(c)}</dd></div>`).join("")}</dl>` : ""}</button>`).join("")}</div>` : `<p class="empty-s" style="text-align:center;padding:30px">${none}</p>`;
+  }
+  $("#cpg", el).innerHTML = `<span>${nf(rows.length)} ${t("shown")} · ${eur(sum(rows.map(r => r.spent)))}</span>${pages > 1 ? `<div><button class="btn ghost sm" id="pp" ${APP.page === 0 ? "disabled" : ""}>${t("prev")}</button><span style="align-self:center" class="mono">${APP.page + 1}/${pages}</span><button class="btn ghost sm" id="pn" ${APP.page >= pages - 1 ? "disabled" : ""}>${t("next")}</button></div>` : ""}`;
+  if ($("#pp", el)) { $("#pp", el).onclick = () => { APP.page--; drawTable(el); }; $("#pn", el).onclick = () => { APP.page++; drawTable(el); }; }
 }
 
 /* ---------- client drawer ---------- */
@@ -2024,6 +2145,7 @@ function openClient(id) {
     <div class="dh">${avatar(c)}<div style="min-width:0"><h3>${esc(c.name)}</h3><div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">${pill(c.status)}<span class="chip">${esc(segName(c.seg))}</span>${c.subActive ? `<span class="chip"><i style="background:var(--lime)"></i>${esc(tr(P.services[c.sub]?.n) || "")}</span>` : ""}</div></div><button class="x" data-close aria-label="Close">${icon(IC.x)}</button></div>
     <div class="db">
       ${drawerMinis(c, bk)}
+      ${isVisit() ? "" : priceBlock(c)}
       ${progress}
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn main sm" data-act="addPay">${icon(IC.euro)}${t("addPay")}</button><button class="btn ghost sm" data-act="logSess">${icon(IC.cal)}${L("Log " + unit(false), "Registra " + unit(false))}</button><button class="btn ghost sm" data-act="editClient">${icon(IC.edit)}${L("Edit", "Modifica")}</button>${c.subActive ? `<button class="btn ghost sm" data-act="endPlan">${L("End plan", "Chiudi abbonamento")}</button>` : ""}<button class="btn ghost sm" data-act="delClient" style="margin-left:auto">${icon(IC.trash)}<span>${L("Delete", "Elimina")}</span></button></div>
       ${c.first ? `<div><span class="eyebrow">${showL ? L(`${Cap(unit())} per month`, `${Cap(unit())} al mese`) : L("Spend per month", "Spesa al mese")}</span><div id="cSpend" style="margin-top:6px"></div></div>` : ""}
@@ -2042,11 +2164,36 @@ function openClient(id) {
     if (e.target.closest("[data-close]")) return closeLayer();
     const a = e.target.closest("[data-act]")?.dataset.act;
     if (a === "addPay") payModal(c);
+    if (a === "pbEdit" || a === "pbCancel") { $("#pb").outerHTML = priceBlock(c, a === "pbEdit"); return; }
+    if (a === "pbAdd") { $("#pbRows").insertAdjacentHTML("beforeend", priceRow({ d: isoDay(NOW), p: priceOf(c)?.cur ? Math.round(priceOf(c).cur) : "" })); return; }
+    if (a === "pbDel") { e.target.closest(".pr-r").remove(); return; }
+    if (a === "pbSave") {
+      const since = $("#pbSince").value, rows = $$("#pbRows .pr-r").map(r => ({ d: $(".d", r).value, p: +$(".p", r).value })).filter(x => x.d && x.p > 0).sort((x, y) => x.d.localeCompare(y.d));
+      c.since = since && (!c.first || since !== isoDay(c.first)) ? since : null; c.prices = rows.length ? rows : null;
+      persistClient(c); afterChange(); openClient(c.id); toast(t("saved")); return;
+    }
     if (a === "logSess") sessModal(c);
     if (a === "editClient") clientModal(c);
     if (a === "endPlan") { c.subActive = false; refreshClient(DB, c); persistClient(c); afterChange(); openClient(c.id); toast(t("saved")); }
     if (a === "delClient") { const b = e.target.closest("[data-act]"); if (b.dataset.armed) { deleteClient(c); closeLayer(); toast(L("Deleted", "Eliminato")); } else { b.dataset.armed = 1; b.querySelector("span").textContent = L("Tap again to delete", "Tocca ancora per eliminare"); b.style.borderColor = "var(--bad)"; b.style.color = "var(--bad)"; } }
   };
+}
+// start date and price history, shown as a timeline and editable by hand
+const priceRow = x => `<div class="pr-r"><input class="d" type="date" value="${esc(x.d || "")}" aria-label="${esc(L("From", "Dal"))}"><input class="p" type="number" min="0" step="1" inputmode="decimal" value="${esc(String(x.p ?? ""))}" aria-label="${esc(L("Price", "Prezzo"))}"><span class="cur">${esc(curSym())}</span><button type="button" class="ed-x" data-act="pbDel" aria-label="${esc(L("Remove", "Togli"))}">${icon(IC.x)}</button></div>`;
+function priceBlock(c, edit) {
+  const h = priceHistory(c), st = startOf(c), per = L(`a ${unit(false)}`, `a ${unit(false)}`);
+  const head = `<div class="ph" style="margin:0"><span class="eyebrow">${L("Start and prices", "Inizio e prezzi")}</span>${edit ? "" : `<button class="btn ghost sm" data-act="pbEdit">${icon(IC.edit)}${L("Edit", "Modifica")}</button>`}</div>`;
+  if (edit) return `<div class="pb" id="pb">${head}
+    ${fld("pbSince", L("Started on", "Ha iniziato il"), `<input id="pbSince" type="date" value="${st ? isoDay(st) : ""}">`)}
+    <div><span class="eyebrow">${L(`Price ${per}, from`, `Prezzo ${per}, dal`)}</span><div id="pbRows" style="margin-top:6px">${(h.length ? h : [{ d: st ? isoDay(st) : "", p: "" }]).map(priceRow).join("")}</div>
+    <button class="btn ghost sm" type="button" data-act="pbAdd" style="margin-top:6px">${icon(IC.plus)}${L("Price change", "Cambio di prezzo")}</button></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn ghost sm" data-act="pbCancel">${L("Cancel", "Annulla")}</button><button class="btn main sm" data-act="pbSave">${L("Save", "Salva")}</button></div></div>`;
+  const shown = h.slice(-5), more = h.length - shown.length;
+  return `<div class="pb" id="pb">${head}<ol class="ptl">
+    <li class="s"><i></i><div><b>${st ? fdate(st, { day: "numeric", month: "long", year: "numeric" }) : "—"}</b><small>${L("Started", "Ha iniziato")}${c.first && st ? " · " + nf(Math.max(1, Math.round((NOW - st) / DAY / 30.44))) + " " + L("months ago", "mesi fa") : ""}</small></div></li>
+    ${more ? `<li class="m"><i></i><div><small>${L(`${more} earlier changes`, `${more} cambi precedenti`)}</small></div></li>` : ""}
+    ${shown.map((x, i) => { const prev = i ? shown[i - 1].p : more ? h[h.length - shown.length - 1].p : null, d = prev ? x.p / prev - 1 : 0; return `<li><i></i><div><b>${eur(x.p)} <span class="per">${per}</span>${prev && Math.abs(d) >= .005 ? ` <span class="delta ${d > 0 ? "up" : "down"}">${d > 0 ? "+" : "−"}${nf(Math.abs(d) * 100, 0)}%</span>` : ""}</b><small>${L("from", "dal")} ${fdate(new Date(x.d + "T00:00"), { day: "numeric", month: "short", year: "numeric" })}</small></div></li>`; }).join("")}
+  </ol><small class="faint">${c.prices?.length ? L("Entered by hand", "Inserito a mano") : L("Read from the payments: edit it to fix dates and prices", "Letto dai pagamenti: modificalo per correggere date e prezzi")}</small></div>`;
 }
 function profProgress(c) {
   const pairs = { kg0: ["kg0", "kg1", "kg", L("Weight", "Peso")], score0: ["score0", "score1", "%", L("Grade", "Voto")], pain0: ["pain0", "pain1", "/10", L("Pain", "Dolore")] };
@@ -2223,8 +2370,7 @@ VIEWS.revenue = el => {
     <div class="panel c12"><div class="ph"><div><h3>${L("Month by month", "Mese per mese")}</h3><p>${L("Days worked, and what each day worked brings", "Giorni lavorati e quanto rende ogni giorno di lavoro")}</p></div></div><div id="rvDay"></div><div class="tablewrap"><table><thead><tr><th>${L("Month", "Mese")}</th><th class="num">${L("Days worked", "Giorni lavorati")}</th><th class="num">${esc(U)}</th><th class="num">${t("revenue")}</th><th class="num">${L("Per day worked", "Per giorno lavorato")}</th><th class="num">${L(`Per ${unit(false)}`, `Per ${unit(false)}`)}</th>${fk ? `<th class="num">${L("Net of fixed costs", "Netto costi fissi")}</th>` : ""}</tr></thead><tbody id="rvDayT"></tbody></table></div></div>
     <div class="panel c8"><div class="ph"><div><h3>${t("revByService")}</h3><p>${t("revByServiceSub")}</p></div></div><div id="rvStack"></div><div class="legend" id="rvLeg"></div></div>
     <div class="panel c4"><div class="ph"><div><h3>${t("methods")}</h3><p>${t("period")}</p></div></div><div class="donut-wrap"><div id="rvM"></div><div class="legend" id="rvML"></div></div></div>
-    <div class="panel c7"><div class="ph"><div><h3>${t("topServices")}</h3><p>${t("period")}</p></div></div><div class="tablewrap"><table><thead><tr><th>${t("service")}</th><th>${t("count")}</th><th>${t("avgPrice")}</th><th>${t("revenue")}</th><th>${t("share")}</th></tr></thead><tbody id="rvT"></tbody></table></div></div>
-    <div class="panel c5"><div class="ph"><div><h3>${t("pending")}</h3><p>${t("pendingSub")}</p></div><b class="mono" id="rvPT"></b></div><div class="list" id="rvP"></div></div>
+    <div class="panel c12"><div class="ph"><div><h3>${t("topServices")}</h3><p>${t("period")}</p></div></div><div class="tablewrap"><table><thead><tr><th>${t("service")}</th><th>${t("count")}</th><th>${t("avgPrice")}</th><th>${t("revenue")}</th><th>${t("share")}</th></tr></thead><tbody id="rvT"></tbody></table></div></div>
     <div class="panel ${hasSub ? "c6" : "c12"}"><div class="ph"><div><h3>${t("seasonality")}</h3><p>${t("seasonalitySub")}</p></div></div><div class="heat-scroll"><div id="rvSeason"></div></div></div>
     ${hasSub ? `<div class="panel c6"><div class="ph"><div><h3>${t("mrr")}</h3><p>${t("mrrSub")}</p></div><b class="mono">${eur(M.mrr[NM - 2])}/${L("mo", "mese")}</b></div><div id="rvMrr"></div></div>` : ""}
   </div>`;
@@ -2240,13 +2386,10 @@ VIEWS.revenue = el => {
   $("#rvML", el).innerHTML = mi.map(x => `<span><span style="display:inline-flex;gap:6px;align-items:center"><i style="background:${x.color}"></i>${esc(x.name)}</span><em>${pct(x.value / (S1.rev || 1))}</em></span>`).join("");
   const rows = [...P.services.map((s, i) => ({ n: tr(s.n), k: "svc", i, c: col(i) })), ...P.extras.map((x, i) => ({ n: "+ " + tr(x.n), k: "ext", i, c: cssv("--pink") }))].map(o => { let cnt = 0, rev = 0; for (const x of DB.txns) if (x.k === o.k && x.s === o.i && inR(x.d, r.a, r.b) && x.st !== "refund") { cnt++; rev += x.a; } return { ...o, cnt, rev }; }).filter(o => o.cnt).sort((a, b) => b.rev - a.rev);
   $("#rvT", el).innerHTML = rows.map(o => `<tr><td><span class="chip"><i style="background:${o.c}"></i>${esc(o.n)}</span></td><td class="num">${nf(o.cnt)}</td><td class="num">${eur(o.rev / o.cnt)}</td><td class="num"><b>${eur(o.rev)}</b></td><td class="num">${pct(o.rev / (S1.rev || 1), 1)}</td></tr>`).join("");
-  const pend = DB.txns.filter(x => x.st === "pending").sort((a, b) => a.d - b.d);
-  $("#rvPT", el).textContent = eur(sum(pend.map(x => x.a)));
-  $("#rvP", el).innerHTML = pend.length ? pend.slice(0, 7).map(x => { const c = DB.clients[x.c]; const age = Math.round((NOW - x.d) / DAY); return `<div class="li" data-client="${c.id}" style="cursor:pointer">${avatar(c)}<div style="min-width:0"><div class="nm">${esc(c.name)}</div><small>${esc(itemName(x))} · ${age} ${L("days ago", "giorni fa")}</small></div><span class="mono" style="font-weight:600">${eur(x.a)}</span></div>`; }).join("") : `<p class="muted-p">${t("nothingPending")}</p>`;
   seasonHeat($("#rvSeason", el));
   const W = workDays(), d0 = Math.max(0, M.from, NM - 12), ms = [...Array(NM - d0)].map((_, k) => d0 + k);
   barChart($("#rvDay", el), { labels: ms.map(i => monthLabel(i, ms.length > 12 || monthDate(d0).getFullYear() !== NOW.getFullYear())), series: [{ name: L("Per day worked", "Per giorno lavorato"), color: cssv("--violet"), values: ms.map(i => W.n[i] ? M.rev[i] / W.n[i] : 0) }], fmt: eur, h: 200, tipTitle: k => monthLabel(ms[k], true) + " · " + nf(W.n[ms[k]]) + " " + L("days worked", "giorni lavorati") });
-  $("#rvDayT", el).innerHTML = [...ms].reverse().map(i => { const cur = i === NM - 1, n = W.n[i]; return `<tr><td>${esc(Cap(monthLabel(i, true)))}${cur ? ` <small class="muted-p">${L("so far · forecast", "finora · previsione")} ${eur(me.fc)}</small>` : ""}</td><td class="num">${n ? nf(n) : "—"}</td><td class="num">${nf(W.les[i])}</td><td class="num"><b>${eur(M.rev[i])}</b></td><td class="num">${n ? eur(M.rev[i] / n) : "—"}</td><td class="num">${W.les[i] ? eur(M.rev[i] / W.les[i]) : "—"}</td>${fk ? `<td class="num">${eur(M.rev[i] - fk)}</td>` : ""}</tr>`; }).join("");
+  $("#rvDayT", el).innerHTML = [...ms].reverse().map(i => { const cur = i === NM - 1, n = W.n[i]; return `<tr><td>${esc(Cap(monthLabel(i, true)))}${cur ? ` <small class="muted-p">${L("so far · forecast", "finora · previsione")} ${eur(me.fc)}</small>` : ""}</td><td class="num">${n ? nf(n) : "—"}</td><td class="num">${nf(W.les[i])}</td><td class="num"><b>${eur(M.rev[i])}</b></td><td class="num">${n ? eur(M.rev[i] / n) : "—"}</td><td class="num">${W.les[i] ? eur(M.rev[i] / W.les[i]) : "—"}</td>${fk ? `<td class="num">${eur(M.rev[i] - monthlyCosts(monthDate(i)))}</td>` : ""}</tr>`; }).join("");
   if (hasSub) lineChart($("#rvMrr", el), { labels: M.mrr.slice(NM - 12).map((_, i) => monthLabel(NM - 12 + i)), series: [{ name: "MRR", color: cssv("--lime"), values: M.mrr.slice(NM - 12, NM - 1).concat([null]), area: 1 }], h: 200 });
 };
 function seasonHeat(el) {
@@ -3167,7 +3310,7 @@ function tableCols() {
   const nameCh = { ...name, cell: c => `<div class="who">${avatar(c)}<div><b>${esc(c.name)}</b><small>${esc(chName(c.ch))}</small></div></div>` };
   return [nameCh,
     { k: "price", lab: L(`Per ${unit(false)}`, `A ${unit(false)}`), num: 1, val: c => priceOf(c)?.cur || 0, cell: c => { const p = priceOf(c); return p ? `<span class="price"><b>${eur(p.cur)}</b>${Math.abs(p.cur - p.first) >= 1 ? `<small class="sub">${L("was", "prima")} ${eur(p.first)}</small>` : ""}</span>` : "—"; } },
-    { k: "first", lab: L("Started", "Iniziato"), val: c => +(c.first || 0), cell: c => c.first ? fdate(c.first, { day: "numeric", month: "short", year: "numeric" }) + `<small class="sub">${((m) => m + " " + (m === 1 ? L("month", "mese") : L("months", "mesi")))(Math.max(1, Math.round(tenure(c))))}</small>` : "—" },
+    { k: "first", lab: L("Started", "Iniziato"), val: c => +(startOf(c) || 0), cell: c => startOf(c) ? fdate(startOf(c), { day: "numeric", month: "short", year: "numeric" }) + `<small class="sub">${((m) => m + " " + (m === 1 ? L("month", "mese") : L("months", "mesi")))(Math.max(1, Math.round(tenure(c))))}</small>` : "—" },
     { k: "n", lab: Cap(unit()), num: 1, val: c => X.att[c.id], cell: c => nf(X.att[c.id]) },
     { k: "perm", lab: L("A month", "Al mese"), num: 1, val: perM, cell: c => perM(c) ? nf(perM(c), 1) : "—" },
     ...(hasPack() ? [{ k: "credit", lab: L("Left", "Rimaste"), val: c => { const x = creditLeft(c); return x ? x.left : -1; }, cell: c => { const x = creditLeft(c); return x && c.status !== "lapsed" ? `<span class="cr" title="${esc(L(`${x.used} used, ${x.booked} booked, ${x.left} left`, `${x.used} usate, ${x.booked} prenotate, ${x.left} rimaste`))}"><b>${x.left + x.booked}</b>/${x.total}<i><u style="width:${((x.used / x.total) * 100).toFixed(0)}%"></u></i></span>` : `<span class="faint">—</span>`; } }] : []),
@@ -3191,7 +3334,7 @@ function drawerMinis(c, bk) {
     const pr = priceOf(c), mo = c.first ? Math.max(1, Math.round(tenure(c))) : 0, n = X.att[c.id] || 0;
     const sp = (Math.min(+NOW, +(c.last || NOW)) - (c.first || NOW)) / DAY / 30.44;
     m = [[pr ? eur(pr.cur) : "—", L(`Per ${unit(false)}`, `A ${unit(false)}`), pr && Math.abs(pr.cur - pr.first) >= 1 ? L("was ", "prima ") + eur(pr.first) : ""],
-      [c.first ? fdate(c.first, { day: "numeric", month: "short", year: "2-digit" }) : "—", L("Started", "Iniziato"), mo ? mo + " " + L(mo === 1 ? "month" : "months", mo === 1 ? "mese" : "mesi") : ""],
+      [startOf(c) ? fdate(startOf(c), { day: "numeric", month: "short", year: "2-digit" }) : "—", L("Started", "Iniziato"), mo ? mo + " " + L(mo === 1 ? "month" : "months", mo === 1 ? "mese" : "mesi") : ""],
       [nf(n), Cap(unit()), n && c.first ? nf(n / Math.max(1, sp), 1) + " " + L("a month", "al mese") + (ns ? " · " + ns + " " + L("missed", "saltate") : "") : ""],
       cr && c.status !== "lapsed" ? [nf(cr.left), L("Left in the package", "Rimaste nel pacchetto"), eur(c.spent) + " " + L("paid", "pagati")] : [eur(c.spent), L("Paid in total", "Pagato in totale"), c.last ? L("last ", "ultima ") + fdate(c.last, { day: "numeric", month: "short" }) : ""]];
   }
@@ -3390,6 +3533,7 @@ function defaultMeta(o) {
     extras: base.extras.map((x, i) => ({ id: "e" + i, n: tr(x.n), p: x.p, ...(x.perhead ? { perhead: true } : {}) })),
     channels: base.channels.map((c, i) => ({ id: "h" + i, n: tr(c.n), spend: 0, comm: c.comm || 0 })),
     created: new Date().toISOString(), updated: new Date().toISOString(),
+    costs: base.costs ? JSON.parse(JSON.stringify(base.costs)) : [],
   };
   if (base.profile) {
     // keep the profile's labels, segments and fields inside the workspace, so it opens the same anywhere
@@ -3413,13 +3557,14 @@ function serClient(c) {
     sub: c.subActive ? { s: id(P.services, c.sub), active: true } : null,
     pays: c.txIdx.map(i => DB.txns[i]).sort((a, b) => a.d - b.d).map(x => ({ d: x.d.toISOString(), k: x.k, s: id(x.k === "ext" ? P.extras : P.services, x.s), a: x.a, m: x.m, st: x.st })),
     sess: [...DB.books.filter(b => b.c === c.id), ...(DB.upcoming || []).filter(u => u.c === c.id)].map(b => ({ d: b.d.toISOString(), s: id(P.services, b.s), ns: b.ns || 0 })),
+    ...(c.since ? { since: c.since } : {}), ...(c.prices?.length ? { prices: c.prices } : {}),
   };
 }
 function buildDB(chunks) {
   const db = { clients: [], txns: [], books: [], upcoming: [] };
   const find = (list, id) => { const i = list.findIndex(x => x.id === id); return i < 0 ? 0 : i; };
   for (const [k, ch] of Object.entries(chunks)) for (const [key, o] of Object.entries(ch?.clients || {})) {
-    const c = { id: db.clients.length, key, chunk: k, name: o.name || "—", email: o.email || "", phone: o.phone || "", origin: o.origin || "—", ch: find(P.channels, o.ch), seg: clamp(o.seg || 0, 0, P.segments.length - 1), size: o.size || 1, freq: o.freq || 1, f: o.f || {}, note: o.note || "", review: o.review || 0, created: new Date(o.created || Date.now()), txIdx: [], subActive: !!o.sub?.active, sub: o.sub ? find(P.services, o.sub.s) : undefined, lang: "en" };
+    const c = { id: db.clients.length, key, chunk: k, name: o.name || "—", email: o.email || "", phone: o.phone || "", origin: o.origin || "—", ch: find(P.channels, o.ch), seg: clamp(o.seg || 0, 0, P.segments.length - 1), size: o.size || 1, freq: o.freq || 1, f: o.f || {}, note: o.note || "", review: o.review || 0, created: new Date(o.created || Date.now()), txIdx: [], subActive: !!o.sub?.active, sub: o.sub ? find(P.services, o.sub.s) : undefined, lang: "en", since: o.since || null, prices: Array.isArray(o.prices) && o.prices.length ? o.prices : null };
     db.clients.push(c);
     for (const p of o.pays || []) db.txns.push({ id: 0, c: c.id, d: new Date(p.d), k: p.k === "ext" ? "ext" : "svc", s: find(p.k === "ext" ? P.extras : P.services, p.s), a: +p.a || 0, m: p.m || "Other", st: p.st || "paid" });
     for (const b of o.sess || []) { const d = new Date(b.d), s = find(P.services, b.s); if (d > NOW) db.upcoming.push({ c: c.id, d, s }); else db.books.push({ c: c.id, d, s, ns: b.ns || 0, size: c.size }); }
@@ -3477,7 +3622,7 @@ function openDemo(key) {
   try { localStorage.setItem("clientela.ws", "demo:" + vkey); } catch (e) { }
   CUR = prof.cur || "EUR";
   if (prof.real) { // a profile with real data (a tracker export): no simulation
-    P = { ...prof, consultStart: null, goal: 0 }; delete P.real;
+    P = { ...prof, consultStart: null, goal: 0, costs: JSON.parse(JSON.stringify(prof.costs || [])), week: prof.week ? [...prof.week] : null }; delete P.real;
     P.services = P.services.map((s, i) => ({ id: "s" + i, ...s })); P.extras = P.extras.map((x, i) => ({ id: "e" + i, ...x })); P.channels = P.channels.map((c, i) => ({ id: "h" + i, ...c }));
     P.realData = importTracker(prof.real) || { error: true };
     const wk = new Map(); for (const b of DB.books) { const d = dayStart(b.d); d.setDate(d.getDate() - (d.getDay() + 6) % 7); wk.set(+d, (wk.get(+d) || 0) + 1); }
@@ -4147,7 +4292,7 @@ function importTracker(text) {
   }
   DB.books.sort((a, b) => a.d - b.d);
   for (const c of touched) refreshClient(DB, c);
-  if (T0.costs.length) { P.costs = T0.costs; if (!fresh) saveMeta({ costs: T0.costs }); } // the tracker's monthly costs replace the ones set before
+  if (T0.costs.length && !(P.costs || []).length) { P.costs = T0.costs; saveMeta({ costs: T0.costs }); } // costs set in the program win over the tracker's
   if (!fresh) {
     if (newSettings) { const clean = { services: P.services.map(s => ({ ...s, n: tr(s.n) })), channels: P.channels.map(c => ({ id: c.id, n: tr(c.n), spend: c.spend || 0, comm: c.comm || 0 })) }; saveMeta(clean); Object.assign(STORE.meta, clean); }
     const ks = new Set(); for (const c of touched) ks.add(persistClient(c, true)); ks.forEach(k => k && queueWrite(k));
@@ -4309,8 +4454,11 @@ VIEWS.data = el => {
       <div class="ed" id="edCh"><div class="ed-h"><span>${t("channel")}</span><span>${L("€ / month", "€ / mese").replace("€", curSym())}</span><span>${L("Fee %", "Comm. %")}</span><span></span></div>${P.channels.map((c, i) => chRow(c, i, used.ch.has(i))).join("")}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost sm" data-add="ch">${icon(IC.plus)}${t("channel")}</button><button class="btn main sm" data-save="ch" style="margin-left:auto">${L("Save channels", "Salva canali")}</button></div>
     </div>
-    <div class="panel c6" id="costsP"><div class="ph"><div><h3>${L("Fixed monthly costs", "Costi fissi mensili")}</h3><p>${L("Taxes, insurance, rent: paid every month whatever the work. Revenue shows what is left after them.", "Tasse, contributi, affitto: si pagano ogni mese comunque. Ricavi mostra quanto resta dopo.")}</p></div></div>
-      <div class="ed" id="edCost"><div class="ed-h cost"><span>${L("Cost", "Costo")}</span><span>${L("€ / month", "€ / mese").replace("€", curSym())}</span><span></span></div>${(P.costs || []).map(costRow).join("")}</div>
+    ${isVisit() ? "" : `<div class="panel c6" id="weekP"><div class="ph"><div><h3>${L("Working week", "Settimana di lavoro")}</h3><p>${L(`Most ${unit()} on each day; 0 is a day off. It sets capacity and the end-of-month forecast.`, `Quante ${unit()} al massimo ogni giorno; 0 è giorno libero. Decide capacità e previsione di fine mese.`)}</p></div><b class="mono" id="wkTot">${P.week ? nf(sum(P.week)) + " " + L("a week", "a settimana") : ""}</b></div>
+      <div class="wk">${(LANG === "it" ? ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"] : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]).map((d, i) => `<label><span>${d}</span><input class="wk-i" type="number" min="0" max="30" inputmode="numeric" value="${P.week ? P.week[i] : ""}" placeholder="—"></label>`).join("")}</div>
+      <div style="display:flex"><button class="btn main sm" data-save="week" style="margin-left:auto">${L("Save week", "Salva settimana")}</button></div></div>`}
+    <div class="panel c6" id="costsP"><div class="ph"><div><h3>${L("Fixed monthly costs", "Costi fissi mensili")}</h3><p>${L("Taxes, insurance, rent: paid every month whatever the work. When an amount changes, add a row with the month it starts and close the old one.", "Tasse, contributi, affitto: si pagano ogni mese comunque. Se un importo cambia, aggiungi una riga con il mese da cui vale e chiudi quella vecchia.")}</p></div><b class="mono">${eur(monthlyCosts())}/${L("mo", "mese")}</b></div>
+      <div class="ed" id="edCost"><div class="ed-h cost"><span>${L("Cost", "Costo")}</span><span>${curSym()} / ${L("month", "mese")}</span><span>${L("From", "Dal")}</span><span>${L("Until", "Fino a")}</span><span></span></div>${(P.costs || []).map(costRow).join("")}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost sm" data-add="cost">${icon(IC.plus)}${L("Cost", "Costo")}</button><button class="btn main sm" data-save="cost" style="margin-left:auto">${L("Save costs", "Salva costi")}</button></div>
     </div>
     <div class="panel c6"><div class="ph"><div><h3>${t("import")}</h3><p>${t("importSub")} ${L("One row per payment; rows with the same email join one client.", "Una riga per pagamento; righe con la stessa email diventano un solo cliente.")}</p></div></div>
@@ -4354,7 +4502,8 @@ VIEWS.data = el => {
     const sv = e.target.closest("[data-save]")?.dataset.save;
     if (sv === "price") savePriceList(el);
     if (sv === "ch") saveChannels(el);
-    if (sv === "cost") { P.costs = $$(".ed-r.cost", el).map(r => ({ n: $(".n", r).value.trim(), a: +$(".a", r).value || 0 })).filter(c => c.n && c.a > 0); if (STORE.active) saveMeta({ costs: P.costs }); computeMonthly(); toast(t("saved")); renderView(); }
+    if (sv === "week") { const w = $$(".wk-i", el).map(i => Math.max(0, Math.round(+i.value || 0))); P.week = sum(w) ? w : null; P.capacity = P.week ? sum(w) : P.capacity; if (STORE.active) saveMeta({ capacity: P.capacity, ext: { ...(STORE.meta.ext || {}), week: P.week } }); computeMonthly(); toast(t("saved")); renderView(); }
+    if (sv === "cost") { P.costs = $$(".ed-r.cost", el).map(r => ({ n: $(".n", r).value.trim(), a: +$(".a", r).value || 0, ...($(".f", r).value ? { from: $(".f", r).value } : {}), ...($(".u", r).value ? { to: $(".u", r).value } : {}) })).filter(c => c.n && c.a > 0); if (STORE.active) saveMeta({ costs: P.costs }); computeMonthly(); toast(t("saved")); renderView(); }
     const ex = e.target.closest("[data-export]")?.dataset.export;
     if (ex) doExport(ex);
     const a = e.target.closest("[data-act]");
@@ -4370,7 +4519,7 @@ VIEWS.data = el => {
   $("#cpT", el).onclick = () => { const txt = csvTemplate(); const sel = () => { const r = document.createRange(); r.selectNodeContents($("#tpl", el)); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }; try { navigator.clipboard.writeText(txt).then(() => toast(t("copied")), sel); } catch (e) { sel(); } };
   if (APP.scrollTo) { const tg = $("#" + APP.scrollTo, el); APP.scrollTo = null; if (tg) setTimeout(() => tg.scrollIntoView({ behavior: "smooth", block: "start" }), 60); }
 };
-const costRow = c => `<div class="ed-r cost"><input aria-label="${esc(L("Cost", "Costo"))}" class="n" value="${esc(c.n)}" placeholder="${esc(L("e.g. social and health insurance", "es. contributi e sanità"))}"><input aria-label="${esc(L("Amount a month", "Importo al mese"))}" class="a" type="number" min="0" step="1" inputmode="decimal" value="${esc(String(c.a ?? ""))}"><button type="button" class="ed-x" data-del aria-label="Remove">${icon(IC.x)}</button></div>`;
+const costRow = c => `<div class="ed-r cost"><input aria-label="${esc(L("Cost", "Costo"))}" class="n" value="${esc(c.n)}" placeholder="${esc(L("e.g. social and health insurance", "es. contributi e sanità"))}"><input aria-label="${esc(L("Amount a month", "Importo al mese"))}" class="a" type="number" min="0" step="1" inputmode="decimal" value="${esc(String(c.a ?? ""))}"><input aria-label="${esc(L("From month", "Dal mese"))}" class="f" type="month" value="${esc(c.from || "")}"><input aria-label="${esc(L("Until month", "Fino al mese"))}" class="u" type="month" value="${esc(c.to || "")}"><button type="button" class="ed-x" data-del aria-label="Remove">${icon(IC.x)}</button></div>`;
 const delBtn = used => used ? `<span class="ed-lock" title="${esc(L("In use: has payments", "In uso: ha pagamenti"))}">●</span>` : `<button type="button" class="ed-x" data-del aria-label="Remove">${icon(IC.x)}</button>`;
 const svcRow = (s, i, used) => `<div class="ed-r svc" data-i="${i}" data-id="${esc(s.id || "")}"><input aria-label="${esc(t("service"))}" class="n" value="${esc(tr(s.n))}" placeholder="${esc(t("service"))}"><input aria-label="${esc(t("amount"))}" class="p" type="number" min="0" step="1" inputmode="decimal" value="${esc(s.p)}" placeholder="0"><select class="k" aria-label="Type">${KINDS().map(([k, l]) => `<option value="${k}" ${(s.trial ? "trial" : s.kind) === k ? "selected" : ""}>${esc(l)}</option>`).join("")}</select>${delBtn(used)}</div>`;
 const extRow = (x, i, used) => `<div class="ed-r ext" data-i="${i}" data-id="${esc(x.id || "")}"><input aria-label="${esc(t("extras"))}" class="n" value="${esc(tr(x.n))}" placeholder="${esc(t("extras"))}"><input aria-label="${esc(t("amount"))}" class="p" type="number" min="0" step="1" inputmode="decimal" value="${esc(x.p)}" placeholder="0"><span></span>${delBtn(used)}</div>`;
@@ -4415,7 +4564,7 @@ function showCsv(kind, data) {
 APP.demoNames = {};
 const bizName = () => STORE.active ? (STORE.meta?.name || "—") : demoName();
 // the four pages used every day, then the deeper analysis, then data
-const NAV = ["overview", "today", "clients", "revenue", "#analysis", "retention", "marketing", "schedule", "insights", "simulator", "report", "|", "data"];
+const NAV = ["overview", "today", "clients", "revenue", "#analysis", "schedule", "insights", "simulator", "report", "|", "data"]; // retention and marketing are off the menu (Gabri, Nov 2026)
 function renderNav() {
   $("#nav").innerHTML = NAV.map(v => v === "|" ? `<div class="sep"></div>` : v === "#analysis" ? `<div class="nav-group">${L("Analysis", "Analisi")}</div>` : `<button type="button" data-view="${v}" aria-current="${APP.view === v}">${icon(NAV_ICONS[v])}<span>${v === "clients" ? Who() : v === "retention" && isVisit() ? L("Reviews & returns", "Recensioni e ritorni") : t("nav_" + v)}</span></button>`).join("");
 }
@@ -4551,7 +4700,7 @@ function recordPlans() {
 (function boot() {
   LANG = (navigator.language || "en").toLowerCase().startsWith("it") ? "it" : "en";
   try { const sv = localStorage.getItem("clientela.lang"); if (sv === "en" || sv === "it") LANG = sv; } catch (e) { }
-  try { const v = localStorage.getItem("clientela.view"); if (v && VIEWS[v]) APP.view = v; } catch (e) { }
+  try { const v = localStorage.getItem("clientela.view"); if (v && VIEWS[v] && NAV.includes(v)) APP.view = v; } catch (e) { }
   loadImportedProfiles();
   let last = null; try { last = localStorage.getItem("clientela.ws"); } catch (e) { }
   const demoId = last && last.startsWith("demo:") ? last.slice(5) : "tour";
