@@ -4560,7 +4560,7 @@ function recordPlans() {
   openDemo(okDemo ? demoId : "tour");
   STORE.init();
   // first visit to the standalone page: offer to open a starter file
-  if (!last) setTimeout(() => { if (STANDALONE.on && STORE.db && !STORE.list.length) showWelcome(); }, 700);
+  if (!last && !PROFILES.some(p => !p.imported)) setTimeout(() => { if (STANDALONE.on && STORE.db && !STORE.list.length) showWelcome(); }, 700); // not in the owner's own copy
 })();
 
 document.addEventListener("change", e => { if (e.target.id === "perM" && e.target.value) { PERIOD = e.target.value; renderTop(); renderView(); } });
