@@ -879,9 +879,10 @@ td .mdl{margin-left:4px}
 .srt:hover{border-color:var(--faint)}.srt i{font-style:normal;font-weight:700;min-width:0}
 .srt[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
 .sort-row small{color:var(--muted);font-size:.78rem;margin-left:4px}
+.st-g{margin-left:auto}
+.st-g button[data-stg="1"][aria-selected="true"]{background:linear-gradient(120deg,var(--sun),var(--coral));color:#fff}
 .seg[hidden]{display:none}
 #curx button[data-x="1"][aria-pressed="true"]{background:linear-gradient(120deg,var(--teal),var(--blue));color:#fff}
-#gross button[data-g="1"][aria-pressed="true"]{background:linear-gradient(120deg,var(--sun),var(--coral));color:#fff}
 /* review prices */
 .fee-p{flex-direction:row;flex-wrap:wrap;gap:12px;padding:14px 18px}
 .fee-r{display:flex;align-items:center;gap:14px;flex-wrap:wrap;width:100%}
@@ -924,7 +925,6 @@ td .mdl{margin-left:4px}
       <div class="tools">
         <button class="prof-btn" id="profBtn" type="button" aria-haspopup="dialog"></button>
         <div class="seg" id="period" role="group" aria-label="Period"></div>
-        <div class="seg" id="gross" role="group" aria-label="Net or gross" hidden></div>
         <div class="seg" id="curx" role="group" aria-label="Currency" hidden></div>
         <div class="seg" id="lang" role="group" aria-label="Language">
           <button type="button" data-l="en">EN</button><button type="button" data-l="it">IT</button>
@@ -1871,9 +1871,9 @@ function prevName(p = PERIOD) {
     || (p.startsWith("m:") ? L("month before", "mese prima") : p === "all" ? "" : L("same number of days before", "stesso numero di giorni prima"));
 }
 
-/* net or gross: a platform like Preply keeps a fee (service.fee, e.g. 0.18). Amounts are stored net, as earned;
-   with GROSS on they are shown as the student pays them. Stored data always stays net (see netAmt in serClient). */
-let GROSS = (() => { try { return localStorage.getItem("clientela.gross") === "1"; } catch (e) { return false; } })();
+/* net or gross: a platform like Preply keeps a fee (service.fee, e.g. 0.18). Amounts are stored net, as earned, and shown net
+   everywhere. Only the Students page can show them gross (APP.stGross), to see what students pay. Stored data always stays net. */
+let GROSS = false;
 const feeOf = s => +P.services[s]?.fee || 0;
 const hasFee = () => P.services.some(s => +s.fee > 0);
 const gfac = s => DB.gross && feeOf(s) ? 1 / (1 - feeOf(s)) : 1; // multiply a stored net price by this to show it
@@ -1885,7 +1885,7 @@ function grossSync() {
   for (const c of DB.clients) refreshClient(DB, c);
 }
 const netAmt = x => DB.gross && x.k === "svc" && feeOf(x.s) ? Math.round(x.a * (1 - feeOf(x.s)) * 100) / 100 : x.a;
-function setGross(on) { GROSS = !!on; try { localStorage.setItem("clientela.gross", on ? "1" : "0"); } catch (e) { } computeMonthly(); }
+function setGross(on) { if (GROSS === !!on) return; GROSS = !!on; computeMonthly(); }
 function computeMonthly() {
   grossSync();
   const z = () => new Array(NM).fill(0);
@@ -2124,7 +2124,7 @@ VIEWS.overview = el => {
   const S1 = periodStats(r.a, r.b), S0 = r.prev ? periodStats(r.prev.a, r.prev.b) : null;
   let h = vhead(Cap(periodName()), t("nav_overview"), cmp ? L(`Changes are against the ${cmp}.`, `Le variazioni sono rispetto a: ${cmp}.`) : "", periodBar());
   if (!hasData()) { el.innerHTML = h + profileBanner() + emptyState(L("Nothing to analyse yet", "Ancora niente da analizzare"), L(`Add ${who()} and payments by hand or import them from a spreadsheet. Every chart on this page fills itself in from there.`, `Aggiungi ${who()} e pagamenti a mano o importali da un foglio di calcolo. Tutti i grafici si compilano da lì.`)); return; }
-  const fk = monthlyCosts(), ck = costsIn(r.a, r.b), ck0 = r.prev ? costsIn(r.prev.a, r.prev.b) : 0;
+  const fk = monthlyCosts(), nextCost = (() => { for (let i = 1; i <= 24; i++) { const d = new Date(NOW.getFullYear(), NOW.getMonth() + i, 1), a = monthlyCosts(d); if (a !== fk) return { a, l: d.toLocaleDateString(loc(), { month: "long", year: "numeric" }) }; } return null; })(); // the next month the fixed costs change
   const w1 = workIn(r.a, r.b), w0 = r.prev ? workIn(r.prev.a, r.prev.b) : null, visit = isVisit();
   const withL = q => new Set(workSource().filter(x => inR(x.d, q.a, q.b)).map(x => x.c)).size, act1 = withL(r), act0 = r.prev ? withL(r.prev) : null;
   const lensDelta = (a, b) => b > 0 && a >= 0 ? window.lensDelta(a, b) : ""; // no badge when there is nothing to compare with
@@ -2132,7 +2132,7 @@ VIEWS.overview = el => {
   const num = (v, f = "eur") => `<span data-num="${v}" data-fmt="${f}">${f === "nf" ? nf(v) : eur(v)}</span>`;
   h += `<div class="hero">
     ${hc("main", L("Revenue", "Incassato"), num(S1.rev), lensDelta(S1.rev, S0?.rev) + " " + esc(L(`${nf(S1.paying)} paying ${who()}`, `${nf(S1.paying)} ${who()} paganti`)))}
-    ${fk ? hc("", L("Net of fixed costs", "Netto dei costi fissi"), num(S1.rev - ck), lensDelta(S1.rev - ck, S0 ? S0.rev - ck0 : null) + " " + esc(L(`after ${eur(ck)} of costs`, `dopo ${eur(ck)} di costi`)))
+    ${fk ? hc("", L("Fixed costs", "Costi fissi"), num(fk), esc(L("a month, the same every month", "al mese, uguale ogni mese")) + (nextCost ? "<br>" + esc(L(`from ${nextCost.l}: ${eur(nextCost.a)}`, `da ${nextCost.l}: ${eur(nextCost.a)}`)) : ""))
       : hc("", L(`New ${who()}`, `Nuovi ${who()}`), num(S1.newC, "nf"), lensDelta(S1.newC, S0?.newC))}
     ${hc("", visit ? Cap(unit()) : L(`${Who()} with ${unit()}`, `${Who()} con lezioni`), num(visit ? w1.les : act1, "nf"), visit ? lensDelta(w1.les, w0?.les) : lensDelta(act1, act0) + " " + esc(L(`${nf(S1.newC)} new in the period`, `${nf(S1.newC)} nuovi nel periodo`)))}
     ${hc("", visit ? L("Per booking", "Per prenotazione") : L(`${Cap(unit())} held`, `${Cap(unit())} svolte`), visit ? (w1.les ? num(S1.rev / w1.les) : "—") : num(w1.les, "nf"), visit ? "" : lensDelta(w1.les, w0?.les) + " " + esc(w1.days ? L(`${nf(w1.days)} days worked · ${eur(S1.rev / w1.days)} a day`, `${nf(w1.days)} giorni lavorati · ${eur(S1.rev / w1.days)} al giorno`) : ""))}
@@ -2304,13 +2304,14 @@ VIEWS.clients = el => {
       <small>${L(`Up to ${CARD_MAX} details show as cards; more become a table.`, `Fino a ${CARD_MAX} dettagli vedi le schede; di più diventano una tabella.`)}</small></div></details>
     <label class="search">${icon(IC.search)}<input id="cq" type="search" placeholder="${esc(t("search"))}" value="${esc(APP.q)}" aria-label="${esc(t("search"))}"></label></div>
   </div>
-  <div class="sort-row" role="group" aria-label="${esc(L("Sort by", "Ordina per"))}"><span class="eyebrow">${L("Sort by", "Ordina per")}</span>${SORTS.map(([k, l]) => `<button type="button" class="srt" data-srt="${k}" aria-pressed="${APP.sort.k === k}">${esc(l)}<i aria-hidden="true">${APP.sort.k === k ? (APP.sort.dir === "asc" ? "↑" : "↓") : ""}</i></button>`).join("")}<small id="srtH">${esc(sortHint())}</small></div>
+  <div class="sort-row" role="group" aria-label="${esc(L("Sort by", "Ordina per"))}"><span class="eyebrow">${L("Sort by", "Ordina per")}</span>${SORTS.map(([k, l]) => `<button type="button" class="srt" data-srt="${k}" aria-pressed="${APP.sort.k === k}">${esc(l)}<i aria-hidden="true">${APP.sort.k === k ? (APP.sort.dir === "asc" ? "↑" : "↓") : ""}</i></button>`).join("")}<small id="srtH">${esc(sortHint())}</small>${hasFee() ? `<div class="seg-t st-g" role="group" aria-label="${esc(L("Net or gross", "Netto o lordo"))}" title="${esc(L("Gross: what students pay on the platform, before its fee. Only on this page.", "Lordo: quanto pagano gli studenti sulla piattaforma, prima della commissione. Solo in questa pagina."))}">${[[0, L("Net", "Netto")], [1, L("Gross", "Lordo")]].map(([v, l]) => `<button type="button" data-stg="${v}" aria-selected="${!!APP.stGross === !!v}">${l}</button>`).join("")}</div>` : ""}</div>
   <div id="clist"></div><div class="pager" id="cpg"></div></div>`;
   el.innerHTML = h;
   drawTable(el);
   let tmr; $("#cq", el).addEventListener("input", e => { clearTimeout(tmr); tmr = setTimeout(() => { APP.q = e.target.value; APP.page = 0; drawTable(el); }, 120); });
   $$("[data-fst]", el).forEach(b => b.onclick = () => { APP.fSt = b.dataset.fst; APP.page = 0; $$("[data-fst]", el).forEach(x => x.setAttribute("aria-pressed", x === b)); drawTable(el); });
   if ($("#cch", el)) $("#cch", el).onchange = e => { APP.fCh = e.target.value; APP.page = 0; drawTable(el); };
+  $$("[data-stg]", el).forEach(b => b.onclick = () => { APP.stGross = b.dataset.stg === "1"; const y = scrollY; renderView(); scrollTo(0, y); toast(APP.stGross ? L("Gross: what students pay, before the platform fee", "Lordo: quanto pagano gli studenti, prima della commissione") : L("Net: what is left after the platform fee", "Netto: quanto resta dopo la commissione")); });
   $$("[data-srt]", el).forEach(b => b.onclick = () => { const k = b.dataset.srt, d0 = SORTS.find(x => x[0] === k)[2]; APP.sort = APP.sort.k === k ? { k, dir: APP.sort.dir === "asc" ? "desc" : "asc" } : { k, dir: d0 }; APP.page = 0;
     $$("[data-srt]", el).forEach(x => { const on = x.dataset.srt === k; x.setAttribute("aria-pressed", on); x.querySelector("i").textContent = on ? (APP.sort.dir === "asc" ? "↑" : "↓") : ""; }); $("#srtH", el).textContent = sortHint(); drawTable(el); });
   $$("[data-fld]", el).forEach(b => b.onchange = () => { const sel = $$("[data-fld]", el).filter(x => x.checked).map(x => x.dataset.fld); try { localStorage.setItem(fieldsKey(), JSON.stringify(sel)); } catch (e) { } $(".fld-menu b", el).textContent = sel.length; drawTable(el); });
@@ -3501,7 +3502,7 @@ function tableCols() {
   const perM = c => c.first && X.att[c.id] ? X.att[c.id] / Math.max(1, (Math.min(+NOW, +(c.last || NOW)) - c.first) / DAY / 30.44) : 0;
   const nameCh = { ...name, cell: c => `<div class="who">${avatar(c)}<div><b>${esc(c.name)}</b><small>${esc(chName(c.ch))}</small></div></div>` };
   return [nameCh,
-    { k: "price", lab: L(`Per ${unit(false)}`, `A ${unit(false)}`), num: 1, val: c => priceOf(c)?.cur || 0, cell: c => { const p = priceOf(c); return p ? `<span class="price"><b>${eur(p.cur)}</b>${Math.abs(p.cur - p.first) >= 1 ? `<small class="sub">${L("was", "prima")} ${eur(p.first)}</small>` : ""}</span>` : "—"; } },
+    { k: "price", lab: L(`Per ${unit(false)}`, `A ${unit(false)}`), num: 1, val: c => priceOf(c)?.cur || 0, cell: c => { const p = priceOf(c), sv = P.services[currentSvc(c)], usd = DB.gross && +sv?.fee && +sv?.rate && p ? p.cur / sv.rate : 0; return p ? `<span class="price"><b>${eur(p.cur)}</b>${usd ? `<small class="sub">$${nf(usd, Math.abs(usd - Math.round(usd)) > .01 ? 2 : 0)} ${L("paid by the student", "pagati dallo studente")}</small>` : ""}${Math.abs(p.cur - p.first) >= 1 ? `<small class="sub">${L("was", "prima")} ${eur(p.first)}</small>` : ""}</span>` : "—"; } },
     { k: "first", lab: L("Started", "Iniziato"), val: c => +(startOf(c) || 0), cell: c => startOf(c) ? fdate(startOf(c), { day: "numeric", month: "short", year: "numeric" }) + `<small class="sub">${((m) => m + " " + (m === 1 ? L("month", "mese") : L("months", "mesi")))(Math.max(1, Math.round(tenure(c))))}</small>` : "—" },
     { k: "n", lab: Cap(unit()), num: 1, val: c => X.att[c.id], cell: c => nf(X.att[c.id]) },
     { k: "perm", lab: L("A month", "Al mese"), num: 1, val: perM, cell: c => perM(c) ? nf(perM(c), 1) : "—" },
@@ -5239,8 +5240,6 @@ function renderTop() {
   $$("#lang button").forEach(b => b.setAttribute("aria-pressed", b.dataset.l === LANG));
   const cx = $("#curx"); cx.hidden = !canEur();
   if (!cx.hidden) { cx.innerHTML = [["0", CUR], ["1", "EUR"]].map(([v, l]) => `<button type="button" data-x="${v}" aria-pressed="${showEur() === (v === "1")}">${l}</button>`).join(""); cx.title = L(`Show amounts in ${CUR} or in euro (1 € = ${nf(eurRate(), 2)} ${CUR})`, `Mostra gli importi in ${CUR} o in euro (1 € = ${nf(eurRate(), 2)} ${CUR})`); }
-  const gs = $("#gross"); gs.hidden = !hasFee();
-  if (!gs.hidden) { gs.innerHTML = [["0", L("Net", "Netto")], ["1", L("Gross", "Lordo")]].map(([v, l]) => `<button type="button" data-g="${v}" aria-pressed="${!!DB.gross === (v === "1")}" title="${esc(v === "1" ? L("What students pay, before the platform fee", "Quanto pagano gli studenti, prima della commissione della piattaforma") : L("What is left after the platform fee", "Quanto resta dopo la commissione della piattaforma"))}">${l}</button>`).join(""); gs.title = L("Platform prices net or gross of the fee", "Prezzi delle piattaforme al netto o al lordo della commissione"); }
   const pill = $(".demo-pill"); pill.hidden = STORE.active; pill.dataset.i = P.realData ? "demoReal" : "demo"; pill.textContent = t(pill.dataset.i); pill.classList.toggle("real", !!P.realData);
   let ss = $("#saveState"); if (!ss) { ss = document.createElement("span"); ss.id = "saveState"; ss.className = "save-state hide-sm"; pill.after(ss); savingEl = ss; }
   ss.hidden = !STORE.active; if (STORE.active && ss.dataset.on !== "1") ss.textContent = L("Saved", "Salvato");
@@ -5249,6 +5248,7 @@ function renderTop() {
 }
 function renderView() {
   APP.stale = false; hideTip();
+  setGross(APP.view === "clients" && !!APP.stGross && hasFee()); // gross amounts only on the Students page
   const d = document.createElement("section"); d.className = "view"; d.id = "v-" + APP.view;
   viewsEl.innerHTML = ""; viewsEl.appendChild(d);
   try { VIEWS[APP.view](d); } catch (e) { console.error(e); d.innerHTML = `<div class="panel"><h3>${L("This section could not be drawn.", "Questa sezione non si è caricata.")}</h3><p class="muted-p">${esc(e.message)}</p></div>`; }
@@ -5325,7 +5325,6 @@ document.addEventListener("click", e => {
   const pr = e.target.closest("[data-per]"); if (pr) { PERIOD = pr.dataset.per; renderTop(); renderView(); $(".view")?.classList.add("per-anim"); return; }
   if (e.target.closest("#perGo")) { const a = $("#perA").value, b = $("#perB").value; if (a && b) { PERIOD = `r:${a < b ? a : b}:${a < b ? b : a}`; renderTop(); renderView(); $(".view")?.classList.add("per-anim"); } return; }
   const xb = e.target.closest("#curx [data-x]"); if (xb) { SHOW_EUR = xb.dataset.x === "1"; try { localStorage.setItem("clientela.eur", SHOW_EUR ? "1" : "0"); } catch (err) { } renderTop(); renderView(); toast(SHOW_EUR ? L(`Amounts in euro, at ${nf(eurRate(), 2)} ${CUR} per euro. Inputs stay in ${CUR}.`, `Importi in euro, a ${nf(eurRate(), 2)} ${CUR} per euro. Gli inserimenti restano in ${CUR}.`) : L(`Amounts in ${CUR}`, `Importi in ${CUR}`)); return; }
-  const gb = e.target.closest("#gross [data-g]"); if (gb) { setGross(gb.dataset.g === "1"); renderTop(); renderView(); toast(DB.gross ? L("Showing gross amounts: what students pay", "Importi lordi: quanto pagano gli studenti") : L("Showing net amounts: what is left after the fee", "Importi netti: quanto resta dopo la commissione")); return; }
   const l = e.target.closest("#lang [data-l]"); if (l) { LANG = l.dataset.l; try { localStorage.setItem("clientela.lang", LANG); } catch (err) { } if (!STORE.active) { /* demo names follow language */ } renderTop(); renderView(); return; }
   if (e.target.closest("#profBtn")) return openPicker();
   const a = e.target.closest("[data-act]")?.dataset.act;
