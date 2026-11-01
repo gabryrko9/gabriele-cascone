@@ -574,11 +574,11 @@ pre.csv{margin:0;background:var(--soft);border-radius:12px;padding:12px;font:400
 .tap-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
 .tap{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);text-align:left;cursor:pointer;font:inherit;color:inherit;min-width:0;transition:border-color .15s,background .15s}
 .tap:hover{border-color:var(--ink)}.tap:active{transform:scale(.98)}
-.tap>span{flex:1;min-width:0;display:flex;flex-direction:column}
+.tap>span:not(.av){flex:1;min-width:0;display:flex;flex-direction:column}
 .tap b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tap small{color:var(--muted);font-size:.76rem}
 .tap>i{color:var(--muted);display:flex}.tap>i svg{width:16px;height:16px}
-@media (max-width:560px){.tap-grid{grid-template-columns:1fr 1fr}.tap .av{display:none}}
+
 .day-a{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
 .btn.ok{border-color:var(--lime);background:var(--lime-s)}
 .lnk{border:0;background:none;padding:0;font:inherit;font-weight:700;text-align:left;color:var(--ink);cursor:pointer}
@@ -758,6 +758,127 @@ details.more summary{cursor:pointer;font-weight:600;font-size:.9rem}
 }
 @media (prefers-reduced-motion:reduce){.fc-bar i,.shr .bar i{transition:none}}
 @keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+
+/* period bar: a segmented control with a coloured pill that slides */
+.per-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0;max-width:100%}
+.per-seg{position:relative;display:inline-flex;gap:2px;padding:4px;border-radius:999px;background:var(--soft);border:1px solid var(--line);overflow-x:auto;scrollbar-width:none;max-width:100%;min-width:0}
+.per-seg::-webkit-scrollbar{display:none}
+.per-b{position:relative;z-index:1;display:inline-flex;align-items:center;gap:6px;font:500 .8rem var(--f-body);padding:7px 14px;border-radius:999px;border:0;background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;transition:color .25s,transform .15s}
+.per-b:hover{color:var(--ink)}
+.per-b:active{transform:scale(.96)}
+.per-b[aria-pressed="true"]{color:#fff}
+.per-b svg{width:15px;height:15px}
+.per-ind{position:absolute;z-index:0;top:4px;bottom:4px;left:0;width:0;border-radius:999px;background:linear-gradient(120deg,var(--blue),var(--violet));box-shadow:0 4px 14px rgba(46,91,255,.28);transition:left .42s cubic-bezier(.3,1.25,.5,1),width .42s cubic-bezier(.3,1.25,.5,1),opacity .2s;opacity:0}
+.per-more summary.per-b{border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 14px}
+.per-more summary.per-b[aria-pressed="true"]{background:linear-gradient(120deg,var(--blue),var(--violet));color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(46,91,255,.28)}
+.per-rng{display:inline-flex;align-items:center;gap:6px;font:500 .72rem var(--f-mono);padding:6px 11px;border-radius:999px;background:var(--blue-s);color:var(--blue);white-space:nowrap;animation:fadeUp .45s both}
+.per-rng::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;animation:pop .5s both}
+.view.per-anim .hero>*,.view.per-anim .kpis>*,.view.per-anim .grid>.panel{animation:fadeUp .45s both}
+.view.per-anim .grid>.panel:nth-child(2){animation-delay:.05s}.view.per-anim .grid>.panel:nth-child(3){animation-delay:.1s}.view.per-anim .grid>.panel:nth-child(n+4){animation-delay:.15s}
+@media (max-width:560px){.per-bar{width:100%}.per-seg{width:100%}}
+/* revenue: month picker */
+.mpick{display:flex;align-items:center;gap:6px;margin:0 0 16px;min-width:0}
+.mp-row{display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin;padding:2px 2px 6px;flex:1;min-width:0;scroll-behavior:smooth}
+.mp{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:74px;padding:8px 10px 7px;border-radius:14px;border:1px solid var(--line);background:#fff;cursor:pointer;font:inherit;color:var(--ink);transition:transform .15s,box-shadow .2s,border-color .2s}
+.mp:hover{border-color:var(--faint);transform:translateY(-1px)}
+.mp b{font-weight:600;font-size:.84rem}.mp b small{font-weight:500;color:var(--faint);font-size:.68rem}
+.mp>small{font:500 .7rem var(--f-mono);color:var(--muted)}
+.mp-b{width:30px;height:28px;display:flex;align-items:flex-end;justify-content:center;border-radius:6px;background:var(--soft)}
+.mp-b i{display:block;width:100%;height:var(--h);border-radius:6px;background:linear-gradient(180deg,var(--blue),var(--violet));opacity:.45;transition:height .5s}
+.mp[aria-pressed="true"]{border-color:transparent;background:linear-gradient(140deg,var(--blue),var(--violet));color:#fff;box-shadow:0 6px 18px rgba(46,91,255,.3)}
+.mp[aria-pressed="true"] b small,.mp[aria-pressed="true"]>small{color:rgba(255,255,255,.85)}
+.mp[aria-pressed="true"] .mp-b{background:rgba(255,255,255,.18)}.mp[aria-pressed="true"] .mp-b i{background:#fff;opacity:.95}
+/* revenue: month tiles */
+.mk-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.mk{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:4px;position:relative;overflow:hidden;animation:fadeUp .45s both}
+.mk::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--kc)}
+.mk:nth-child(2){animation-delay:.04s}.mk:nth-child(3){animation-delay:.08s}.mk:nth-child(4){animation-delay:.12s}.mk:nth-child(5){animation-delay:.16s}.mk:nth-child(6){animation-delay:.2s}.mk:nth-child(7){animation-delay:.24s}.mk:nth-child(8){animation-delay:.28s}
+.mk .l{display:flex;align-items:center;gap:6px;font:500 .66rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.mk .l i{width:7px;height:7px;border-radius:50%;background:var(--kc)}
+.mk b{font:700 1.5rem var(--f-display);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.mk .s{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.76rem}.mk .s small{color:var(--faint)}
+.mk .x{color:var(--muted);font-size:.74rem}
+.mdl{display:inline-flex;align-items:center;gap:3px;font:600 .72rem var(--f-body);padding:2px 7px;border-radius:999px;white-space:nowrap}
+.mdl.up{background:var(--lime-s);color:var(--good)}.mdl.down{background:#FFE9E4;color:#D2401E}.mdl.flat{background:var(--soft);color:var(--muted)}
+td .mdl{margin-left:4px}
+.shv{display:inline-block;width:46px;height:6px;border-radius:4px;background:var(--soft2);overflow:hidden;vertical-align:middle;margin-right:6px}.shv i{display:block;height:100%;border-radius:4px}
+.svt td small.sub,.mm td small.sub{display:block;color:var(--faint);font-size:.72rem;margin-top:1px}
+.svt td{vertical-align:top}
+.pp2{display:flex;flex-direction:column;gap:14px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tagb{font:500 .78rem var(--f-body);padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--soft);color:var(--ink);cursor:pointer}
+.tagb:hover{border-color:var(--faint);background:#fff}
+.seg-t{display:inline-flex;gap:2px;padding:3px;border-radius:12px;background:var(--soft);border:1px solid var(--line);max-width:100%;overflow-x:auto;scrollbar-width:none}
+.seg-t::-webkit-scrollbar{display:none}
+.seg-t button{font:500 .78rem var(--f-body);padding:6px 11px;border-radius:9px;border:0;background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;transition:background .2s,color .2s}
+.seg-t button[aria-selected="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(19,21,27,.1)}
+.mm tbody tr[data-rmrow]{cursor:pointer;transition:background .15s}
+.mm tbody tr[data-rmrow]:hover{background:var(--soft)}
+.mm tbody tr.on{background:var(--blue-s)}.mm tbody tr.on td:first-child{box-shadow:inset 3px 0 0 var(--blue);font-weight:600}
+.ns-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.ns-facts>div{padding:12px 14px;border-radius:12px;background:var(--violet-s);display:flex;flex-direction:column;gap:2px}
+.ns-facts b{font:700 1.3rem var(--f-display)}.ns-facts span{font-size:.76rem;color:var(--muted)}
+/* export */
+.exp{gap:18px}
+.exl{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.exo{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;cursor:pointer;transition:border-color .2s,background .2s}
+.exo.on{border-color:var(--blue);background:var(--blue-s)}
+.exo input{margin-top:3px;accent-color:var(--blue)}
+.exo span{flex:1;display:flex;flex-direction:column;gap:1px}.exo span small{color:var(--muted);font-size:.76rem}
+.exo em{font:500 .7rem var(--f-mono);color:var(--muted);font-style:normal;white-space:nowrap}
+.exp-t td{font-size:.8rem}
+@media (max-width:900px){.mk-grid,.ns-facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.mk b{font-size:1.25rem}.mpick>.btn{display:none}.mp{min-width:66px}}
+.mnotes{margin-top:auto;padding:14px 16px;border-radius:12px;background:linear-gradient(135deg,var(--blue-s),var(--violet-s))}
+.mnotes ul{margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:5px;font-size:.84rem;line-height:1.45}
+.exp .eyebrow{display:block}
+/* day register: week strip, day tiles, student tiles */
+.wstrip{gap:10px;padding:14px 16px}
+.ws-top{display:flex;align-items:center;gap:10px}.ws-top>div{flex:1;display:flex;flex-direction:column;align-items:center}
+.ws-top b{font-weight:600;font-size:.95rem}.ws-top small{color:var(--muted);font-size:.78rem}
+.ws-days{display:grid;grid-template-columns:repeat(7,minmax(64px,1fr));gap:6px;overflow-x:auto;scrollbar-width:none}
+.ws-days::-webkit-scrollbar{display:none}
+.wsd{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px 8px;border-radius:14px;border:1px solid var(--line);background:#fff;cursor:pointer;font:inherit;color:var(--ink);transition:transform .15s,box-shadow .2s,border-color .2s}
+.wsd:hover{transform:translateY(-2px);border-color:var(--faint)}
+.wsd small{font:500 .64rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.wsd b{font:700 1.2rem var(--f-display)}
+.wsd em{font-style:normal;font-size:.68rem;color:var(--muted);white-space:nowrap}
+.ws-bar{width:70%;height:5px;border-radius:3px;background:var(--soft2);overflow:hidden}.ws-bar i{display:block;height:100%;width:calc(var(--f) * 100%);border-radius:3px;background:linear-gradient(90deg,var(--lime),var(--teal));transition:width .5s}
+.wsd.off{background:var(--soft);border-style:dashed}.wsd.off b{color:var(--faint)}
+.wsd.today b{color:var(--blue)}.wsd.today small::after{content:" •";color:var(--blue)}
+.wsd.on{border-color:transparent;background:linear-gradient(140deg,var(--blue),var(--violet));color:#fff;box-shadow:0 6px 18px rgba(46,91,255,.3)}
+.wsd.on small,.wsd.on em,.wsd.on.today b{color:rgba(255,255,255,.9)}.wsd.on .ws-bar{background:rgba(255,255,255,.25)}.wsd.on .ws-bar i{background:#fff}
+.dtiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.dtile{position:relative;display:flex;flex-direction:column;gap:10px;padding:12px 12px 10px 16px;border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden;animation:fadeUp .35s both;animation-delay:calc(var(--i) * 30ms)}
+.dtile::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--lime)}
+.dtile.miss::before{background:var(--coral)}.dtile.plan::before{background:var(--faint)}
+.dtile.miss{background:#FFF8F6}.dtile.plan{background:var(--soft)}
+.dt-top{display:flex;align-items:flex-start;gap:10px}
+.dt-top .lnk{font-weight:600;text-align:left}
+.dt-st{font:600 .66rem var(--f-body);padding:3px 8px;border-radius:999px;background:var(--lime-s);color:var(--good);white-space:nowrap}
+.dtile.miss .dt-st{background:#FFE9E4;color:#D2401E}.dtile.plan .dt-st{background:#fff;color:var(--muted)}
+.dt-bot{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.dt-p{font:700 1rem var(--f-display)}.dt-p.muted{font:400 .76rem var(--f-body);color:var(--muted)}
+.dtile .day-a{gap:4px}.btn.ic{padding:0;width:30px;justify-content:center}
+.sd{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--sc);margin-right:5px;vertical-align:1px}
+.tap-h{font:500 .66rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px}
+#dayAdd>.tap-h:first-child{margin-top:0}
+.tap-grid{grid-template-columns:repeat(auto-fill,minmax(168px,1fr))}
+.tap b{white-space:normal;line-height:1.25;overflow:visible}
+.tap-lg{display:flex;flex-wrap:wrap;gap:14px;font-size:.76rem;color:var(--muted);margin-bottom:4px}
+.tap{position:relative;overflow:hidden;background:#fff;padding:10px 10px 10px 14px;transition:border-color .15s,box-shadow .2s,transform .15s}
+.tap::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--sc)}
+.tap:hover{border-color:var(--sc);box-shadow:0 4px 14px rgba(19,21,27,.08);transform:translateY(-1px)}
+.tap em{font-style:normal;font:600 .8rem var(--f-body);white-space:nowrap;display:flex;flex-direction:column;align-items:flex-end}.tap em small{font-weight:400}
+.tap small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tap .pl{width:26px;height:26px;border-radius:50%;display:grid!important;place-items:center;background:var(--soft);color:var(--ink);flex:none;transition:background .2s,color .2s}
+.tap:hover .pl{background:var(--ink);color:#fff}
+@media (max-width:560px){.tap-grid{grid-template-columns:1fr 1fr;gap:6px}.tap{padding:9px 8px 9px 12px;gap:6px}.tap .av{display:none}.dtiles{grid-template-columns:1fr}.ws-days{grid-template-columns:repeat(7,minmax(52px,1fr));gap:4px}.wsd{padding:8px 2px}.wsd b{font-size:1.05rem}}
+.sort-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.sort-row .eyebrow{margin-right:4px}
+.srt{display:inline-flex;align-items:center;gap:4px;font:500 .8rem var(--f-body);padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;transition:background .2s,color .2s,border-color .2s}
+.srt:hover{border-color:var(--faint)}.srt i{font-style:normal;font-weight:700;min-width:0}
+.srt[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.sort-row small{color:var(--muted);font-size:.78rem;margin-left:4px}
 </style>
 </head>
 <body>
@@ -795,7 +916,7 @@ const I = {
   footnote: T("One platform for every independent professional. Your clients, your numbers, clear decisions.", "Una piattaforma per ogni libero professionista. I tuoi clienti, i tuoi numeri, decisioni chiare."),
   nav_overview: T("Overview", "Panoramica"), nav_clients: T("Clients", "Clienti"), nav_revenue: T("Revenue", "Ricavi"),
   nav_marketing: T("Marketing", "Marketing"), nav_retention: T("Retention", "Fidelizzazione"), nav_schedule: T("Schedule", "Agenda"),
-  nav_insights: T("AI insights", "Insight AI"), nav_simulator: T("What-if", "Simulatore"), nav_data: T("Data", "Dati"), nav_report: T("Report", "Report"), nav_today: T("Day register", "Registro"),
+  nav_insights: T("AI insights", "Insight AI"), nav_simulator: T("What-if", "Simulatore"), nav_data: T("Data", "Dati"), nav_report: T("Report", "Report"), nav_today: T("Day register", "Registro"), nav_export: T("Export", "Esporta"),
   p30: T("30d", "30g"), p90: T("90d", "90g"), p12: T("12m", "12m"), pall: T("All", "Tutto"),
   pickTitle: T("Choose a profession", "Scegli la professione"),
   pickSub: T("Same platform, different fields, KPIs and advice. The demo data changes with it.", "Stessa piattaforma, campi, KPI e consigli diversi. I dati demo cambiano di conseguenza."),
@@ -874,6 +995,7 @@ const NAV_ICONS = {
   schedule: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
   insights: '<path d="M12 3l2.2 5.3L20 9l-4.4 3.8L17 19l-5-3-5 3 1.4-6.2L4 9l5.8-.7z"/>',
   today: '<rect x="4" y="4" width="16" height="17" rx="2"/><path d="M8 2v4M16 2v4M8 13l2.5 2.5L16 10"/>',
+  export: '<path d="M12 3v12M7 8l5-5 5 5"/><path d="M4 14v6h16v-6"/>',
   report: '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 17v-3M13 17v-5M16 17v-2"/>',
   simulator: '<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',
   data: '<ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
@@ -1566,7 +1688,7 @@ function barChart(host, o) {
   const W = Math.max(280, host.clientWidth || 600), H = o.h || 240, pad = { l: 46, r: 6, t: 10, b: 24 };
   const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b, n = o.labels.length;
   const tot = o.labels.map((_, i) => o.stacked ? o.series.reduce((s, se) => s + (se.values[i] || 0), 0) : Math.max(...o.series.map(se => se.values[i] || 0)));
-  const { max, step } = niceMax(Math.max(...tot) * 1.05);
+  const { max, step } = niceMax(Math.max(o.ymax || 0, ...tot) * 1.05);
   const svg = S("svg", { viewBox: `0 0 ${W} ${H}`, height: H }, host);
   const y = v => pad.t + ih - v / max * ih;
   for (let v = 0; v <= max + 1e-9; v += step) { S("line", { x1: pad.l, x2: W - pad.r, y1: y(v), y2: y(v), class: v === 0 ? "axis-l" : "grid-l" }, svg); const tx = S("text", { x: pad.l - 8, y: y(v) + 3.5, "text-anchor": "end" }, svg); tx.textContent = (o.yfmt || o.fmt || eurK)(v); }
@@ -1581,13 +1703,14 @@ function barChart(host, o) {
       const v = se.values[i] || 0; if (v <= 0) return;
       const w = o.stacked ? bw : bw / o.series.length, bx = o.stacked ? cx - bw / 2 : cx - bw / 2 + si * w;
       const top = o.stacked ? y(acc + v) : y(v), hgt = o.stacked ? y(acc) - y(acc + v) : y(0) - y(v);
-      const r = S("rect", { x: bx, y: top, width: Math.max(1, w - (o.stacked ? 0 : 1)), height: Math.max(0, hgt - (o.stacked ? .8 : 0)), fill: se.color, rx: o.stacked ? 2 : 3, class: "growbar", opacity: se.opacity ?? 1 }, g);
+      const r = S("rect", { x: bx, y: top, width: Math.max(1, w - (o.stacked ? 0 : 1)), height: Math.max(0, hgt - (o.stacked ? .8 : 0)), fill: se.color, rx: o.stacked ? 2 : 3, class: "growbar", opacity: (se.opacity ?? 1) * (o.hl != null && o.hl !== i ? .32 : 1) }, g);
       r.style.animationDelay = (i * 18) + "ms";
       if (o.stacked) acc += v;
     });
     const hit = S("rect", { x: pad.l + slot * i, y: pad.t, width: slot, height: ih, fill: "transparent" }, svg);
     const show = ev => { g.style.opacity = .78; let rows = o.series.filter(se => se.values[i]).map(se => tipRow(se.color, se.name, (o.fmt || eur)(se.values[i]))).join(""); if (o.stacked && o.series.length > 1) rows += `<div class="tr" style="margin-top:4px;border-top:1px solid rgba(255,255,255,.2);padding-top:4px"><span>Total</span><em>${(o.fmt || eur)(tot[i])}</em></div>`; showTip(`<b>${esc(o.tipTitle ? o.tipTitle(i) : o.labels[i])}</b>${rows}`, ev.clientX, ev.clientY); };
     hit.addEventListener("pointermove", show); hit.addEventListener("pointerdown", show);
+    if (o.onPick) { hit.style.cursor = "pointer"; hit.addEventListener("click", () => { hideTip(); o.onPick(i); }); }
     hit.addEventListener("pointerleave", () => { g.style.opacity = 1; hideTip(); });
   }
 }
@@ -1802,9 +1925,10 @@ function heatData(a, b) {
   return { H0, H1, grid };
 }
 
-function weeklyUtil() {
-  const weeks = 26, out = [], labels = [];
-  const end = new Date(NOW); end.setHours(0, 0, 0, 0); end.setDate(end.getDate() - ((end.getDay() + 6) % 7)); // this Monday
+function weeklyUtil(ra, rb) {
+  const out = [], labels = [], mon = d => { const x = new Date(d); x.setHours(0, 0, 0, 0); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
+  const end = mon(rb && rb < NOW ? rb : NOW); // the last Monday in the range
+  const weeks = ra ? clamp(Math.round((end - mon(ra)) / (7 * DAY)) + 1, 1, 78) : 26;
   for (let w = weeks - 1; w >= 0; w--) {
     const a = new Date(+end - w * 7 * DAY), b = new Date(+a + 7 * DAY - 1);
     let n = 0; for (const x of DB.books) if (inR(x.d, a, b) && !x.ns) n++;
@@ -1870,13 +1994,14 @@ function weekLeft(perDay) {
   const perW = [...Array(7)].map((_, w) => { const ds = [...byDay.entries()].filter(([, o]) => o.w === w); return ds.length ? sum(ds.map(([k]) => revDay.get(k) || 0)) / ds.length : 0; });
   const perLes = (() => { let r = 0, n = 0; for (const [k, o] of byDay) { r += revDay.get(k) || 0; n += o.n; } return n ? r / n : 0; })();
   const today = dayKey(NOW), doneToday = src.some(x => dayKey(x.d) === today);
-  let left = 0, add = 0; const d = new Date(TODAY);
+  let left = 0, add = 0; const d = new Date(TODAY), days = new Map();
   for (; d.getMonth() === NOW.getMonth(); d.setDate(d.getDate() + 1)) {
     if (dayKey(d) === today && doneToday) continue;
     const w = (d.getDay() + 6) % 7; if (!(wk[w] > 0)) continue;
-    left++; add += Math.min(perW[w] || perDay, wk[w] * perLes || Infinity);
+    const v = Math.min(perW[w] || perDay, wk[w] * perLes || Infinity);
+    left++; add += v; days.set(d.getDate(), v);
   }
-  return { left, fc: M.rev[NM - 1] + add };
+  return { left, fc: M.rev[NM - 1] + add, days };
 }
 // fixed costs can start or stop in a given month (from / to as "YYYY-MM"), e.g. taxes that rise in January
 const ymKey = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
@@ -1934,42 +2059,67 @@ const L = (en, it) => LANG === "it" ? it : en;
 
 /* ================= overview ================= */
 VIEWS.overview = el => {
-  const r = rangeFor(PERIOD), S1 = periodStats(r.a, r.b), S0 = r.prev ? periodStats(r.prev.a, r.prev.b) : null, cmp = prevName();
+  const r = rangeFor(PERIOD); let cmp = prevName();
+  // a month is compared with the last month that had revenue, so a holiday month does not wipe out the comparison
+  if (r.prev && (PERIOD === "mtd" || PERIOD === "lm" || PERIOD.startsWith("m:")) && !periodStats(r.prev.a, r.prev.b).rev) {
+    const p = prevWith(monthIdx(r.a));
+    if (p >= 0) { const a = monthDate(p), full = new Date(+monthDate(p + 1) - 60000); r.prev = { a, b: PERIOD === "mtd" ? new Date(Math.min(+full, +a + (r.b - r.a))) : full }; cmp = Cap(a.toLocaleDateString(loc(), { month: "long", year: "numeric" })) + (PERIOD === "mtd" ? L(", same days", ", stessi giorni") : ""); }
+  }
+  const S1 = periodStats(r.a, r.b), S0 = r.prev ? periodStats(r.prev.a, r.prev.b) : null;
   let h = vhead(Cap(periodName()), t("nav_overview"), cmp ? L(`Changes are against the ${cmp}.`, `Le variazioni sono rispetto a: ${cmp}.`) : "", periodBar());
   if (!hasData()) { el.innerHTML = h + profileBanner() + emptyState(L("Nothing to analyse yet", "Ancora niente da analizzare"), L(`Add ${who()} and payments by hand or import them from a spreadsheet. Every chart on this page fills itself in from there.`, `Aggiungi ${who()} e pagamenti a mano o importali da un foglio di calcolo. Tutti i grafici si compilano da lì.`)); return; }
   const fk = monthlyCosts(), ck = costsIn(r.a, r.b), ck0 = r.prev ? costsIn(r.prev.a, r.prev.b) : 0;
   const w1 = workIn(r.a, r.b), w0 = r.prev ? workIn(r.prev.a, r.prev.b) : null, visit = isVisit();
-  const active = DB.clients.filter(c => c.status === "active").length;
-  const lensDelta = (a, b) => b ? window.lensDelta(a, b) : ""; // no badge when there is nothing to compare with
+  const withL = q => new Set(workSource().filter(x => inR(x.d, q.a, q.b)).map(x => x.c)).size, act1 = withL(r), act0 = r.prev ? withL(r.prev) : null;
+  const lensDelta = (a, b) => b > 0 && a >= 0 ? window.lensDelta(a, b) : ""; // no badge when there is nothing to compare with
   const hc = (cls, l, v, s) => `<div class="hc ${cls}"><span class="l">${esc(l)}</span><span class="v">${v}</span><span class="s">${s}</span></div>`;
   const num = (v, f = "eur") => `<span data-num="${v}" data-fmt="${f}">${f === "nf" ? nf(v) : eur(v)}</span>`;
   h += `<div class="hero">
     ${hc("main", L("Revenue", "Incassato"), num(S1.rev), lensDelta(S1.rev, S0?.rev) + " " + esc(L(`${nf(S1.paying)} paying ${who()}`, `${nf(S1.paying)} ${who()} paganti`)))}
     ${fk ? hc("", L("Net of fixed costs", "Netto dei costi fissi"), num(S1.rev - ck), lensDelta(S1.rev - ck, S0 ? S0.rev - ck0 : null) + " " + esc(L(`after ${eur(ck)} of costs`, `dopo ${eur(ck)} di costi`)))
       : hc("", L(`New ${who()}`, `Nuovi ${who()}`), num(S1.newC, "nf"), lensDelta(S1.newC, S0?.newC))}
-    ${hc("", visit ? Cap(unit()) : L(`Active ${who()}`, `${Who()} attivi`), num(visit ? w1.les : active, "nf"), visit ? lensDelta(w1.les, w0?.les) : esc(L(`${nf(S1.newC)} new in the period`, `${nf(S1.newC)} nuovi nel periodo`)))}
+    ${hc("", visit ? Cap(unit()) : L(`${Who()} with ${unit()}`, `${Who()} con lezioni`), num(visit ? w1.les : act1, "nf"), visit ? lensDelta(w1.les, w0?.les) : lensDelta(act1, act0) + " " + esc(L(`${nf(S1.newC)} new in the period`, `${nf(S1.newC)} nuovi nel periodo`)))}
     ${hc("", visit ? L("Per booking", "Per prenotazione") : L(`${Cap(unit())} held`, `${Cap(unit())} svolte`), visit ? (w1.les ? num(S1.rev / w1.les) : "—") : num(w1.les, "nf"), visit ? "" : lensDelta(w1.les, w0?.les) + " " + esc(w1.days ? L(`${nf(w1.days)} days worked · ${eur(S1.rev / w1.days)} a day`, `${nf(w1.days)} giorni lavorati · ${eur(S1.rev / w1.days)} al giorno`) : ""))}
   </div>`;
-  const me = monthEndFc(), mon = tr(I.monthNames)[NOW.getMonth()];
-  h += `<div class="grid">
-    <div class="panel c8"><div class="ph"><div><h3>${L("Revenue month by month", "Incassi mese per mese")}</h3><p>${L("Paid in each month", "Quanto è entrato ogni mese")}${fk ? L(`, before ${eur(fk)} of fixed costs a month`, `, prima dei ${eur(fk)} di costi fissi al mese`) : ""}</p></div></div><div id="ovRev"></div></div>
-    <div class="panel c4 mo"><div class="ph"><div><h3>${Cap(NOW.toLocaleDateString(loc(), { month: "long" }))}</h3><p>${L("How the month is going", "Come sta andando il mese")}</p></div></div>
+  // the months the period covers; one month alone is drawn day by day
+  const mA = Math.max(0, monthIdx(r.a), M.from >= 0 ? M.from : 0), mB = clamp(monthIdx(r.b), 0, NM - 1), ms = [];
+  for (let i = Math.min(mA, mB); i <= mB; i++) ms.push(i);
+  const one = ms.length === 1, lm = mB, isCur = lm === NM - 1, me = isCur ? monthEndFc() : null, lmD = monthDate(lm), W = workDays();
+  const pm = typeof prevWith === "function" ? prevWith(lm) : lm - 1, past = !isCur;
+  const card = isCur ? `
       <div><span class="big-f">${num(me.fc)}</span><p class="muted-p" style="margin-top:2px">${L("expected by the end of the month", "previsti a fine mese")}${fk ? ` · ${L("net", "netto")} <b>${eur(me.fc - monthlyCosts())}</b>` : ""}</p></div>
       <div class="fc-bar" role="img" aria-label="${esc(L(`${eur(me.so)} paid so far out of ${eur(me.fc)} expected`, `${eur(me.so)} incassati finora su ${eur(me.fc)} previsti`))}"><i style="--w:${me.fc ? Math.max(me.so ? 2 : 0, me.so / me.fc * 100).toFixed(1) : 0}%"></i></div>
       <div class="lg"><span><i class="so"></i>${L("Paid", "Incassato")} <b>${eur(me.so)}</b></span><span><i class="todo"></i>${L("Still to come", "Ancora da fare")} <b>${eur(Math.max(0, me.fc - me.so))}</b></span></div>
       ${calHtml()}
-      <p class="muted-p" style="margin:0;font-size:.8rem">${me.left ? L(`${nf(me.left)} working days left, each worth about ${eur(me.perDay)} (what a day brought recently).`, `${nf(me.left)} giorni di lavoro rimasti, ognuno vale circa ${eur(me.perDay)} (quanto ha reso un giorno di recente).`) : L("No working days left this month.", "Nessun giorno di lavoro rimasto questo mese.")}</p>
-      <button class="more-link" data-go="revenue">${L("Revenue details", "Dettagli ricavi")} →</button></div>
-    <div class="panel c6"><div class="ph"><div><h3>${visit ? t("upcoming") : L("To get back in touch", "Da ricontattare")}</h3><p>${visit ? t("upcomingSub") : L(`${Cap(who())} who have not come for 6 weeks or more`, `${Cap(who())} che non vengono da almeno 6 settimane`)}</p></div></div><div class="rows" id="ovA"></div></div>
+      <p class="muted-p" style="margin:0;font-size:.8rem">${me.left ? L(`${nf(me.left)} working days left, each worth about ${eur(me.perDay)} (what a day brought recently).`, `${nf(me.left)} giorni di lavoro rimasti, ognuno vale circa ${eur(me.perDay)} (quanto ha reso un giorno di recente).`) : L("No working days left this month.", "Nessun giorno di lavoro rimasto questo mese.")}</p>` : `
+      <div><span class="big-f">${num(M.rev[lm] || 0)}</span><p class="muted-p" style="margin-top:2px">${L("paid in the month", "incassati nel mese")}${fk ? ` · ${L("net", "netto")} <b>${eur((M.rev[lm] || 0) - monthlyCosts(lmD))}</b>` : ""}${pm >= 0 && M.rev[pm] ? ` · ${dlt(M.rev[lm] || 0, M.rev[pm])} ${L("vs", "vs")} ${esc(monthDate(pm).toLocaleDateString(loc(), { month: "long" }))}` : ""}</p></div>
+      <div class="fc-bar done" role="img" aria-label="${esc(L("Revenue against the best month", "Incassi rispetto al mese migliore"))}"><i style="--w:${(Math.max(...M.rev) ? (M.rev[lm] || 0) / Math.max(...M.rev) * 100 : 0).toFixed(1)}%"></i></div>
+      <div class="lg"><span><i class="so"></i>${Cap(unit())} <b>${nf(W.les[lm] || 0)}</b></span><span><i class="so" style="background:var(--teal)"></i>${L("Days worked", "Giorni lavorati")} <b>${nf(W.n[lm] || 0)}</b></span></div>
+      ${calHtml(lmD.getFullYear(), lmD.getMonth())}
+      <p class="muted-p" style="margin:0;font-size:.8rem">${W.n[lm] ? L(`On average ${eur(M.rev[lm] / W.n[lm])} for each day worked. The bar compares the month with the best one.`, `In media ${eur(M.rev[lm] / W.n[lm])} per ogni giorno lavorato. La barra confronta il mese con quello migliore.`) : L("No lessons this month.", "Nessuna lezione in questo mese.")}</p>`;
+  h += `<div class="grid">
+    <div class="panel c8"><div class="ph"><div><h3>${one ? L("Revenue day by day", "Incassi giorno per giorno") : L("Revenue month by month", "Incassi mese per mese")}</h3><p>${one ? Cap(lmD.toLocaleDateString(loc(), { month: "long", year: "numeric" })) + (isCur ? L(": the faint bars are the days still to work", ": le barre chiare sono i giorni ancora da lavorare") : "") : L("Paid in each month of the period", "Quanto è entrato in ogni mese del periodo")}${fk && !one ? L(`, before ${eur(fk)} of fixed costs a month`, `, prima dei ${eur(fk)} di costi fissi al mese`) : ""}</p></div></div><div id="ovRev"></div></div>
+    <div class="panel c4 mo"><div class="ph"><div><h3>${Cap(lmD.toLocaleDateString(loc(), { month: "long" }))}${lmD.getFullYear() !== NOW.getFullYear() ? " " + lmD.getFullYear() : ""}</h3><p>${isCur ? L("How the month is going", "Come sta andando il mese") : L("How the month went", "Com'è andato il mese")}</p></div></div>
+      ${card}
+      <button class="more-link" data-go="revenue" data-revm="${lm}">${L("Open the month in Revenue", "Apri il mese in Ricavi")} →</button></div>
+    <div class="panel c6"><div class="ph"><div><h3>${visit ? t("upcoming") : past ? L("Who stopped", "Chi si è fermato") : L("To get back in touch", "Da ricontattare")}</h3><p>${visit ? t("upcomingSub") : past ? L(`Their last ${unit(false)} was in this period`, `La loro ultima ${unit(false)} è stata in questo periodo`) : L(`${Cap(who())} who have not come for 6 weeks or more`, `${Cap(who())} che non vengono da almeno 6 settimane`)}</p></div></div><div class="rows" id="ovA"></div></div>
     <div class="panel c6"><div class="ph"><div><h3>${L(`New ${who()}`, `Nuovi ${who()}`)}</h3><p>${L("Who started in the period", "Chi ha iniziato nel periodo")}</p></div></div><div class="rows" id="ovN"></div></div>
     <div class="panel c6"><div class="ph"><div><h3>${L("Where the money comes from", "Da dove arrivano gli incassi")}</h3><p>${L(`By type of ${unit(false)}, in the period`, `Per tipo di ${unit(false)}, nel periodo`)}</p></div></div><div class="shr" id="ovC"></div></div>
     <div class="panel c6"><div class="ph"><div><h3>${L(`Top ${who()}`, `${Who()} che rendono di più`)}</h3><p>${L("Paid in the period", "Incassato nel periodo")}</p></div></div><div class="rows" id="ovT"></div><button class="more-link" data-view="clients">${L("See all", "Vedi tutti")} →</button></div>
   </div>`;
   el.innerHTML = h;
-  // revenue by month, from where the records start
-  const f0 = M.from > 0 ? Math.max(0, Math.min(NM - 6, M.from)) : NM - 12, ms = [...Array(NM - f0)].map((_, k) => f0 + k);
-  barChart($("#ovRev", el), { labels: ms.map(i => Cap(monthLabel(i, ms.length > 12))), stacked: true, series: [{ name: L("Revenue", "Incassato"), color: cssv("--blue"), values: ms.map(i => M.rev[i]) }, { name: L("Forecast, still to come", "Previsione, ancora da fare"), color: cssv("--blue"), opacity: .22, values: ms.map(i => i === NM - 1 ? Math.max(0, me.fc - me.so) : 0) }], fmt: eur, yfmt: eurK, h: 330, tipTitle: k => Cap(monthLabel(ms[k], true)) + (ms[k] === NM - 1 ? " · " + t("mtd") : "") });
-  $$("#ovRev .growbar", el).forEach((r, k) => r.style.animationDelay = (k % ms.length) * 45 + "ms");
+  // revenue in the period: by month, or by day when the period is one month
+  if (one) {
+    const y = lmD.getFullYear(), mo = lmD.getMonth(), n = daysIn(y, mo), rv = new Array(n).fill(0);
+    for (const x of DB.txns) if (x.st !== "refund" && x.d.getFullYear() === y && x.d.getMonth() === mo) rv[x.d.getDate() - 1] += x.a;
+    const fcv = rv.map((_, k) => me?.days?.get(k + 1) || 0);
+    barChart($("#ovRev", el), { labels: rv.map((_, k) => String(k + 1)), stacked: true, series: [{ name: L("Revenue", "Incassato"), color: cssv("--blue"), values: rv }, ...(isCur ? [{ name: L("Expected", "Previsto"), color: cssv("--blue"), opacity: .22, values: fcv }] : [])], fmt: eur, yfmt: eurK, h: 330, tipTitle: k => Cap(fdate(new Date(y, mo, k + 1), { weekday: "long", day: "numeric", month: "long" })) });
+    $$("#ovRev .growbar", el).forEach((b, k) => b.style.animationDelay = (k % n) * 22 + "ms");
+  } else {
+    barChart($("#ovRev", el), { labels: ms.map(i => Cap(monthLabel(i, ms.length > 12))), stacked: true, series: [{ name: L("Revenue", "Incassato"), color: cssv("--blue"), values: ms.map(i => M.rev[i]) }, { name: L("Forecast, still to come", "Previsione, ancora da fare"), color: cssv("--blue"), opacity: .22, values: ms.map(i => i === NM - 1 && me ? Math.max(0, me.fc - me.so) : 0) }], fmt: eur, yfmt: eurK, h: 330, tipTitle: k => Cap(monthLabel(ms[k], true)) + (ms[k] === NM - 1 ? " · " + t("mtd") : ""), onPick: k => { APP.revM = ms[k]; go("revenue"); } });
+    $$("#ovRev .growbar", el).forEach((b, k) => b.style.animationDelay = (k % ms.length) * 45 + "ms");
+  }
+  $("[data-revm]", el)?.addEventListener("click", e => { APP.revM = +e.currentTarget.dataset.revm; });
   // numbers count up, bars fill: the page builds itself in the order it reads
   $$("[data-num]", el).forEach(x => countUp(x, +x.dataset.num, x.dataset.fmt === "nf" ? v => nf(v) : eur));
   requestAnimationFrame(() => requestAnimationFrame(() => { el.classList.add("ov-go"); $$(".shr .bar i", el).forEach(b => b.style.width = b.dataset.w); }));
@@ -1977,8 +2127,8 @@ VIEWS.overview = el => {
   const none = txt => `<p class="empty-s">${esc(txt)}</p>`;
   if (visit) upcomingList($("#ovA", el), 6);
   else {
-    const q = DB.clients.filter(c => c.first && c.status === "risk").sort((a, b) => b.last - a.last).slice(0, 6);
-    $("#ovA", el).innerHTML = q.length ? q.map(c => { const pr = priceOf(c); return row(c, `${fdate(c.last, { day: "numeric", month: "long" })}<small>${Math.round((NOW - c.last) / DAY / 7)} ${L("weeks ago", "settimane fa")}</small>`, esc(chName(c.ch)) + (pr ? " · " + eur(pr.cur) + " " + L(`a ${unit(false)}`, `a ${unit(false)}`) : "")); }).join("") : none(L("No one: everyone came recently.", "Nessuno: tutti sono venuti di recente."));
+    const q = (past ? DB.clients.filter(c => c.first && c.last && inR(c.last, r.a, r.b) && c.status !== "active") : DB.clients.filter(c => c.first && c.status === "risk")).sort((a, b) => b.last - a.last).slice(0, 6);
+    $("#ovA", el).innerHTML = q.length ? q.map(c => { const pr = priceOf(c); return row(c, `${fdate(c.last, { day: "numeric", month: "long" })}<small>${Math.round((NOW - c.last) / DAY / 7)} ${L("weeks ago", "settimane fa")}</small>`, esc(chName(c.ch)) + (pr ? " · " + eur(pr.cur) + " " + L(`a ${unit(false)}`, `a ${unit(false)}`) : "")); }).join("") : none(past ? L("No one: everyone came back afterwards.", "Nessuno: sono tornati tutti anche dopo.") : L("No one: everyone came recently.", "Nessuno: tutti sono venuti di recente."));
   }
   const nw = DB.clients.filter(c => startOf(c) && inR(startOf(c), r.a, r.b)).sort((a, b) => startOf(b) - startOf(a));
   $("#ovN", el).innerHTML = nw.length ? nw.slice(0, 6).map(c => row(c, `${nf(LX().att[c.id])} ${unit(LX().att[c.id] !== 1)}<small>${eur(c.spent)}</small>`, `${L("since", "dal")} ${fdate(startOf(c), { day: "numeric", month: "short" })} · ${esc(chName(c.ch))}`)).join("") + (nw.length > 6 ? `<p class="empty-s">${L(`and ${nw.length - 6} more`, `e altri ${nw.length - 6}`)}</p>` : "") : none(L("No one new in this period.", "Nessuno nuovo in questo periodo."));
@@ -1991,8 +2141,8 @@ VIEWS.overview = el => {
   $("#ovT", el).innerHTML = top.length ? top.map(([id, v]) => { const c = DB.clients[id], pr = priceOf(c); return row(c, `<b>${eur(v)}</b><small>${pct(v / tot)}</small>`, esc(chName(c.ch)) + (pr && !visit ? " · " + eur(pr.cur) + " " + L(`a ${unit(false)}`, `a ${unit(false)}`) : "")); }).join("") : none(L("No payments in this period.", "Nessun pagamento in questo periodo."));
 };
 // the month as a calendar: days worked, days still to work, days off. It shows where the forecast comes from
-function calHtml() {
-  const y = NOW.getFullYear(), m = NOW.getMonth(), n = daysIn(y, m), first = (new Date(y, m, 1).getDay() + 6) % 7, today = dayKey(NOW);
+function calHtml(y = NOW.getFullYear(), m = NOW.getMonth()) {
+  const n = daysIn(y, m), first = (new Date(y, m, 1).getDay() + 6) % 7, today = dayKey(NOW);
   const les = new Map(); for (const x of workSource()) if (x.d.getFullYear() === y && x.d.getMonth() === m) les.set(dayKey(x.d), (les.get(dayKey(x.d)) || 0) + 1);
   const wk = P.week, cap = wk ? Math.max(...wk) : Math.max(1, ...les.values()), dn = LANG === "it" ? ["L", "M", "M", "G", "V", "S", "D"] : ["M", "T", "W", "T", "F", "S", "S"];
   let h = dn.map(d => `<span class="cw">${d}</span>`).join("") + "<span></span>".repeat(first);
@@ -2084,23 +2234,29 @@ VIEWS.clients = el => {
   const cnt = { "": DB.clients.length }; DB.clients.forEach(c => cnt[c.status] = (cnt[c.status] || 0) + 1);
   const sts = ["", "active", ...(P.oneoff ? [] : ["risk"]), "lapsed", "lead"].filter(s => s === "" || cnt[s]);
   const chUsed = P.channels.map((c, i) => i).filter(i => DB.clients.some(c => c.ch === i));
-  const F = cardFields(), sorts = [["name", "asc", L("Name", "Nome")], ...F.all.filter(c => c.k !== "status").map(c => [c.k, c.k === "first" ? "desc" : "desc", c.lab])];
+  const F = cardFields(), cols = tableCols();
+  // sort: one chip per choice, tap again to flip the order; the line next to it says the order in words
+  const SORTS = [["name", L("Name", "Nome"), "asc", [L("A to Z", "dalla A alla Z"), L("Z to A", "dalla Z alla A")]], ["price", L("Price", "Prezzo"), "desc", [L("cheapest first", "dal meno caro"), L("most expensive first", "dal più caro")]], ["spent", L("Paid", "Incassato"), "desc", [L("least first", "da chi ha pagato meno"), L("most first", "da chi ha pagato di più")]], ["first", L("Start", "Inizio"), "desc", [L("oldest first", "dai primi arrivati"), L("newest first", "dagli ultimi arrivati")]], ["last", L(`Last ${unit(false)}`, `Ultima ${unit(false)}`), "desc", [L("longest ago first", "da chi manca da più tempo"), L("most recent first", "dai più recenti")]], ["n", Cap(unit()), "desc", [L("fewest first", "da chi ne ha fatte meno"), L("most first", "da chi ne ha fatte di più")]]].filter(([k]) => cols.some(c => c.k === k));
+  if (!SORTS.some(([k]) => k === APP.sort.k)) APP.sort = { k: SORTS.find(([k]) => k === "price") ? "price" : "spent", dir: "desc" };
+  const sortHint = () => { const o = SORTS.find(([k]) => k === APP.sort.k); return o ? o[3][APP.sort.dir === "asc" ? 0 : 1] : ""; };
   h += `<div class="panel"><div class="filters" style="justify-content:space-between">
     <div class="st-chips" role="group" aria-label="${esc(t("status"))}">${sts.map(s => `<button type="button" class="chipb" data-fst="${s}" aria-pressed="${APP.fSt === s}">${s ? `<i class="dot ${s}"></i>` : ""}${esc(s ? stLabel(s) : L("All", "Tutti"))}<b>${nf(cnt[s] || 0)}</b></button>`).join("")}</div>
     <div class="filters">
     ${chUsed.length > 1 ? `<select class="sel" id="cch" aria-label="${esc(t("channel"))}"><option value="">${t("allCh")}</option>${chUsed.map(i => `<option value="${i}" ${APP.fCh === String(i) ? "selected" : ""}>${esc(tr(P.channels[i].n))}</option>`).join("")}</select>` : ""}
-    <select class="sel" id="csort" aria-label="${esc(L("Sort", "Ordina"))}">${sorts.map(([k, d, l]) => `<option value="${k}:${d}" ${APP.sort.k === k ? "selected" : ""}>${esc(L("Sort: ", "Ordina: ") + l)}</option>`).join("")}</select>
     <details class="fld-menu"><summary class="btn ghost sm">${icon(IC.edit)}${L("Show", "Mostra")} <b class="mono">${F.sel.length}</b></summary><div class="fld-pop">
       ${F.all.map(c => `<label><input type="checkbox" data-fld="${c.k}" ${F.sel.includes(c.k) ? "checked" : ""}>${esc(c.lab)}</label>`).join("")}
       <small>${L(`Up to ${CARD_MAX} details show as cards; more become a table.`, `Fino a ${CARD_MAX} dettagli vedi le schede; di più diventano una tabella.`)}</small></div></details>
     <label class="search">${icon(IC.search)}<input id="cq" type="search" placeholder="${esc(t("search"))}" value="${esc(APP.q)}" aria-label="${esc(t("search"))}"></label></div>
-  </div><div id="clist"></div><div class="pager" id="cpg"></div></div>`;
+  </div>
+  <div class="sort-row" role="group" aria-label="${esc(L("Sort by", "Ordina per"))}"><span class="eyebrow">${L("Sort by", "Ordina per")}</span>${SORTS.map(([k, l]) => `<button type="button" class="srt" data-srt="${k}" aria-pressed="${APP.sort.k === k}">${esc(l)}<i aria-hidden="true">${APP.sort.k === k ? (APP.sort.dir === "asc" ? "↑" : "↓") : ""}</i></button>`).join("")}<small id="srtH">${esc(sortHint())}</small></div>
+  <div id="clist"></div><div class="pager" id="cpg"></div></div>`;
   el.innerHTML = h;
   drawTable(el);
   let tmr; $("#cq", el).addEventListener("input", e => { clearTimeout(tmr); tmr = setTimeout(() => { APP.q = e.target.value; APP.page = 0; drawTable(el); }, 120); });
   $$("[data-fst]", el).forEach(b => b.onclick = () => { APP.fSt = b.dataset.fst; APP.page = 0; $$("[data-fst]", el).forEach(x => x.setAttribute("aria-pressed", x === b)); drawTable(el); });
   if ($("#cch", el)) $("#cch", el).onchange = e => { APP.fCh = e.target.value; APP.page = 0; drawTable(el); };
-  $("#csort", el).onchange = e => { const [k, dir] = e.target.value.split(":"); APP.sort = { k, dir }; drawTable(el); };
+  $$("[data-srt]", el).forEach(b => b.onclick = () => { const k = b.dataset.srt, d0 = SORTS.find(x => x[0] === k)[2]; APP.sort = APP.sort.k === k ? { k, dir: APP.sort.dir === "asc" ? "desc" : "asc" } : { k, dir: d0 }; APP.page = 0;
+    $$("[data-srt]", el).forEach(x => { const on = x.dataset.srt === k; x.setAttribute("aria-pressed", on); x.querySelector("i").textContent = on ? (APP.sort.dir === "asc" ? "↑" : "↓") : ""; }); $("#srtH", el).textContent = sortHint(); drawTable(el); });
   $$("[data-fld]", el).forEach(b => b.onchange = () => { const sel = $$("[data-fld]", el).filter(x => x.checked).map(x => x.dataset.fld); try { localStorage.setItem(fieldsKey(), JSON.stringify(sel)); } catch (e) { } $(".fld-menu b", el).textContent = sel.length; drawTable(el); });
   document.addEventListener("click", function off(e) { const m = $(".fld-menu", el); if (!m || !document.contains(m)) return document.removeEventListener("click", off); if (m.open && !m.contains(e.target)) m.open = false; });
 };
@@ -2169,7 +2325,7 @@ function openClient(id) {
     if (a === "pbDel") { e.target.closest(".pr-r").remove(); return; }
     if (a === "pbSave") {
       const since = $("#pbSince").value, rows = $$("#pbRows .pr-r").map(r => ({ d: $(".d", r).value, p: +$(".p", r).value })).filter(x => x.d && x.p > 0).sort((x, y) => x.d.localeCompare(y.d));
-      c.since = since && (!c.first || since !== isoDay(c.first)) ? since : null; c.prices = rows.length ? rows : null;
+      c.since = since && (!c.first || since !== isoDay(c.first)) ? since : null; if ($("#pbRows")) c.prices = rows.length ? rows : null;
       persistClient(c); afterChange(); openClient(c.id); toast(t("saved")); return;
     }
     if (a === "logSess") sessModal(c);
@@ -2181,12 +2337,12 @@ function openClient(id) {
 // start date and price history, shown as a timeline and editable by hand
 const priceRow = x => `<div class="pr-r"><input class="d" type="date" value="${esc(x.d || "")}" aria-label="${esc(L("From", "Dal"))}"><input class="p" type="number" min="0" step="1" inputmode="decimal" value="${esc(String(x.p ?? ""))}" aria-label="${esc(L("Price", "Prezzo"))}"><span class="cur">${esc(curSym())}</span><button type="button" class="ed-x" data-act="pbDel" aria-label="${esc(L("Remove", "Togli"))}">${icon(IC.x)}</button></div>`;
 function priceBlock(c, edit) {
-  const h = priceHistory(c), st = startOf(c), per = L(`a ${unit(false)}`, `a ${unit(false)}`);
-  const head = `<div class="ph" style="margin:0"><span class="eyebrow">${L("Start and prices", "Inizio e prezzi")}</span>${edit ? "" : `<button class="btn ghost sm" data-act="pbEdit">${icon(IC.edit)}${L("Edit", "Modifica")}</button>`}</div>`;
+  const h = priceHistory(c), st = startOf(c), per = L(`a ${unit(false)}`, `a ${unit(false)}`), fx = P.services[currentSvc(c)]?.fixed;
+  const head = `<div class="ph" style="margin:0"><span class="eyebrow">${L("Start and prices", "Inizio e prezzi")}</span>${edit ? "" : `<button class="btn ghost sm" data-act="pbEdit">${icon(IC.edit)}${fx ? L("Edit start", "Modifica inizio") : L("Edit", "Modifica")}</button>`}</div>`;
   if (edit) return `<div class="pb" id="pb">${head}
     ${fld("pbSince", L("Started on", "Ha iniziato il"), `<input id="pbSince" type="date" value="${st ? isoDay(st) : ""}">`)}
-    <div><span class="eyebrow">${L(`Price ${per}, from`, `Prezzo ${per}, dal`)}</span><div id="pbRows" style="margin-top:6px">${(h.length ? h : [{ d: st ? isoDay(st) : "", p: "" }]).map(priceRow).join("")}</div>
-    <button class="btn ghost sm" type="button" data-act="pbAdd" style="margin-top:6px">${icon(IC.plus)}${L("Price change", "Cambio di prezzo")}</button></div>
+    ${fx ? `<div class="note-box">${icon(IC.info)}<div>${L(`The price of ${esc(tr(P.services[currentSvc(c)].n))} is set by the school and cannot be changed here. It is read from the payments.`, `Il prezzo di ${esc(tr(P.services[currentSvc(c)].n))} lo decide la scuola e non si modifica qui. Viene letto dai pagamenti.`)}</div></div>` : `<div><span class="eyebrow">${L(`Price ${per}, from`, `Prezzo ${per}, dal`)}</span><div id="pbRows" style="margin-top:6px">${(h.length ? h : [{ d: st ? isoDay(st) : "", p: "" }]).map(priceRow).join("")}</div>
+    <button class="btn ghost sm" type="button" data-act="pbAdd" style="margin-top:6px">${icon(IC.plus)}${L("Price change", "Cambio di prezzo")}</button></div>`}
     <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn ghost sm" data-act="pbCancel">${L("Cancel", "Annulla")}</button><button class="btn main sm" data-act="pbSave">${L("Save", "Salva")}</button></div></div>`;
   const shown = h.slice(-5), more = h.length - shown.length;
   return `<div class="pb" id="pb">${head}<ol class="ptl">
@@ -2339,59 +2495,39 @@ function deleteClient(c) {
 function afterChange() { computeMonthly(); renderView(); }
 
 /* time filters: quick periods, plus any single month or a custom range under "Other" */
+const PER_G = { mtd: "var(--blue),var(--violet)", lm: "var(--violet),var(--pink)", "90": "var(--teal),var(--blue)", "12": "var(--lime),var(--teal)", all: "var(--sun),var(--coral)" };
 function periodBar() {
   const quick = [["mtd", L("This month", "Questo mese")], ["lm", L("Last month", "Mese scorso")], ["90", L("3 months", "3 mesi")], ["12", L("12 months", "12 mesi")], ["all", L("All", "Tutto")]];
   const first = Math.max(0, M.from >= 0 ? M.from : 0), months = []; for (let i = NM - 1; i >= first; i--) { const d = monthDate(i); months.push([`m:${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`, Cap(fdate(d, { month: "long", year: "numeric" }))]); }
-  const other = !quick.some(([v]) => v === PERIOD), cus = PERIOD.startsWith("r:") ? [PERIOD.slice(2, 12), PERIOD.slice(13)] : [isoDay(rangeFor(PERIOD).a), isoDay(NOW)];
-  return `<div class="per-bar" role="group" aria-label="${esc(L("Period", "Periodo"))}">${quick.map(([v, l]) => `<button type="button" class="chipb" data-per="${v}" aria-pressed="${PERIOD === v}">${esc(l)}</button>`).join("")}
-    <details class="per-more"><summary class="chipb" aria-pressed="${other}">${esc(other ? Cap(periodName()) : L("Other…", "Altro…"))}</summary><div class="per-pop">
+  const other = !quick.some(([v]) => v === PERIOD), r = rangeFor(PERIOD), cus = PERIOD.startsWith("r:") ? [PERIOD.slice(2, 12), PERIOD.slice(13)] : [isoDay(r.a), isoDay(NOW)];
+  const a0 = new Date(Math.max(+r.a, +monthDate(first))), same = a0.getFullYear() === r.b.getFullYear();
+  const rng = fdate(a0, { day: "numeric", month: "short", ...(same ? {} : { year: "numeric" }) }) + " – " + fdate(r.b, { day: "numeric", month: "short", year: "numeric" });
+  return `<div class="per-bar" role="group" aria-label="${esc(L("Period", "Periodo"))}"><div class="per-seg"><span class="per-ind" aria-hidden="true"></span>${quick.map(([v, l]) => `<button type="button" class="per-b" data-per="${v}" style="--g:${PER_G[v]}" aria-pressed="${PERIOD === v}">${esc(l)}</button>`).join("")}</div>
+    <details class="per-more"><summary class="per-b alt" aria-pressed="${other}">${esc(other ? Cap(periodName()) : L("Other…", "Altro…"))}</summary><div class="per-pop">
       <label>${esc(L("A month", "Un mese"))}<select class="sel" id="perM"><option value="">—</option>${months.map(([v, l]) => `<option value="${v}" ${PERIOD === v ? "selected" : ""}>${esc(l)}</option>`).join("")}</select></label>
       <div class="row2"><label>${esc(L("From", "Dal"))}<input type="date" class="sel" id="perA" value="${cus[0]}"></label><label>${esc(L("To", "Al"))}<input type="date" class="sel" id="perB" value="${cus[1]}" max="${isoDay(NOW)}"></label><button type="button" class="btn main sm" id="perGo">${esc(L("Apply", "Applica"))}</button></div>
-    </div></details></div>`;
+    </div></details><span class="per-rng" title="${esc(L("Dates the page is showing", "Le date che la pagina sta mostrando"))}">${esc(rng)}</span></div>`;
+}
+// the coloured pill slides from the old choice to the new one
+APP.perInd = null;
+function placePerInd() {
+  const seg = $(".per-seg"); if (!seg) return;
+  const ind = $(".per-ind", seg), on = $(".per-b[aria-pressed=true]", seg);
+  if (!on) { ind.style.opacity = 0; APP.perInd = null; return; }
+  const to = { l: on.offsetLeft, w: on.offsetWidth, g: on.style.getPropertyValue("--g") };
+  ind.style.background = `linear-gradient(120deg,${to.g})`;
+  const from = APP.perInd;
+  if (from && (from.l !== to.l || from.w !== to.w) && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    ind.style.transition = "none"; ind.style.left = from.l + "px"; ind.style.width = from.w + "px"; ind.offsetWidth;
+    ind.style.transition = ""; requestAnimationFrame(() => { ind.style.left = to.l + "px"; ind.style.width = to.w + "px"; });
+  } else { ind.style.left = to.l + "px"; ind.style.width = to.w + "px"; }
+  ind.style.opacity = 1; APP.perInd = to;
+  if (seg.scrollWidth > seg.clientWidth) seg.scrollTo({ left: Math.max(0, to.l - seg.clientWidth / 2 + to.w / 2), behavior: "smooth" });
 }
 function bindPeriodBar() { } // the bar is handled by the document listeners in 07-main
 
 /* ================= revenue ================= */
-VIEWS.revenue = el => {
-  const r = rangeFor(PERIOD), S1 = periodStats(r.a, r.b);
-  let h = vhead(eur(S1.rev) + " · " + periodName(), t("nav_revenue"), L("What sells, how people pay, and which months carry the year.", "Cosa si vende, come si paga e quali mesi reggono l'anno."), periodBar());
-  if (!hasData()) { el.innerHTML = h + emptyState(L("No payments yet", "Ancora nessun pagamento"), L("Record a payment from a client's card or import past payments.", "Registra un pagamento dalla scheda cliente o importa i pagamenti passati.")); return; }
-  const hasSub = P.services.some(s => s.kind === "sub") && sum(M.mrr) > 0;
-  const me = monthEndFc(), wi = workIn(r.a, r.b), U = Cap(unit()), mon = tr(I.monthNames)[NOW.getMonth()], fk = monthlyCosts(), ck = costsIn(r.a, r.b);
-  const kp = (c, lab, val, hint) => `<div class="kpi" style="--kc:var(${c})"><span class="lab"><i></i>${esc(lab)}</span><span class="val">${val}</span><span class="hint">${hint}</span></div>`;
-  h += `<div class="kpis">
-    ${kp("--blue", L(`End of ${mon} (forecast)`, `Fine ${mon} (previsione)`), eur(me.fc), (!me.left ? L(`${eur(me.so)} so far · no working days left this month`, `${eur(me.so)} finora · nessun giorno di lavoro rimasto nel mese`) : L(`${eur(me.so)} so far · ${me.byWeek ? "" : "about "}${nf(me.left)} working ${me.left === 1 ? "day" : "days"} left`, `${eur(me.so)} finora · ${me.byWeek ? "" : "circa "}${nf(me.left)} ${me.left === 1 ? "giorno" : "giorni"} di lavoro ${me.left === 1 ? "rimasto" : "rimasti"}`)) + (fk ? L(` · net ${eur(me.fc - fk)}`, ` · netto ${eur(me.fc - fk)}`) : ""))}
-    ${kp("--lime", L(`Days worked in ${mon}`, `Giorni lavorati a ${mon}`), nf(me.wd), L(`of ${nf(me.el)} days so far` + (me.prevDays != null ? ` · last month ${nf(me.prevDays)}` : ""), `su ${nf(me.el)} giorni trascorsi` + (me.prevDays != null ? ` · mese scorso ${nf(me.prevDays)}` : "")))}
-    ${kp("--violet", L("Per day worked", "Per giorno lavorato"), wi.days ? eur(S1.rev / wi.days) : "—", fk ? L(`${nf(wi.days)} days · ${wi.days ? nf(wi.les / wi.days, 1) : "—"} ${unit()} a day · ${periodName()}`, `${nf(wi.days)} giorni · ${wi.days ? nf(wi.les / wi.days, 1) : "—"} ${unit()} al giorno · ${periodName()}`) : L(`${periodName()} · ${nf(wi.days)} days · ${mon} ${eur(me.perDay)}`, `${periodName()} · ${nf(wi.days)} giorni · ${mon} ${eur(me.perDay)}`))}
-    ${fk ? kp("--sun", L("Net of fixed costs", "Netto dei costi fissi"), eur(S1.rev - ck), L(`${eur(ck)} of fixed costs (${eur(fk)}/month) · ${periodName()}`, `${eur(ck)} di costi fissi (${eur(fk)}/mese) · ${periodName()}`))
-      : kp("--sun", L(`${U} per day worked`, `${U} per giorno lavorato`), wi.days ? nf(wi.les / wi.days, 1) : "—", L(`${nf(wi.les)} ${unit()} · ${periodName()}`, `${nf(wi.les)} ${unit()} · ${periodName()}`))}
-  </div>`;
-  h += `<div class="grid">
-    <div class="panel c12"><div class="ph"><div><h3>${L("Month by month", "Mese per mese")}</h3><p>${L("Days worked, and what each day worked brings", "Giorni lavorati e quanto rende ogni giorno di lavoro")}</p></div></div><div id="rvDay"></div><div class="tablewrap"><table><thead><tr><th>${L("Month", "Mese")}</th><th class="num">${L("Days worked", "Giorni lavorati")}</th><th class="num">${esc(U)}</th><th class="num">${t("revenue")}</th><th class="num">${L("Per day worked", "Per giorno lavorato")}</th><th class="num">${L(`Per ${unit(false)}`, `Per ${unit(false)}`)}</th>${fk ? `<th class="num">${L("Net of fixed costs", "Netto costi fissi")}</th>` : ""}</tr></thead><tbody id="rvDayT"></tbody></table></div></div>
-    <div class="panel c8"><div class="ph"><div><h3>${t("revByService")}</h3><p>${t("revByServiceSub")}</p></div></div><div id="rvStack"></div><div class="legend" id="rvLeg"></div></div>
-    <div class="panel c4"><div class="ph"><div><h3>${t("methods")}</h3><p>${t("period")}</p></div></div><div class="donut-wrap"><div id="rvM"></div><div class="legend" id="rvML"></div></div></div>
-    <div class="panel c12"><div class="ph"><div><h3>${t("topServices")}</h3><p>${t("period")}</p></div></div><div class="tablewrap"><table><thead><tr><th>${t("service")}</th><th>${t("count")}</th><th>${t("avgPrice")}</th><th>${t("revenue")}</th><th>${t("share")}</th></tr></thead><tbody id="rvT"></tbody></table></div></div>
-    <div class="panel ${hasSub ? "c6" : "c12"}"><div class="ph"><div><h3>${t("seasonality")}</h3><p>${t("seasonalitySub")}</p></div></div><div class="heat-scroll"><div id="rvSeason"></div></div></div>
-    ${hasSub ? `<div class="panel c6"><div class="ph"><div><h3>${t("mrr")}</h3><p>${t("mrrSub")}</p></div><b class="mono">${eur(M.mrr[NM - 2])}/${L("mo", "mese")}</b></div><div id="rvMrr"></div></div>` : ""}
-  </div>`;
-  el.innerHTML = h;
-  const n0 = PERIOD === "all" ? NM : 12, from = Math.max(NM - n0, M.from > 0 ? Math.min(NM - 6, M.from) : 0), n = NM - from; // records that start recently: begin where they start
-  const series = P.services.map((s, i) => ({ name: tr(s.n), color: col(i), values: M.svc[i].slice(from) })).filter(s => sum(s.values) > 0);
-  series.push({ name: t("extras"), color: cssv("--pink"), values: M.ext.slice(from) });
-  barChart($("#rvStack", el), { labels: M.rev.slice(from).map((_, i) => monthLabel(from + i, n > 12)), series, stacked: true, h: 260, tipTitle: i => monthLabel(from + i, true) });
-  $("#rvLeg", el).innerHTML = series.map(s => `<span><i style="background:${s.color}"></i>${esc(s.name)}</span>`).join("");
-  const meth = {}; for (const x of DB.txns) if (inR(x.d, r.a, r.b) && x.st !== "refund") meth[x.m] = (meth[x.m] || 0) + x.a;
-  const mi = Object.entries(meth).sort((a, b) => b[1] - a[1]).map(([m, v], i) => ({ name: trMethod(m), value: v, color: col(i + 2), fmt: eur, sub: t("revenue") }));
-  donut($("#rvM", el), mi, [eurK(sum(mi.map(x => x.value))), t("revenue")]);
-  $("#rvML", el).innerHTML = mi.map(x => `<span><span style="display:inline-flex;gap:6px;align-items:center"><i style="background:${x.color}"></i>${esc(x.name)}</span><em>${pct(x.value / (S1.rev || 1))}</em></span>`).join("");
-  const rows = [...P.services.map((s, i) => ({ n: tr(s.n), k: "svc", i, c: col(i) })), ...P.extras.map((x, i) => ({ n: "+ " + tr(x.n), k: "ext", i, c: cssv("--pink") }))].map(o => { let cnt = 0, rev = 0; for (const x of DB.txns) if (x.k === o.k && x.s === o.i && inR(x.d, r.a, r.b) && x.st !== "refund") { cnt++; rev += x.a; } return { ...o, cnt, rev }; }).filter(o => o.cnt).sort((a, b) => b.rev - a.rev);
-  $("#rvT", el).innerHTML = rows.map(o => `<tr><td><span class="chip"><i style="background:${o.c}"></i>${esc(o.n)}</span></td><td class="num">${nf(o.cnt)}</td><td class="num">${eur(o.rev / o.cnt)}</td><td class="num"><b>${eur(o.rev)}</b></td><td class="num">${pct(o.rev / (S1.rev || 1), 1)}</td></tr>`).join("");
-  seasonHeat($("#rvSeason", el));
-  const W = workDays(), d0 = Math.max(0, M.from, NM - 12), ms = [...Array(NM - d0)].map((_, k) => d0 + k);
-  barChart($("#rvDay", el), { labels: ms.map(i => monthLabel(i, ms.length > 12 || monthDate(d0).getFullYear() !== NOW.getFullYear())), series: [{ name: L("Per day worked", "Per giorno lavorato"), color: cssv("--violet"), values: ms.map(i => W.n[i] ? M.rev[i] / W.n[i] : 0) }], fmt: eur, h: 200, tipTitle: k => monthLabel(ms[k], true) + " · " + nf(W.n[ms[k]]) + " " + L("days worked", "giorni lavorati") });
-  $("#rvDayT", el).innerHTML = [...ms].reverse().map(i => { const cur = i === NM - 1, n = W.n[i]; return `<tr><td>${esc(Cap(monthLabel(i, true)))}${cur ? ` <small class="muted-p">${L("so far · forecast", "finora · previsione")} ${eur(me.fc)}</small>` : ""}</td><td class="num">${n ? nf(n) : "—"}</td><td class="num">${nf(W.les[i])}</td><td class="num"><b>${eur(M.rev[i])}</b></td><td class="num">${n ? eur(M.rev[i] / n) : "—"}</td><td class="num">${W.les[i] ? eur(M.rev[i] / W.les[i]) : "—"}</td>${fk ? `<td class="num">${eur(M.rev[i] - monthlyCosts(monthDate(i)))}</td>` : ""}</tr>`; }).join("");
-  if (hasSub) lineChart($("#rvMrr", el), { labels: M.mrr.slice(NM - 12).map((_, i) => monthLabel(NM - 12 + i)), series: [{ name: "MRR", color: cssv("--lime"), values: M.mrr.slice(NM - 12, NM - 1).concat([null]), area: 1 }], h: 200 });
-};
+// revenue lives in 05-views-f.js
 function seasonHeat(el) {
   const years = [...new Set(M.rev.map((_, i) => i >= Math.max(0, M.from) ? monthDate(i).getFullYear() : null).filter(y => y != null))];
   const val = (y, m) => { const i = monthIdx(new Date(y, m, 1)); return i >= Math.max(0, M.from) && i < NM ? M.rev[i] : null; };
@@ -2474,9 +2610,9 @@ VIEWS.schedule = el => {
   let best = [0, 0, -1], worst = [0, 0, Infinity];
   hd.grid.forEach((row, d) => row.forEach((v, hh) => { if (v > best[2]) best = [d, hh, v]; if (v < worst[2] && (P.days?.[d] ?? 1) >= .3 && (ut || (P.hours?.[hd.H0 + hh] || 0) > 0)) worst = [d, hh, v]; }));
   const slot = ([d, hh]) => ut ? Cap(tr(I.dayNames)[d]) : tr(I.dayNames)[d] + " " + String(hd.H0 + hh).padStart(2, "0") + ":00";
-  const u = weeklyUtil(), avgU = avg(u.out.filter(v => v > 0).slice(-8)) / (P.capacity || 1); // weeks off (holidays, gaps) do not count as empty capacity
+  const ra = new Date(Math.max(+r.a, +monthDate(Math.max(0, M.from)))), u = weeklyUtil(ra, r.b), wOn = u.out.filter(v => v > 0), avgU = avg(wOn) / (P.capacity || 1); // weeks off (holidays, gaps) do not count as empty capacity
   h += `<div class="kpis">
-    <div class="kpi" style="--kc:var(--sun)"><span class="lab"><i></i>${t("util")}</span><span class="val">${pct(avgU)}</span><span class="hint">${L("avg of the last 8 weeks, capacity", "media ultime 8 settimane, capacità")} ${nf(P.capacity)}/${L("wk", "sett.")}</span></div>
+    <div class="kpi" style="--kc:var(--sun)"><span class="lab"><i></i>${t("util")}</span><span class="val">${pct(avgU)}</span><span class="hint">${L(`avg of the ${wOn.length} weeks worked in the period, capacity`, `media delle ${wOn.length} settimane lavorate nel periodo, capacità`)} ${nf(P.capacity)}/${L("wk", "sett.")}</span></div>
     <div class="kpi" style="--kc:var(--coral)"><span class="lab"><i></i>${t("noshow")}</span><span class="val">${pct(S1.books ? S1.ns / S1.books : 0, 1)}</span><span class="hint">${nf(S1.ns)} ${L("missed in the period", "mancate nel periodo")}</span></div>
     <div class="kpi" style="--kc:var(--lime)"><span class="lab"><i></i>${t("busiest")}</span><span class="val" style="font-size:1.4rem">${best[2] > 0 ? slot(best) : "—"}</span><span class="hint">${nf(best[2])} ${L("bookings", "prenotazioni")}</span></div>
     <div class="kpi" style="--kc:var(--blue)"><span class="lab"><i></i>${t("quietest")}</span><span class="val" style="font-size:1.4rem">${worst[2] < Infinity ? slot(worst) : "—"}</span><span class="hint">${L("a slot to fill with an offer", "una fascia da riempire con un'offerta")}</span></div>
@@ -2484,7 +2620,7 @@ VIEWS.schedule = el => {
   <div class="grid">
     ${ut ? `<div class="panel c8"><div class="ph"><div><h3>${L("Busiest days", "Giorni più pieni")}</h3><p>${L(`${Cap(unit())} by weekday. The records have dates but no times.`, `${Cap(unit())} per giorno della settimana. I dati hanno le date ma non gli orari.`)}</p></div></div><div id="scDays"></div></div>` : `<div class="panel c8"><div class="ph"><div><h3>${t("heat")}</h3><p>${t("heatSub")}</p></div><div class="heat-scale">${L("fewer", "meno")}${[10, 35, 60, 85, 100].map(p => `<i style="background:color-mix(in srgb, var(--coral) ${p}%, #fff)"></i>`).join("")}${L("more", "più")}</div></div><div class="heat-scroll"><div class="heat" style="grid-template-columns:40px repeat(${hd.H1 - hd.H0 + 1},minmax(26px,1fr));min-width:${60 + (hd.H1 - hd.H0 + 1) * 28}px"><span></span>${[...Array(hd.H1 - hd.H0 + 1)].map((_, i) => `<span style="text-align:center">${hd.H0 + i}</span>`).join("")}${hd.grid.map((row, d) => `<span class="hl">${tr(I.dayNames)[d]}</span>${row.map((v, hh) => `<span class="cell" style="background:${v ? `color-mix(in srgb, var(--coral) ${Math.round(8 + v / max * 92)}%, #fff)` : "var(--soft)"}" data-tip="${esc(tr(I.dayNames)[d] + " " + (hd.H0 + hh) + ":00 · " + v)}"></span>`).join("")}`).join("")}</div></div></div>`}
     <div class="panel c4"><div class="ph"><div><h3>${t("upcoming")}</h3><p>${t("upcomingSub")}</p></div></div><div class="list" id="scU"></div></div>
-    <div class="panel c12"><div class="ph"><div><h3>${t("util")}</h3><p>${t("utilSub")}</p></div><div class="legend"><span><i style="background:var(--sun)"></i>${L("Sessions held", "Sessioni svolte")}</span><span><i class="dash" style="border-color:var(--ink)"></i>${L("Capacity", "Capacità")}</span></div></div><div id="scW"></div></div>
+    <div class="panel c12"><div class="ph"><div><h3>${t("util")}</h3><p>${t("utilSub")} · ${esc(Cap(periodName()))}</p></div><div class="legend"><span><i style="background:var(--sun)"></i>${L("Sessions held", "Sessioni svolte")}</span><span><i class="dash" style="border-color:var(--ink)"></i>${L("Capacity", "Capacità")}</span></div></div><div id="scW"></div></div>
   </div>`;
   el.innerHTML = h;
   upcomingList($("#scU", el), 9);
@@ -2492,10 +2628,10 @@ VIEWS.schedule = el => {
   lineChartWithBars($("#scW", el), u);
 };
 function lineChartWithBars(host, u) {
-  barChart(host, { labels: u.labels, series: [{ name: L("Sessions", "Sessioni"), color: cssv("--sun"), values: u.out }], fmt: v => nf(v), h: 220 });
+  barChart(host, { labels: u.labels, series: [{ name: L("Sessions", "Sessioni"), color: cssv("--sun"), values: u.out }], fmt: v => nf(v), h: 220, ymax: P.capacity || 0 });
   const svg = $("svg", host); if (!svg) return;
   const vb = svg.viewBox.baseVal, ih = vb.height - 34;
-  const max = niceMax(Math.max(...u.out) * 1.05).max;
+  const max = niceMax(Math.max(P.capacity || 0, ...u.out) * 1.05).max;
   if (P.capacity <= max) { const y = 10 + ih - P.capacity / max * ih; S("line", { x1: 46, x2: vb.width - 6, y1: y, y2: y, stroke: cssv("--ink"), "stroke-width": 1.5, "stroke-dasharray": "5 4" }, svg); }
 }
 
@@ -3414,7 +3550,7 @@ VIEWS.today = el => {
   const day = APP.day ? new Date(APP.day) : dayStart(new Date()), past = dayStart(day) <= dayStart(new Date());
   const isToday = sameDay(day, new Date());
   const title = isToday ? L("Today", "Oggi") : day.toLocaleDateString(loc(), { weekday: "long", day: "numeric", month: "long" });
-  const nav = `<div class="filters day-nav"><button class="btn ghost sm" data-day="-1" aria-label="${esc(L("Previous day", "Giorno prima"))}">‹</button><input type="date" class="sel" id="dayPick" value="${isoDay(day)}" aria-label="${esc(L("Day", "Giorno"))}"><button class="btn ghost sm" data-day="1" aria-label="${esc(L("Next day", "Giorno dopo"))}">›</button>${isToday ? "" : `<button class="btn ghost sm" data-day="0">${L("Today", "Oggi")}</button>`}</div>`;
+  const nav = `<div class="filters day-nav"><input type="date" class="sel" id="dayPick" value="${isoDay(day)}" aria-label="${esc(L("Go to a day", "Vai a un giorno"))}">${isToday ? "" : `<button class="btn ghost sm" data-day="0">${L("Today", "Oggi")}</button>`}</div>`;
   let h = vhead(L("Day register", "Registro del giorno"), Cap(title), isVisit()
     ? L(`The ${unit()} of the day: mark who showed up and add the review stars after the ${unit(false)}. Every tap is saved.`, `I ${unit()} del giorno: segna chi si è presentato e aggiungi le stelle della recensione dopo il ${unit(false)}. Ogni tocco viene salvato.`)
     : L(`Pick the day and tap who had a ${unit(false)}. Every tap is saved.`, `Scegli il giorno e tocca chi ha fatto ${unit(false)}. Ogni tocco viene salvato.`), nav);
@@ -3422,21 +3558,24 @@ VIEWS.today = el => {
   const sm = isVisit()
     ? [[nf(ents.length), Cap(unit())], [nf(sum(ents.map(e => e.c.size || 1))), Who()], [nf(miss.length), "No-show"]]
     : [[nf(came.length), Cap(unit())], [eur(sum(DB.txns.filter(x => x.st !== "refund" && sameDay(x.d, day)).map(x => x.a))), L("Earned", "Incassato")], [nf(miss.length), L("Missed", "Assenti")], ...(plan.length ? [[nf(plan.length), past ? L("To mark", "Da segnare") : L("Booked", "Prenotate")]] : [])];
+  h += weekStrip(day);
   h += `<div class="panel"><div class="minis">${sm.map(([v, l]) => `<div class="mini"><b>${v}</b><small>${esc(l)}</small></div>`).join("")}</div>`;
   if (!ents.length && P.week && !(P.week[(day.getDay() + 6) % 7] > 0)) h += `<p class="muted-p" style="margin:0">${L("Day off.", "Giorno libero.")}</p>`;
   else if (!ents.length) h += `<p class="muted-p" style="margin:0">${isVisit() ? L(`No ${unit()} on this day.`, `Nessun ${unit(false)} in questo giorno.`) : L(`Nothing recorded yet. Tap the ${who()} below who had a ${unit(false)}.`, `Ancora niente. Tocca qui sotto gli ${who()} che hanno fatto ${unit(false)}.`)}</p>`;
-  h += `<div class="day-list">${ents.map((e, i) => dayRow(e, i, past)).join("")}</div>`;
+  h += `<div class="day-list dtiles">${ents.map((e, i) => dayRow(e, i, past)).join("")}</div>`;
   if (isVisit()) h += `<div><button class="btn main" data-act="dayBook">${icon(IC.plus)}${L("New booking for this day", "Nuova prenotazione per questo giorno")}</button></div>`;
   h += `</div>`;
   if (!isVisit()) {
     h += `<div class="panel"><div class="ph"><div><h3>${past ? L(`Who had a ${unit(false)}?`, `Chi ha fatto ${unit(false)}?`) : L(`Book a ${unit(false)}`, `Prenota una ${unit(false)}`)}</h3><p>${past ? L("One tap records the lesson and its payment at the student's price.", `Un tocco registra la ${unit(false)} e il pagamento al prezzo dello ${who(false)}.`) : L("One tap books them for this day.", "Un tocco li prenota per questo giorno.")}</p></div>
       <label class="search" style="flex:none;min-width:180px">${icon(IC.search)}<input id="dayQ" type="search" placeholder="${esc(t("search"))}" aria-label="${esc(t("search"))}"></label></div>
-      <div class="tap-grid" id="dayAdd"></div>
+      <div id="dayAdd"></div>
       <button class="btn ghost sm" data-act="dayNew" style="margin-top:12px">${icon(IC.plus)}${L(`New ${who(false)}`, `Nuovo ${who(false)}`)}</button></div>`;
   }
   el.innerHTML = h;
   const goDay = d => { APP.day = +dayStart(d); renderView(); };
   $$("[data-day]", el).forEach(b => b.onclick = () => { const k = +b.dataset.day; goDay(k === 0 ? new Date() : new Date(+day + k * DAY + 3 * 3600e3)); });
+  $$("[data-dset]", el).forEach(b => b.onclick = () => goDay(new Date(b.dataset.dset + "T12:00")));
+  $(".wsd.on", el)?.scrollIntoView({ block: "nearest", inline: "center" });
   $("#dayPick", el).onchange = e => { if (e.target.value) goDay(new Date(e.target.value + "T12:00")); };
   el.onclick = e => {
     const r = e.target.closest("[data-i]"); const a = e.target.closest("[data-a]")?.dataset.a;
@@ -3470,13 +3609,27 @@ VIEWS.today = el => {
       const onWd = new Map(); for (const b of DB.books) if (!b.ns && b.d.getDay() === wd && b.d > NOW - 120 * DAY) onWd.set(b.c, (onWd.get(b.c) || 0) + 1);
       const list = DB.clients.filter(c => c.first && !ids.has(c.id) && (s ? c.name.toLowerCase().includes(s) : ["active", "risk"].includes(c.status)))
         .sort((a, b) => (onWd.get(b.id) || 0) - (onWd.get(a.id) || 0) || (b.last || 0) - (a.last || 0)).slice(0, s ? 24 : 60);
-      $("#dayAdd", el).innerHTML = list.length ? list.map(c => { const sv = currentSvc(c), ch = chargeFor(c, sv), cr = hasPack() ? creditLeft(c) : null;
-        const sub = ch && past ? eur(ch.a) : tr(P.services[sv]?.n) || ""; return `<button type="button" class="tap" data-add="${c.id}">${avatar(c)}<span><b>${esc(c.name)}</b><small>${esc(sub)}${cr && c.status !== "lapsed" ? " · " + L(`${cr.left} left`, `${cr.left} rimaste`) : ""}</small></span><i>${icon(IC.plus)}</i></button>`; }).join("")
+      const tile = c => { const sv = currentSvc(c), ch = chargeFor(c, sv), cr = hasPack() ? creditLeft(c) : null;
+        return `<button type="button" class="tap" data-add="${c.id}" style="--sc:${col(sv)}" title="${esc(c.name + " · " + (tr(P.services[sv]?.n) || ""))}">${avatar(c)}<span><b>${esc(c.name)}</b><small>${ch && past ? esc(eur(ch.a)) : esc(tr(P.services[sv]?.n) || "")}${cr && c.status !== "lapsed" ? " · " + L(`${cr.left} left`, `${cr.left} rimaste`) : ""}</small></span></button>`; };
+      const used = [...new Set(list.map(currentSvc))], legend = used.length > 1 ? `<div class="tap-lg">${used.map(k => `<span><i class="sd" style="--sc:${col(k)}"></i>${esc(tr(P.services[k]?.n) || "")}</span>`).join("")}</div>` : "";
+      const reg = s ? [] : list.filter(c => onWd.get(c.id) >= 2), rest = list.filter(c => !reg.includes(c)), wdn = day.toLocaleDateString(loc(), { weekday: "long" });
+      $("#dayAdd", el).innerHTML = list.length ? legend + (reg.length ? `<div class="tap-h">${L(`Usually on ${wdn}`, `Di solito il ${wdn}`)} · ${reg.length}</div><div class="tap-grid">${reg.map(tile).join("")}</div>` : "") + (rest.length ? `${reg.length ? `<div class="tap-h">${L(`Other ${who()}`, `Altri ${who()}`)} · ${rest.length}</div>` : ""}<div class="tap-grid">${rest.map(tile).join("")}</div>` : "")
         : `<p class="muted-p" style="margin:0">${s ? L("No one found.", "Nessuno trovato.") : L(`Everyone is already in the day.`, `Ci sono già tutti.`)}</p>`;
     };
     q.oninput = draw; draw();
   }
 };
+// the week around the chosen day: tap a day to open it
+function weekStrip(day) {
+  const m0 = dayStart(day); m0.setDate(m0.getDate() - ((m0.getDay() + 6) % 7));
+  const days = [...Array(7)].map((_, k) => { const d = new Date(m0); d.setDate(d.getDate() + k); return d; });
+  const cnt = days.map(d => DB.books.filter(b => !b.ns && sameDay(b.d, d)).length), pl = days.map(d => (DB.upcoming || []).filter(u => sameDay(u.d, d)).length);
+  const rev = sum(DB.txns.filter(x => x.st !== "refund" && x.d >= days[0] && x.d < new Date(+days[6] + DAY)).map(x => x.a)), max = Math.max(1, ...cnt, ...(P.week || []));
+  const lbl = days[0].getMonth() === days[6].getMonth() ? `${days[0].getDate()} – ${fdate(days[6], { day: "numeric", month: "long" })}` : `${fdate(days[0], { day: "numeric", month: "short" })} – ${fdate(days[6], { day: "numeric", month: "short" })}`;
+  return `<div class="panel wstrip"><div class="ws-top"><button class="btn ghost sm" data-day="-7" aria-label="${esc(L("Previous week", "Settimana prima"))}">‹</button><div><b>${esc(L("Week of ", "Settimana ") + lbl)}</b><small>${nf(sum(cnt))} ${unit(sum(cnt) !== 1)}${isVisit() ? "" : " · " + eur(rev)}</small></div><button class="btn ghost sm" data-day="7" aria-label="${esc(L("Next week", "Settimana dopo"))}">›</button></div>
+    <div class="ws-days">${days.map((d, k) => { const off = P.week && !(P.week[k] > 0) && !cnt[k], n = cnt[k], cap = P.week?.[k] || max;
+      return `<button type="button" class="wsd${sameDay(d, day) ? " on" : ""}${sameDay(d, new Date()) ? " today" : ""}${off ? " off" : ""}" data-dset="${isoDay(d)}" aria-pressed="${sameDay(d, day)}"><small>${esc(d.toLocaleDateString(loc(), { weekday: "short" }))}</small><b>${d.getDate()}</b><span class="ws-bar"><i style="--f:${Math.min(1, n / cap).toFixed(2)}"></i></span><em>${n ? `${n} ${L("les.", "lez.")}` : pl[k] ? `${pl[k]} ${L("booked", "pren.")}` : off ? L("off", "libero") : "—"}</em></button>`; }).join("")}</div></div>`;
+}
 function dayRow(e, i, past) {
   const c = e.c, time = !e.d.getHours() && !e.d.getMinutes() && untimed() ? "" : e.d.toLocaleTimeString(loc(), { hour: "2-digit", minute: "2-digit" });
   const st = e.kind === "plan" ? "plan" : e.ref.ns ? "miss" : "came";
@@ -3484,12 +3637,328 @@ function dayRow(e, i, past) {
   const cr = !isVisit() && hasPack() && !isTrial(e.s) ? creditLeft(c) : null;
   const rf = ratingField(), stars = isVisit() && rf && st === "came" ? `<span class="stars" role="group" aria-label="${esc(L("Review stars", "Stelle recensione"))}">${[1, 2, 3, 4, 5].map(v => `<button type="button" data-a="star" data-v="${v}" class="${+c.f[rf.k] >= v ? "on" : ""}" aria-label="${v}">★</button>`).join("")}</span>` : "";
   const paid = !isVisit() && e.kind === "book" ? dayPaid(c, e.d) : 0;
-  const sub = [tr(P.services[e.s]?.n), paid ? eur(paid) : "", isVisit() && (c.size || 1) > 1 ? `${c.size} ${L("people", "persone")}` : "", cr ? (cr.left <= 1 ? `<b class="warn">${L(`${cr.left} left: offer the next package`, `${cr.left} rimaste: proponi il prossimo pacchetto`)}</b>` : L(`${cr.left} left`, `${cr.left} rimaste`)) : "", isTrial(e.s) && !c.first ? `<b class="warn">${L("free trial: follow up today", "prova gratuita: ricontatta oggi")}</b>` : ""].filter(Boolean).join(" · ");
+  const sub = [time, tr(P.services[e.s]?.n), isVisit() && (c.size || 1) > 1 ? `${c.size} ${L("people", "persone")}` : "", cr ? (cr.left <= 1 ? `<b class="warn">${L(`${cr.left} left: offer the next package`, `${cr.left} rimaste: proponi il prossimo pacchetto`)}</b>` : L(`${cr.left} left`, `${cr.left} rimaste`)) : "", isTrial(e.s) && !c.first ? `<b class="warn">${L("free trial: follow up today", "prova gratuita: ricontatta oggi")}</b>` : ""].filter(Boolean).join(" · ");
+  const badge = st === "plan" ? L("Booked", "Prenotata") : st === "came" ? L("Came", "C'era") : L("Missed", "Assente");
   const acts = st === "plan"
-    ? (past ? `<button class="btn ghost sm ok" data-a="came">${L("Came", "C'era")}</button><button class="btn ghost sm" data-a="miss">${L("Missed", "Assente")}</button>` : `<span class="pill lead">${L("Booked", "Prenotato")}</span>`)
-    : `<span class="pill ${st === "came" ? "active" : "risk"}">${st === "came" ? L("Came", "C'era") : L("Missed", "Assente")}</span>${st === "came" ? `<button class="btn ghost sm" data-a="miss">${L("Missed", "Assente")}</button>` : `<button class="btn ghost sm" data-a="came">${L("Came", "C'era")}</button>`}`;
-  return `<div class="day-r ${st}" data-i="${i}">${time ? `<span class="when"><b>${esc(time)}</b></span>` : ""}${avatar(c)}<div class="day-n"><button type="button" class="lnk" data-a="open">${esc(c.name)}</button><small>${sub}</small>${stars}</div><div class="day-a">${acts}${owed ? `<button class="btn ghost sm" data-a="collect" title="${esc(L("Mark open payments as paid", "Segna i pagamenti aperti come pagati"))}">${L("Collect", "Incassa")} ${eur(owed)}</button>` : ""}${!isVisit() ? `<button class="btn ghost sm" data-a="pay" aria-label="${esc(t("addPay"))}">${icon(IC.euro)}</button><button class="btn ghost sm" data-a="del" aria-label="${esc(L("Remove", "Togli"))}" title="${esc(L("Remove", "Togli"))}">${icon(IC.x)}</button>` : ""}</div></div>`;
+    ? (past ? `<button class="btn ghost sm ok" data-a="came">✓ ${L("Came", "C'era")}</button><button class="btn ghost sm" data-a="miss">${L("Missed", "Assente")}</button>` : "")
+    : st === "came" ? `<button class="btn ghost sm" data-a="miss" title="${esc(L("Mark as missed", "Segna come assente"))}">${L("Missed", "Assente")}</button>` : `<button class="btn ghost sm ok" data-a="came">✓ ${L("Came", "C'era")}</button>`;
+  return `<div class="dtile ${st}" data-i="${i}" style="--sc:${col(e.s)};--i:${i}">
+    <div class="dt-top">${avatar(c)}<div class="day-n"><button type="button" class="lnk" data-a="open">${esc(c.name)}</button><small><i class="sd"></i>${sub}</small>${stars}</div><span class="dt-st">${badge}</span></div>
+    <div class="dt-bot">${paid ? `<b class="dt-p">${eur(paid)}</b>` : `<span class="dt-p muted">${st === "miss" ? L("no charge", "niente da pagare") : ""}</span>`}<div class="day-a">${acts}${owed ? `<button class="btn ghost sm" data-a="collect" title="${esc(L("Mark open payments as paid", "Segna i pagamenti aperti come pagati"))}">${L("Collect", "Incassa")} ${eur(owed)}</button>` : ""}${!isVisit() ? `<button class="btn ghost sm ic" data-a="pay" aria-label="${esc(t("addPay"))}" title="${esc(t("addPay"))}">${icon(IC.euro)}</button><button class="btn ghost sm ic" data-a="del" aria-label="${esc(L("Remove", "Togli"))}" title="${esc(L("Remove", "Togli"))}">${icon(IC.x)}</button>` : ""}</div></div></div>`;
 }
+
+/* ================= revenue: pick a month, compare it with the one before, see how it all grows =================
+   Month chips on top (each with a small bar of its revenue), the month's numbers against the previous month
+   with revenue, revenue by type of lesson with the average price, who started and who stopped, then the
+   trend charts, what new students bring, and the whole history month by month. */
+APP.revM = null; APP.revChart = "rev";
+const revMonths = () => { const f = M.from >= 0 ? M.from : Math.max(0, NM - 12); return [...Array(Math.max(0, NM - f))].map((_, k) => f + k); };
+const prevWith = m => { for (let i = m - 1; i >= Math.max(0, M.from); i--) if (M.rev[i] > 0) return i; return -1; };
+const monthLong = i => Cap(monthDate(i).toLocaleDateString(loc(), { month: "long", year: "numeric" }));
+const monthOnly = i => monthDate(i).toLocaleDateString(loc(), { month: "long" });
+const aM = n => (/^[aeiou]/i.test(n) ? "ad " : "a ") + n; // Italian: "a ottobre" but "ad agosto"
+
+function monthStats(m) {
+  const W = workDays(), a = monthDate(m), svc = new Map(); let ext = 0;
+  for (const x of DB.txns) {
+    if (x.st === "refund" || monthIdx(x.d) !== m) continue;
+    if (x.k === "ext") { ext += x.a; continue; }
+    if (P.services[x.s]?.trial) continue;
+    const o = svc.get(x.s) || { n: 0, v: 0, p: 0, who: new Set() }; o.n++; o.v += x.a; o.p += lessonPrice(x); o.who.add(x.c); svc.set(x.s, o);
+  }
+  const sv = [...svc.values()], n = sum(sv.map(o => o.n));
+  const pm = prevWith(m), act = M.act[m] || new Set(), before = pm >= 0 ? M.act[pm] || new Set() : new Set();
+  const nw = DB.clients.filter(c => startOf(c) && monthIdx(startOf(c)) === m).sort((x, y) => startOf(x) - startOf(y));
+  const stop = [...before].filter(id => !act.has(id)).map(id => DB.clients[id]).filter(Boolean);
+  const rev = M.rev[m] || 0, days = W.n[m] || 0, les = W.les[m] || 0, costs = monthlyCosts(a);
+  return { m, pm, a, rev, days, les, perDay: days ? rev / days : 0, perLes: n ? sum(sv.map(o => o.p)) / n : 0, svc, ext, act: act.size, nw, stop, costs, net: rev - costs };
+}
+const dlt = (cur, prev) => {
+  if (prev == null) return "";
+  if (!prev) return `<span class="mdl flat">—</span>`;
+  const d = cur / prev - 1, z = Math.abs(d) < .005;
+  return `<span class="mdl ${z ? "flat" : d > 0 ? "up" : "down"}">${z ? "=" : d > 0 ? "▲" : "▼"} ${nf(Math.abs(d) * 100, Math.abs(d) < .1 ? 1 : 0)}%</span>`;
+};
+// a few plain sentences on what changed against the month before
+function monthNotes(S, S0, p) {
+  if (!S.rev) return "";
+  const out = [], pn = S0 ? monthOnly(p) : "", U = unit(), u1 = unit(false);
+  if (S0 && S0.rev) {
+    const dr = S.rev - S0.rev, dl = S.les - S0.les, dp = S0.perLes ? S.perLes / S0.perLes - 1 : 0;
+    const why = Math.abs(dl) >= 1 && Math.abs(dp) < .03 ? L(`it comes from the number of ${U} (${dl > 0 ? "+" : "−"}${nf(Math.abs(dl))}), the price stayed about the same`, `dipende dal numero di ${U} (${dl > 0 ? "+" : "−"}${nf(Math.abs(dl))}), il prezzo è rimasto quasi uguale`)
+      : Math.abs(dp) >= .03 && Math.abs(dl) < 1 ? L(`it comes from the price, ${dp > 0 ? "up" : "down"} ${pct(Math.abs(dp), 1)}`, `dipende dal prezzo, ${dp > 0 ? "salito" : "sceso"} del ${pct(Math.abs(dp), 1)}`)
+      : L(`${nf(Math.abs(dl))} ${U} ${dl >= 0 ? "more" : "fewer"} and an average price ${dp >= 0 ? "up" : "down"} ${pct(Math.abs(dp), 1)}`, `${nf(Math.abs(dl))} ${U} in ${dl >= 0 ? "più" : "meno"} e prezzo medio ${dp >= 0 ? "su" : "giù"} del ${pct(Math.abs(dp), 1)}`);
+    out.push(L(`<b>${dr >= 0 ? "+" : "−"}${eur(Math.abs(dr))}</b> against ${pn}: ${why}.`, `<b>${dr >= 0 ? "+" : "−"}${eur(Math.abs(dr))}</b> rispetto ${aM(pn)}: ${why}.`));
+    if (S.days && S0.days) out.push(L(`${nf(S.les / S.days, 1)} ${U} a day worked, against ${nf(S0.les / S0.days, 1)} in ${pn}.`, `${nf(S.les / S.days, 1)} ${U} per giorno lavorato, contro ${nf(S0.les / S0.days, 1)} ${aM(pn)}.`));
+  }
+  const big = [...S.svc.entries()].sort((a, b) => b[1].v - a[1].v)[0];
+  if (big) { const o0 = S0?.svc.get(big[0]); out.push(L(`Average price of “${esc(tr(P.services[big[0]]?.n))}”: <b>${eur(big[1].p / big[1].n)}</b> a ${u1}${o0 ? ` (${eur(o0.p / o0.n)} in ${pn})` : ""}.`, `Prezzo medio di «${esc(tr(P.services[big[0]]?.n))}»: <b>${eur(big[1].p / big[1].n)}</b> a ${u1}${o0 ? ` (${eur(o0.p / o0.n)} ${aM(pn)})` : ""}.`)); }
+  if (S.nw.length) { const ids = new Set(S.nw.map(c => c.id)), v = sum(DB.txns.filter(x => ids.has(x.c) && monthIdx(x.d) === S.m && x.st !== "refund").map(x => x.a)); out.push(L(`The ${nf(S.nw.length)} new ${who()} brought <b>${eur(v)}</b>, ${pct(v / S.rev)} of the month.`, `I ${nf(S.nw.length)} nuovi ${who()} hanno portato <b>${eur(v)}</b>, il ${pct(v / S.rev)} del mese.`)); }
+  const top = [...S.act ? DB.txns.filter(x => monthIdx(x.d) === S.m && x.st !== "refund").reduce((m, x) => m.set(x.c, (m.get(x.c) || 0) + x.a), new Map()) : []].sort((a, b) => b[1] - a[1])[0];
+  if (top) out.push(L(`Top ${who(false)}: <b>${esc(DB.clients[top[0]].name)}</b> with ${eur(top[1])}.`, `${Cap(who(false))} che ha reso di più: <b>${esc(DB.clients[top[0]].name)}</b> con ${eur(top[1])}.`));
+  return out.length ? `<div class="mnotes"><span class="eyebrow">${L("In short", "In breve")}</span><ul>${out.map(x => `<li>${x}</li>`).join("")}</ul></div>` : "";
+}
+// students who started in each month: how many, how many still come, what they bring
+function startCohorts() {
+  const X = LX(), out = new Map();
+  for (const c of DB.clients) {
+    const s = startOf(c); if (!s || !c.first) continue;
+    const m = monthIdx(s); if (m < 0 || m >= NM) continue;
+    const o = out.get(m) || { m, n: 0, still: 0, les: 0, paid: 0, p0: [], first: 0, ch: new Map() };
+    o.n++; if (c.status === "active" || c.status === "risk") o.still++;
+    o.les += X.att[c.id] || 0; o.paid += c.spent;
+    const pr = priceOf(c); if (pr) o.p0.push(pr.first);
+    o.first += DB.books.filter(b => b.c === c.id && !b.ns && !isTrial(b.s) && monthIdx(b.d) === m).length;
+    o.ch.set(c.ch, (o.ch.get(c.ch) || 0) + 1);
+    out.set(m, o);
+  }
+  return [...out.values()].sort((a, b) => a.m - b.m);
+}
+
+VIEWS.revenue = el => {
+  const ms = revMonths();
+  if (!hasData() || !ms.length) { el.innerHTML = vhead(L("Revenue", "Ricavi"), t("nav_revenue"), "") + emptyState(L("No payments yet", "Ancora nessun pagamento"), L("Add payments or import them: this page fills itself in.", "Aggiungi pagamenti o importali: questa pagina si compila da sola.")); return; }
+  let m = APP.revM;
+  if (m == null || !ms.includes(m)) { m = NM - 1; if (!(M.rev[m] > 0)) { const p = prevWith(NM); if (p >= 0) m = p; } }
+  APP.revM = m;
+  const S = monthStats(m), p = prevWith(m), S0 = p >= 0 ? monthStats(p) : null, cur = m === NM - 1, fc = cur ? monthEndFc() : null;
+  const skipped = p >= 0 && p < m - 1, maxR = Math.max(1, ...ms.map(i => M.rev[i] || 0)), U = Cap(unit());
+  let h = vhead(L("Revenue", "Ricavi") + (cur ? " · " + L("month in progress", "mese in corso") : ""), monthLong(m),
+    S0 ? L(`Every number against ${monthOnly(p)}${skipped ? ", the last month with revenue" : ""}. Pick another month below or click a bar in the chart.`, `Ogni numero è confrontato con ${monthOnly(p)}${skipped ? ", l'ultimo mese con incassi" : ""}. Scegli un altro mese qui sotto o tocca una barra del grafico.`) : L("The first month on record.", "Il primo mese registrato."));
+  const ix = ms.indexOf(m);
+  h += `<div class="mpick"><button class="btn ghost sm" data-rm="${ms[Math.max(0, ix - 1)]}" ${ix <= 0 ? "disabled" : ""} aria-label="${esc(L("Previous month", "Mese prima"))}">‹</button>
+    <div class="mp-row">${ms.map(i => `<button type="button" class="mp" data-rm="${i}" aria-pressed="${i === m}"><span class="mp-b"><i style="--h:${Math.max(M.rev[i] ? 6 : 0, (M.rev[i] || 0) / maxR * 100).toFixed(0)}%"></i></span><b>${esc(Cap(monthDate(i).toLocaleDateString(loc(), { month: "short" })))}${monthDate(i).getMonth() === 0 || i === ms[0] ? ` <small>${monthDate(i).getFullYear()}</small>` : ""}</b><small>${M.rev[i] ? eurK(M.rev[i]) : "—"}</small></button>`).join("")}</div>
+    <button class="btn ghost sm" data-rm="${ms[Math.min(ms.length - 1, ix + 1)]}" ${ix >= ms.length - 1 ? "disabled" : ""} aria-label="${esc(L("Next month", "Mese dopo"))}">›</button></div>`;
+  const pv = (k) => S0 ? S0[k] : null;
+  const tiles = [
+    ["--blue", L("Revenue", "Incassato"), S.rev, pv("rev"), "eur", fc ? L(`forecast ${eur(fc.fc)}`, `previsione ${eur(fc.fc)}`) : ""],
+    ["--violet", U, S.les, pv("les"), "nf", ""],
+    ["--teal", L("Days worked", "Giorni lavorati"), S.days, pv("days"), "nf", fc ? L(`${fc.left} still to work`, `${fc.left} ancora da lavorare`) : ""],
+    ["--lime", L("Per day worked", "Per giorno lavorato"), S.perDay, pv("perDay"), "eur", ""],
+    ["--sun", L(`Average price a ${unit(false)}`, `Prezzo medio a ${unit(false)}`), S.perLes, pv("perLes"), "eur", ""],
+    ["--coral", L(`${Who()} who came`, `${Who()} con lezioni`), S.act, pv("act"), "nf", ""],
+    ["--pink", L(`New ${who()}`, `Nuovi ${who()}`), S.nw.length, S0 ? S0.nw.length : null, "nf", ""],
+    ...(S.costs ? [["--ink", L("Net of fixed costs", "Netto dei costi fissi"), S.net, pv("net"), "eur", L(`${eur(S.costs)} of costs`, `${eur(S.costs)} di costi`)]] : []),
+  ];
+  h += `<div class="mk-grid">${tiles.map(([c, l, v, pvv, f, sub]) => `<div class="mk" style="--kc:var(${c})"><span class="l"><i></i>${esc(l)}</span><b data-num="${v}" data-fmt="${f}">${f === "eur" ? eur(v) : nf(v)}</b><span class="s">${dlt(v, pvv)}${pvv != null ? `<small>${esc(monthOnly(p))} ${f === "eur" ? eur(pvv) : nf(pvv)}</small>` : ""}</span>${sub ? `<small class="x">${esc(sub)}</small>` : ""}</div>`).join("")}</div>`;
+  // by type of lesson
+  const rowsS = [...S.svc.entries()].map(([s, o]) => ({ s, ...o, o0: S0?.svc.get(s) })).sort((a, b) => b.v - a.v), totS = sum(rowsS.map(r => r.v)) + S.ext || 1;
+  const tabs = [["rev", L("Revenue", "Incassi")], ["cum", L("Running total", "Cumulato")], ["day", L("Per day worked", "Per giorno lavorato")], ["price", L(`Price a ${unit(false)}`, `Prezzo a ${unit(false)}`)], ["stu", Who()]];
+  h += `<div class="grid">
+    <div class="panel c7"><div class="ph"><div><h3>${L(`By type of ${unit(false)}`, `Per tipo di ${unit(false)}`)}</h3><p>${L(`${monthLong(m)}: how many, how much, and the average price against ${S0 ? monthOnly(p) : "—"}`, `${monthLong(m)}: quante, quanto, e il prezzo medio rispetto ${S0 ? aM(monthOnly(p)) : "a —"}`)}</p></div></div>
+      <div class="tablewrap"><table class="svt"><thead><tr><th>${L("Type", "Tipo")}</th><th class="num">${U}</th><th class="num">${L("Revenue", "Incassato")}</th><th class="num">${L(`Avg a ${unit(false)}`, `Media a ${unit(false)}`)}</th><th class="num">${L("Share", "Quota")}</th></tr></thead><tbody>
+      ${rowsS.map(r => { const ap = r.p / r.n, ap0 = r.o0 ? r.o0.p / r.o0.n : null; return `<tr><td><span class="chip"><i style="background:${col(r.s)}"></i>${esc(tr(P.services[r.s]?.n) || "—")}</span><small class="sub">${nf(r.who.size)} ${r.who.size === 1 ? who(false) : who()}</small></td><td class="num">${nf(r.n)} ${r.o0 ? dlt(r.n, r.o0.n) : ""}</td><td class="num"><b>${eur(r.v)}</b></td><td class="num"><b>${eur(ap)}</b> ${ap0 ? dlt(ap, ap0) : ""}${ap0 ? `<small class="sub">${esc(monthOnly(p))} ${eur(ap0)}</small>` : ""}</td><td class="num"><span class="shv"><i style="width:${(r.v / totS * 100).toFixed(1)}%;background:${col(r.s)}"></i></span>${pct(r.v / totS)}</td></tr>`; }).join("") || `<tr><td colspan="5" class="muted-p" style="text-align:center;padding:20px">${L("No payments this month.", "Nessun pagamento in questo mese.")}</td></tr>`}
+      ${S.ext ? `<tr><td><span class="chip"><i style="background:var(--pink)"></i>${t("extras")}</span></td><td></td><td class="num"><b>${eur(S.ext)}</b></td><td></td><td class="num">${pct(S.ext / totS)}</td></tr>` : ""}
+      </tbody></table></div>${monthNotes(S, S0, p)}</div>
+    <div class="panel c5"><div class="ph"><div><h3>${L(`${Who()} in ${monthOnly(m)}`, `${Who()} di ${monthOnly(m)}`)}</h3><p>${L("Who started and who did not come back", "Chi ha iniziato e chi non è tornato")}</p></div></div>
+      <div class="pp2"><div><span class="eyebrow">${L("Started", "Hanno iniziato")} · ${nf(S.nw.length)}</span><div class="rows">${S.nw.slice(0, 8).map(c => { const pr = priceOf(c); return `<div class="rw" data-client="${c.id}">${avatar(c)}<div class="t"><b>${esc(c.name)}</b><small>${fdate(startOf(c), { day: "numeric", month: "short" })} · ${esc(chName(c.ch))}</small></div><div class="r">${pr ? eur(pr.first) : ""}<small>${L(`a ${unit(false)}`, `a ${unit(false)}`)}</small></div></div>`; }).join("") || `<p class="empty-s">${L("No one new.", "Nessuno nuovo.")}</p>`}${S.nw.length > 8 ? `<p class="empty-s">${L(`and ${S.nw.length - 8} more`, `e altri ${S.nw.length - 8}`)}</p>` : ""}</div></div>
+      <div><span class="eyebrow">${cur ? L("Not back yet", "Non ancora tornati") : L("Did not come back", "Non sono tornati")} · ${nf(S.stop.length)}</span><p class="muted-p" style="margin:2px 0 6px;font-size:.78rem">${L(`Came in ${S.pm >= 0 ? monthOnly(S.pm) : "—"}, not in ${monthOnly(m)}`, `Venuti ${S.pm >= 0 ? aM(monthOnly(S.pm)) : "—"}, non ${aM(monthOnly(m))}`)}</p><div class="tags">${S.stop.slice(0, 14).map(c => `<button type="button" class="tagb" data-client="${c.id}">${esc(c.name)}</button>`).join("") || `<span class="empty-s">${L("Everyone came back.", "Sono tornati tutti.")}</span>`}${S.stop.length > 14 ? `<span class="empty-s">+${S.stop.length - 14}</span>` : ""}</div></div></div></div>
+    <div class="panel c12"><div class="ph"><div><h3>${L("How it grows", "Come cresce")}</h3><p id="rvCs"></p></div><div class="seg-t" role="tablist">${tabs.map(([k, l]) => `<button type="button" role="tab" data-rc="${k}" aria-selected="${APP.revChart === k}">${esc(l)}</button>`).join("")}</div></div><div id="rvC"></div><div class="legend" id="rvCL"></div></div>
+    <div class="panel c12"><div class="ph"><div><h3>${L(`New ${who()}: what they bring`, `Nuovi ${who()}: cosa portano`)}</h3><p>${L("Grouped by the month they started. Tap a row to open that month.", "Raggruppati per mese di inizio. Tocca una riga per aprire quel mese.")}</p></div></div><div id="rvNs"></div></div>
+    <div class="panel c12"><div class="ph"><div><h3>${L("Month by month", "Mese per mese")}</h3><p>${L("The whole history in one table. Tap a row to open that month.", "Tutto lo storico in una tabella. Tocca una riga per aprire quel mese.")}</p></div><button class="btn ghost sm" data-go="export">${icon(IC.dl)}${L("Export to Excel", "Esporta in Excel")}</button></div><div class="tablewrap"><table class="mm"><thead><tr><th>${L("Month", "Mese")}</th><th class="num">${L("Revenue", "Incassato")}</th><th class="num">${L("vs before", "vs prima")}</th><th class="num">${U}</th><th class="num">${L("Days", "Giorni")}</th><th class="num">${L("Per day", "Per giorno")}</th><th class="num">${L(`Avg a ${unit(false)}`, `Media a ${unit(false)}`)}</th><th class="num">${L("With lessons", "Con lezioni")}</th><th class="num">${L("New", "Nuovi")}</th>${S.costs || (P.costs || []).length ? `<th class="num">${L("Net", "Netto")}</th>` : ""}</tr></thead><tbody id="rvMM"></tbody></table></div></div>
+  </div>`;
+  el.innerHTML = h;
+  $$("[data-num]", el).forEach(x => countUp(x, +x.dataset.num, x.dataset.fmt === "nf" ? v => nf(v) : eur));
+  const sel = $(".mp[aria-pressed=true]", el); if (sel) sel.scrollIntoView({ block: "nearest", inline: "center" });
+  el.onclick = e => {
+    const b = e.target.closest("[data-rm]"); if (b && !b.disabled) { APP.revM = +b.dataset.rm; renderView(); return; }
+    const c = e.target.closest("[data-rc]"); if (c) { APP.revChart = c.dataset.rc; $$("[data-rc]", el).forEach(x => x.setAttribute("aria-selected", x === c)); drawRevChart(el, ms, m); return; }
+    const r = e.target.closest("[data-rmrow]"); if (r && !e.target.closest("[data-client]")) { APP.revM = +r.dataset.rmrow; renderView(); scrollTo({ top: 0, behavior: "smooth" }); }
+  };
+  drawRevChart(el, ms, m);
+  // new students by start month
+  const co = startCohorts().filter(o => o.m >= ms[0]);
+  const all = co.reduce((s, o) => ({ n: s.n + o.n, first: s.first + o.first }), { n: 0, first: 0 });
+  const r90 = DB.clients.filter(c => startOf(c) && c.first && NOW - startOf(c) >= 90 * DAY).map(c => sum(c.txIdx.map(i => DB.txns[i]).filter(x => x.st !== "refund" && x.d - startOf(c) < 90 * DAY).map(x => x.a)));
+  $("#rvNs", el).innerHTML = (co.length ? `<div class="ns-facts">
+      <div><b>${nf(all.n / Math.max(1, co.length), 1)}</b><span>${L(`new ${who()} a month on average`, `nuovi ${who()} al mese in media`)}</span></div>
+      <div><b>${nf(all.first / Math.max(1, all.n), 1)}</b><span>${L(`${unit()} each in their first month`, `${unit()} a testa nel primo mese`)}</span></div>
+      <div><b>${r90.length ? eur(avg(r90)) : "—"}</b><span>${L("brought by each in the first 3 months", "portati da ognuno nei primi 3 mesi")}</span></div>
+      <div><b>${pct(sum(co.map(o => o.still)) / Math.max(1, all.n))}</b><span>${L("still coming today", "vengono ancora oggi")}</span></div></div>` : "") +
+    `<div class="tablewrap"><table class="mm"><thead><tr><th>${L("Started in", "Iniziati a")}</th><th class="num">${L("New", "Nuovi")}</th><th class="num">${L("Still coming", "Vengono ancora")}</th><th class="num">${L(`${Cap(unit())} in the 1st month`, `${Cap(unit())} nel 1° mese`)}</th><th class="num">${L(`${Cap(unit())} each so far`, `${Cap(unit())} a testa finora`)}</th><th class="num">${L("Paid each so far", "Pagato a testa finora")}</th><th class="num">${L("Starting price", "Prezzo iniziale")}</th><th>${L("Mostly from", "Da dove")}</th></tr></thead><tbody>
+    ${co.map(o => { const ch = [...o.ch.entries()].sort((a, b) => b[1] - a[1])[0]; return `<tr data-rmrow="${o.m}" class="${o.m === m ? "on" : ""}"><td>${esc(monthLong(o.m))}</td><td class="num"><b>${nf(o.n)}</b></td><td class="num"><span class="shv"><i style="width:${(o.still / o.n * 100).toFixed(0)}%;background:var(--lime)"></i></span>${nf(o.still)} · ${pct(o.still / o.n)}</td><td class="num">${nf(o.first / o.n, 1)}</td><td class="num">${nf(o.les / o.n, 1)}</td><td class="num"><b>${eur(o.paid / o.n)}</b></td><td class="num">${o.p0.length ? eur(avg(o.p0)) : "—"}</td><td>${ch ? esc(chName(ch[0])) + (o.ch.size > 1 ? ` <small class="muted-p">+${o.ch.size - 1}</small>` : "") : "—"}</td></tr>`; }).join("") || `<tr><td colspan="8" class="muted-p" style="text-align:center;padding:20px">${L("No start dates yet.", "Ancora nessuna data di inizio.")}</td></tr>`}
+    </tbody></table></div>`;
+  // month by month
+  const hasNet = !!(S.costs || (P.costs || []).length);
+  $("#rvMM", el).innerHTML = [...ms].reverse().map(i => { const s = monthStats(i), pp = prevWith(i); return `<tr data-rmrow="${i}" class="${i === m ? "on" : ""}"><td>${esc(monthLong(i))}${i === NM - 1 ? ` <small class="muted-p">${L("in progress", "in corso")}</small>` : ""}</td><td class="num"><b>${eur(s.rev)}</b></td><td class="num">${pp >= 0 && s.rev ? dlt(s.rev, M.rev[pp]) : ""}</td><td class="num">${nf(s.les)}</td><td class="num">${nf(s.days)}</td><td class="num">${s.days ? eur(s.perDay) : "—"}</td><td class="num">${s.perLes ? eur(s.perLes) : "—"}</td><td class="num">${nf(s.act)}</td><td class="num">${nf(s.nw.length)}</td>${hasNet ? `<td class="num">${eur(s.net)}</td>` : ""}</tr>`; }).join("");
+};
+function drawRevChart(el, ms, m) {
+  const host = $("#rvC", el), leg = $("#rvCL", el), sub = $("#rvCs", el), labels = ms.map(i => Cap(monthLabel(i, ms.length > 12))), hl = ms.indexOf(m);
+  const pick = k => { APP.revM = ms[k]; renderView(); };
+  const tip = k => monthLong(ms[k]);
+  leg.innerHTML = "";
+  if (APP.revChart === "rev") {
+    const ser = P.services.map((s, i) => ({ name: tr(s.n), color: col(i), values: ms.map(j => sum(DB.txns.filter(x => x.k === "svc" && x.s === i && x.st !== "refund" && monthIdx(x.d) === j).map(x => x.a))) })).filter(s => sum(s.values) > 0);
+    const ex = ms.map(j => sum(DB.txns.filter(x => x.k === "ext" && x.st !== "refund" && monthIdx(x.d) === j).map(x => x.a))); if (sum(ex)) ser.push({ name: t("extras"), color: cssv("--pink"), values: ex });
+    sub.textContent = L("Revenue each month by type. Click a bar to open that month.", "Incassi di ogni mese per tipo. Tocca una barra per aprire quel mese.");
+    barChart(host, { labels, series: ser, stacked: true, fmt: eur, yfmt: eurK, h: 300, hl, onPick: pick, tipTitle: tip });
+    leg.innerHTML = ser.map(s => `<span><i style="background:${s.color}"></i>${esc(s.name)}</span>`).join("");
+  } else if (APP.revChart === "cum") {
+    let run = 0; const v = ms.map(i => run += M.rev[i] || 0);
+    sub.textContent = L(`Everything earned since ${monthOnly(ms[0])}, month after month.`, `Tutto quello incassato da ${monthOnly(ms[0])}, mese dopo mese.`);
+    lineChart(host, { labels, series: [{ name: L("Running total", "Cumulato"), color: cssv("--blue"), values: v, area: 1 }], fmt: eur, h: 300 });
+  } else if (APP.revChart === "day") {
+    const W = workDays();
+    sub.textContent = L("What one working day brought, each month. Click a bar to open that month.", "Quanto ha reso un giorno di lavoro, mese per mese. Tocca una barra per aprire quel mese.");
+    barChart(host, { labels, series: [{ name: L("Per day worked", "Per giorno lavorato"), color: cssv("--lime"), values: ms.map(i => W.n[i] ? M.rev[i] / W.n[i] : 0) }], fmt: eur, yfmt: eurK, h: 300, hl, onPick: pick, tipTitle: tip });
+  } else if (APP.revChart === "price") {
+    const ser = P.services.map((s, i) => ({ i, name: tr(s.n), color: col(i), values: ms.map(j => { const tx = DB.txns.filter(x => x.k === "svc" && x.s === i && x.st !== "refund" && x.a > 0 && monthIdx(x.d) === j); return tx.length ? avg(tx.map(lessonPrice)) : null; }) })).filter(s => !P.services[s.i].trial && s.values.some(v => v));
+    sub.textContent = L(`Average price of one ${unit(false)}, by type. Gaps are months without that type.`, `Prezzo medio di una ${unit(false)}, per tipo. I vuoti sono mesi senza quel tipo.`);
+    lineChart(host, { labels, series: ser.map(s => ({ ...s, values: s.values.map(v => v ?? null) })), fmt: eur, h: 300 });
+    leg.innerHTML = ser.map(s => `<span><i style="background:${s.color}"></i>${esc(s.name)}</span>`).join("");
+  } else {
+    const nw = ms.map(i => DB.clients.filter(c => startOf(c) && monthIdx(startOf(c)) === i).length);
+    sub.textContent = L(`${Who()} with at least one ${unit(false)} each month, and how many were new.`, `${Who()} con almeno una ${unit(false)} ogni mese, e quanti erano nuovi.`);
+    barChart(host, { labels, series: [{ name: L(`With ${unit()}`, `Con ${unit()}`), color: cssv("--coral"), values: ms.map(i => M.act[i]?.size || 0) }, { name: L("New", "Nuovi"), color: cssv("--violet"), values: nw }], fmt: v => nf(v), h: 300, hl, onPick: pick, tipTitle: tip });
+    leg.innerHTML = `<span><i style="background:var(--coral)"></i>${L(`With ${unit()}`, `Con ${unit()}`)}</span><span><i style="background:var(--violet)"></i>${L("New", "Nuovi")}</span>`;
+  }
+}
+
+/* ================= export: choose the sheets, the period and the format ================= */
+APP.exp = null;
+function exportSheets(a, b) {
+  const inP = d => d && d >= a && d <= b, X = LX(), U = Cap(unit()), cur = " (" + curSym() + ")";
+  const ms = revMonths().filter(i => monthDate(i) <= b && monthDate(i + 1) > a);
+  const sheets = [];
+  sheets.push({ key: "les", name: L("Payments", "Lezioni e pagamenti"), desc: L("One row per payment: date, student, type, channel, amount", "Una riga per pagamento: data, studente, tipo, canale, importo"),
+    cols: [{ h: L("Date", "Data") }, { h: Who(false) }, { h: L("Type", "Tipo") }, { h: t("channel") }, { h: L("Amount", "Importo") + cur, t: "m" }, { h: L("Method", "Metodo") }, { h: t("status") }],
+    rows: DB.txns.filter(x => inP(x.d) && x.st !== "refund").sort((x, y) => x.d - y.d).map(x => { const c = DB.clients[x.c]; return [new Date(x.d), c?.name || "", itemName(x), chName(c?.ch), x.a, trMethod(x.m), x.st === "pending" ? L("To collect", "Da incassare") : L("Paid", "Pagato")]; }) });
+  sheets.push({ key: "stu", name: Who(), desc: L("Start date, price now and at the start, lessons, total paid", "Inizio, prezzo attuale e iniziale, lezioni, totale pagato"),
+    cols: [{ h: L("Name", "Nome") }, { h: t("channel") }, { h: t("status") }, { h: L("Started", "Inizio") }, { h: L(`Price a ${unit(false)} now`, `Prezzo a ${unit(false)} ora`) + cur, t: "m" }, { h: L("Starting price", "Prezzo iniziale") + cur, t: "m" }, { h: U }, { h: L(`${U} a month`, `${U} al mese`), t: "d1" }, { h: L(`Last ${unit(false)}`, `Ultima ${unit(false)}`) }, { h: L("Paid in total", "Pagato in totale") + cur, t: "m" }, { h: L("Paid in the period", "Pagato nel periodo") + cur, t: "m" }, { h: t("email") }, { h: t("phone") }, { h: t("notes") }],
+    rows: DB.clients.filter(c => c.first || c.status === "lead").map(c => { const pr = priceOf(c), s = startOf(c), mo = s ? Math.max(1, (Math.min(+NOW, +(c.last || NOW)) - s) / DAY / 30.44) : 0; return [c.name, chName(c.ch), stLabel(c.status), s ? new Date(s) : null, pr ? Math.round(pr.cur) : null, pr ? Math.round(pr.first) : null, X.att[c.id] || 0, mo ? Math.round((X.att[c.id] || 0) / mo * 10) / 10 : null, c.last ? new Date(c.last) : null, c.spent, sum(c.txIdx.map(i => DB.txns[i]).filter(x => inP(x.d) && x.st !== "refund").map(x => x.a)), c.email || "", c.phone || "", c.note || ""]; }).sort((x, y) => y[9] - x[9]) });
+  const svcs = P.services.map((s, i) => i).filter(i => !P.services[i].trial && DB.txns.some(x => x.k === "svc" && x.s === i));
+  sheets.push({ key: "mon", name: L("Months", "Mesi"), desc: L("Revenue, lessons, days worked, prices, new students, net, month by month", "Incassi, lezioni, giorni, prezzi, nuovi studenti, netto, mese per mese"),
+    cols: [{ h: L("Month", "Mese") }, { h: L("Revenue", "Incassato") + cur, t: "m" }, { h: L("vs month before", "vs mese prima"), t: "p" }, { h: U }, { h: L("Days worked", "Giorni lavorati") }, { h: L("Per day worked", "Per giorno lavorato") + cur, t: "m" }, { h: L(`Avg price a ${unit(false)}`, `Prezzo medio a ${unit(false)}`) + cur, t: "m" }, { h: L(`${Who()} with lessons`, `${Who()} con lezioni`) }, { h: L("New", "Nuovi") }, { h: L("Fixed costs", "Costi fissi") + cur, t: "m" }, { h: L("Net", "Netto") + cur, t: "m" }, ...svcs.map(i => ({ h: tr(P.services[i].n) + cur, t: "m" }))],
+    rows: ms.map(i => { const s = monthStats(i), pp = prevWith(i); return [monthLong(i), s.rev, pp >= 0 && M.rev[pp] ? s.rev / M.rev[pp] - 1 : null, s.les, s.days, s.days ? Math.round(s.perDay) : null, s.perLes ? Math.round(s.perLes) : null, s.act, s.nw.length, s.costs, s.net, ...svcs.map(k => s.svc.get(k)?.v || 0)]; }) });
+  sheets.push({ key: "pri", name: L("Price history", "Storico prezzi"), desc: L("Every price change of every student", "Ogni cambio di prezzo di ogni studente"),
+    cols: [{ h: Who(false) }, { h: L("From", "Dal") }, { h: L("Price", "Prezzo") + cur, t: "m" }, { h: L("Change", "Variazione"), t: "p" }],
+    rows: DB.clients.filter(c => c.first).flatMap(c => priceHistory(c).map((x, k, h) => [c.name, new Date(x.d + "T00:00"), x.p, k ? x.p / h[k - 1].p - 1 : null])) });
+  sheets.push({ key: "new", name: L("New by month", "Nuovi per mese"), desc: L("Students grouped by start month: how many still come, what they paid", "Studenti per mese di inizio: quanti vengono ancora, quanto hanno pagato"),
+    cols: [{ h: L("Started in", "Iniziati a") }, { h: L("New", "Nuovi") }, { h: L("Still coming", "Vengono ancora") }, { h: L("Share still coming", "Quota che viene ancora"), t: "p" }, { h: L(`${U} in the first month`, `${U} nel primo mese`), t: "d1" }, { h: L(`${U} each so far`, `${U} a testa finora`), t: "d1" }, { h: L("Paid each so far", "Pagato a testa finora") + cur, t: "m" }, { h: L("Starting price", "Prezzo iniziale") + cur, t: "m" }],
+    rows: startCohorts().filter(o => ms.includes(o.m)).map(o => [monthLong(o.m), o.n, o.still, o.still / o.n, Math.round(o.first / o.n * 10) / 10, Math.round(o.les / o.n * 10) / 10, Math.round(o.paid / o.n), o.p0.length ? Math.round(avg(o.p0)) : null]) });
+  if ((P.costs || []).length) sheets.push({ key: "cos", name: L("Fixed costs", "Costi fissi"), desc: L("Taxes and other monthly costs with their dates", "Tasse e altri costi mensili con le date"),
+    cols: [{ h: L("Cost", "Voce") }, { h: L("A month", "Al mese") + cur, t: "m" }, { h: L("From", "Dal") }, { h: L("Until", "Fino a") }],
+    rows: P.costs.map(c => [c.n, c.a, c.from || "", c.to || ""]) });
+  return sheets;
+}
+VIEWS.export = el => {
+  const ms = revMonths(), E = APP.exp = APP.exp || { per: "all", fmt: "xlsx", on: null, view: "les" };
+  const range = E.per === "all" ? { a: new Date(0), b: new Date(+NOW + DAY) } : E.per === "page" ? rangeFor(PERIOD) : { a: monthDate(+E.per), b: new Date(+monthDate(+E.per + 1) - 1) };
+  const sh = exportSheets(range.a, range.b); if (!E.on) E.on = sh.map(s => s.key);
+  if (!sh.some(s => s.key === E.view)) E.view = sh[0].key;
+  const pv = sh.find(s => s.key === E.view), chosen = sh.filter(s => E.on.includes(s.key));
+  let h = vhead(L("Export", "Esporta"), L("Export to Excel", "Esporta in Excel"), L("Choose what goes in the file and for which period. Each part becomes a sheet of the same Excel file.", "Scegli cosa mettere nel file e per quale periodo. Ogni parte diventa un foglio dello stesso file Excel."));
+  h += `<div class="grid">
+    <div class="panel c5 exp"><div><span class="eyebrow">1 · ${L("What to export", "Cosa esportare")}</span>
+      <div class="exl">${sh.map(s => `<label class="exo ${E.on.includes(s.key) ? "on" : ""}"><input type="checkbox" data-exs="${s.key}" ${E.on.includes(s.key) ? "checked" : ""}><span><b>${esc(s.name)}</b><small>${esc(s.desc)}</small></span><em>${nf(s.rows.length)} ${L("rows", "righe")}</em></label>`).join("")}</div>
+      <div style="display:flex;gap:8px;margin-top:8px"><button class="btn ghost sm" data-exall="1">${L("All", "Tutto")}</button><button class="btn ghost sm" data-exall="0">${L("None", "Niente")}</button></div></div>
+      <div><span class="eyebrow">2 · ${L("Period", "Periodo")}</span><select class="sel" id="exPer" style="width:100%;margin-top:8px"><option value="all" ${E.per === "all" ? "selected" : ""}>${L("Everything", "Tutto")}</option><option value="page" ${E.per === "page" ? "selected" : ""}>${esc(Cap(periodName()))} (${L("period filter", "filtro periodo")})</option>${[...ms].reverse().map(i => `<option value="${i}" ${E.per === String(i) ? "selected" : ""}>${esc(monthLong(i))}</option>`).join("")}</select></div>
+      <div><span class="eyebrow">3 · ${L("Format", "Formato")}</span><div class="seg-t" style="margin-top:8px"><button type="button" data-exf="xlsx" aria-selected="${E.fmt === "xlsx"}">Excel (.xlsx)</button><button type="button" data-exf="csv" aria-selected="${E.fmt === "csv"}">CSV</button></div>
+        <p class="muted-p" style="font-size:.78rem;margin:6px 0 0">${E.fmt === "xlsx" ? L(`${chosen.length} sheets in one file, with real dates and numbers ready for formulas and filters.`, `${chosen.length} fogli in un solo file, con date e numeri veri, pronti per formule e filtri.`) : L("CSV holds one sheet: the one in the preview.", "Il CSV contiene un solo foglio: quello in anteprima.")}</p></div>
+      <button class="btn main" id="exGo" ${E.fmt === "xlsx" && !chosen.length ? "disabled" : ""} style="justify-content:center">${icon(IC.dl)}${E.fmt === "xlsx" ? L("Download Excel", "Scarica Excel") : L("Download CSV", "Scarica CSV")}</button>
+      <div id="exMsg"></div></div>
+    <div class="panel c7"><div class="ph"><div><h3>${L("Preview", "Anteprima")}</h3><p>${esc(pv.name)} · ${nf(pv.rows.length)} ${L("rows", "righe")}${pv.rows.length > 12 ? " · " + L("first 12", "prime 12") : ""}</p></div></div>
+      <div class="seg-t sc-x">${sh.map(s => `<button type="button" data-exv="${s.key}" aria-selected="${s.key === E.view}">${esc(s.name)}</button>`).join("")}</div>
+      <div class="tablewrap"><table class="mm exp-t"><thead><tr>${pv.cols.map(c => `<th${c.t && c.t !== "s" ? ' class="num"' : ""}>${esc(c.h)}</th>`).join("")}</tr></thead><tbody>${pv.rows.slice(0, 12).map(r => `<tr>${r.map((v, j) => `<td${pv.cols[j].t ? ' class="num"' : ""}>${esc(cellText(v, pv.cols[j].t))}</td>`).join("")}</tr>`).join("") || `<tr><td colspan="${pv.cols.length}" class="muted-p" style="text-align:center;padding:20px">${L("Nothing in this period.", "Niente in questo periodo.")}</td></tr>`}</tbody></table></div></div>
+  </div>`;
+  el.innerHTML = h;
+  el.onchange = e => {
+    if (e.target.dataset.exs) { E.on = $$("[data-exs]", el).filter(x => x.checked).map(x => x.dataset.exs); renderView(); }
+    if (e.target.id === "exPer") { E.per = e.target.value; renderView(); }
+  };
+  el.onclick = async e => {
+    const a = e.target.closest("[data-exall]"); if (a) { E.on = a.dataset.exall === "1" ? sh.map(s => s.key) : []; renderView(); return; }
+    const f = e.target.closest("[data-exf]"); if (f) { E.fmt = f.dataset.exf; renderView(); return; }
+    const v = e.target.closest("[data-exv]"); if (v) { E.view = v.dataset.exv; renderView(); return; }
+    if (e.target.closest("#exGo")) {
+      const tag = E.per === "all" ? L("all", "tutto") : E.per === "page" ? slug(periodName()) : isoDay(monthDate(+E.per)).slice(0, 7), base = slug(bizName()) + "-" + tag;
+      const file = E.fmt === "xlsx" ? { filename: base + ".xlsx", data: xlsxBlob(chosen) } : { filename: base + "-" + slug(pv.name) + ".csv", data: "﻿" + csvOf(pv) };
+      await saveFile(file, $("#exMsg", el));
+    }
+  };
+};
+function cellText(v, t) {
+  if (v == null || v === "") return "";
+  if (v instanceof Date) return fdate(v, { day: "numeric", month: "short", year: "numeric" });
+  if (typeof v === "number") return t === "m" ? eur(v) : t === "p" ? (v >= 0 ? "+" : "−") + nf(Math.abs(v) * 100, 0) + "%" : t === "d1" ? nf(v, 1) : nf(v);
+  return String(v);
+}
+function csvOf(sh) {
+  const sep = LANG === "it" ? ";" : ",", q = v => { v = v == null ? "" : v instanceof Date ? isoDay(v) : typeof v === "number" ? (LANG === "it" ? String(Math.round(v * 100) / 100).replace(".", ",") : String(Math.round(v * 100) / 100)) : String(v); return new RegExp(`["\\n${sep}]`).test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+  return [sh.cols.map(c => q(c.h)).join(sep), ...sh.rows.map(r => r.map(q).join(sep))].join("\r\n");
+}
+async function saveFile(file, box) {
+  const say = (ok, txt) => { if (box) box.innerHTML = `<div class="note-box" style="background:var(${ok ? "--lime-s" : "--sun-s"})">${icon(IC.info)}<div>${esc(txt)}</div></div>`; };
+  if (STORE.downloads) {
+    try { const r = await STORE.downloads.save(file); if (r?.status === "saved") { toast(L("File saved", "File salvato")); say(true, L(`Saved: ${file.filename}`, `Salvato: ${file.filename}`)); } }
+    catch (e) { if (e?.code === "declined") say(false, L("Download cancelled.", "Download annullato.")); else say(false, L("This view cannot save files. Open the page outside the preview and try again.", "Questa vista non può salvare file. Apri la pagina fuori dall'anteprima e riprova.")); }
+    return;
+  }
+  try { const u = URL.createObjectURL(file.data instanceof Blob ? file.data : new Blob([file.data])); const a = document.createElement("a"); a.href = u; a.download = file.filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000); say(true, L(`Downloading ${file.filename}`, `Scarico ${file.filename}`)); }
+  catch (e) { say(false, L("This browser blocked the download.", "Questo browser ha bloccato il download.")); }
+}
+
+/* ---------- a small .xlsx writer: real dates, numbers, bold frozen header, filters. No library, works offline ---------- */
+const XLSX_W = (() => {
+  const T = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; T[n] = c >>> 0; }
+  const crc = b => { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = T[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+  const enc = new TextEncoder();
+  function zip(files) { // stored entries, no compression
+    const parts = [], cen = []; let off = 0;
+    for (const f of files) {
+      const nm = enc.encode(f.name), d = enc.encode(f.text), c = crc(d);
+      const lh = new DataView(new ArrayBuffer(30));
+      lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(10, 0, true); lh.setUint16(12, 0x21, true);
+      lh.setUint32(14, c, true); lh.setUint32(18, d.length, true); lh.setUint32(22, d.length, true); lh.setUint16(26, nm.length, true);
+      parts.push(new Uint8Array(lh.buffer), nm, d);
+      const ch = new DataView(new ArrayBuffer(46));
+      ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(14, 0x21, true);
+      ch.setUint32(16, c, true); ch.setUint32(20, d.length, true); ch.setUint32(24, d.length, true); ch.setUint16(28, nm.length, true); ch.setUint32(42, off, true);
+      cen.push(new Uint8Array(ch.buffer), nm);
+      off += 30 + nm.length + d.length;
+    }
+    const cs = cen.reduce((s, x) => s + x.length, 0), end = new DataView(new ArrayBuffer(22));
+    end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true); end.setUint32(12, cs, true); end.setUint32(16, off, true);
+    return new Blob([...parts, ...cen, new Uint8Array(end.buffer)], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  }
+  const x = s => String(s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const colL = i => { let s = ""; i++; while (i) { const r = (i - 1) % 26; s = String.fromCharCode(65 + r) + s; i = Math.floor((i - 1) / 26); } return s; };
+  const serial = d => (Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - Date.UTC(1899, 11, 30)) / 864e5;
+  const ST = { m: 3, p: 4, d1: 5 };
+  function sheetXml(sh) {
+    const rows = [sh.cols.map(c => c.h), ...sh.rows], last = colL(sh.cols.length - 1) + rows.length;
+    const widths = sh.cols.map((c, j) => Math.min(46, Math.max(9, ...rows.slice(0, 300).map(r => { const v = r[j]; return v == null ? 0 : v instanceof Date ? 12 : String(typeof v === "number" ? Math.round(v * 10) / 10 : v).length + 3; }))));
+    let s = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><dimension ref="A1:${last}"/><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/><cols>${widths.map((w, j) => `<col min="${j + 1}" max="${j + 1}" width="${w}" customWidth="1"/>`).join("")}</cols><sheetData>`;
+    rows.forEach((r, i) => {
+      s += `<row r="${i + 1}">`;
+      r.forEach((v, j) => {
+        if (v == null || v === "") return;
+        const ref = colL(j) + (i + 1);
+        if (!i) s += `<c r="${ref}" t="inlineStr" s="1"><is><t>${x(v)}</t></is></c>`;
+        else if (v instanceof Date) s += `<c r="${ref}" s="2"><v>${serial(v)}</v></c>`;
+        else if (typeof v === "number" && isFinite(v)) s += `<c r="${ref}" s="${ST[sh.cols[j].t] || 0}"><v>${Math.round(v * 1e6) / 1e6}</v></c>`;
+        else s += `<c r="${ref}" t="inlineStr"><is><t xml:space="preserve">${x(v)}</t></is></c>`;
+      });
+      s += `</row>`;
+    });
+    return s + `</sheetData>${rows.length > 1 ? `<autoFilter ref="A1:${last}"/>` : ""}<pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/></worksheet>`;
+  }
+  const NS = "http://schemas.openxmlformats.org";
+  return function (sheets) {
+    const names = [], used = new Set();
+    for (const s of sheets) { let n = String(s.name).replace(/[\[\]:*?\/\\]/g, " ").slice(0, 31).trim() || "Sheet"; let k = 2; while (used.has(n.toLowerCase())) n = n.slice(0, 28) + " " + k++; used.add(n.toLowerCase()); names.push(n); }
+    const files = [
+      { name: "[Content_Types].xml", text: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Types xmlns="${NS}/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((_, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join("")}</Types>` },
+      { name: "_rels/.rels", text: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="${NS}/package/2006/relationships"><Relationship Id="rId1" Type="${NS}/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>` },
+      { name: "xl/workbook.xml", text: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<workbook xmlns="${NS}/spreadsheetml/2006/main" xmlns:r="${NS}/officeDocument/2006/relationships"><bookViews><workbookView/></bookViews><sheets>${names.map((n, i) => `<sheet name="${x(n)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join("")}</sheets><definedNames>${sheets.map((s, i) => s.rows.length ? `<definedName name="_xlnm._FilterDatabase" localSheetId="${i}" hidden="1">'${x(names[i].replace(/'/g, "''"))}'!$A$1:$${colL(s.cols.length - 1)}$${s.rows.length + 1}</definedName>` : "").join("")}</definedNames></workbook>` },
+      { name: "xl/_rels/workbook.xml.rels", text: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="${NS}/package/2006/relationships">${sheets.map((_, i) => `<Relationship Id="rId${i + 1}" Type="${NS}/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join("")}<Relationship Id="rId${sheets.length + 1}" Type="${NS}/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>` },
+      { name: "xl/styles.xml", text: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<styleSheet xmlns="${NS}/spreadsheetml/2006/main"><numFmts count="2"><numFmt numFmtId="164" formatCode="#,##0"/><numFmt numFmtId="165" formatCode="0.0"/></numFmts><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF2E5BFF"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="6"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/><xf numFmtId="14" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="9" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>` },
+      ...sheets.map((s, i) => ({ name: `xl/worksheets/sheet${i + 1}.xml`, text: sheetXml(s) })),
+    ];
+    return zip(files);
+  };
+})();
+const xlsxBlob = sheets => XLSX_W(sheets);
 
 /* ================= persistence: saved workspaces in the artifact database =================
    workspaces/{ws}                -> settings (name, profession, currency, price list, channels, goal, start date)
@@ -3529,7 +3998,7 @@ function defaultMeta(o) {
   const base = profBase(o.prof, o.profile);
   const meta = {
     name: o.name, prof: base.id, cur: o.cur || base.cur || "EUR", goal: +o.goal || 0, start: o.start || null, capacity: +o.capacity || base.capacity,
-    services: base.services.map((s, i) => ({ id: "s" + i, n: tr(s.n), p: s.p, kind: s.kind, ...(s.sessions ? { sessions: s.sessions } : {}), ...(s.perWeek ? { perWeek: s.perWeek } : {}), ...(s.trial ? { trial: true } : {}) })),
+    services: base.services.map((s, i) => ({ id: "s" + i, n: tr(s.n), p: s.p, kind: s.kind, ...(s.sessions ? { sessions: s.sessions } : {}), ...(s.perWeek ? { perWeek: s.perWeek } : {}), ...(s.trial ? { trial: true } : {}), ...(s.fixed ? { fixed: true } : {}) })),
     extras: base.extras.map((x, i) => ({ id: "e" + i, n: tr(x.n), p: x.p, ...(x.perhead ? { perhead: true } : {}) })),
     channels: base.channels.map((c, i) => ({ id: "h" + i, n: tr(c.n), spend: 0, comm: c.comm || 0 })),
     created: new Date().toISOString(), updated: new Date().toISOString(),
@@ -3547,7 +4016,7 @@ function makeP(meta) {
   // profile settings apply while the workspace keeps the profession it was created with
   const ext = meta.ext && (meta.extProf || meta.prof) === prof.id ? meta.ext : null;
   const base = { ...prof, ...(ext || {}) };
-  return { ...base, services: meta.services || [], extras: meta.extras || [], channels: meta.channels?.length ? meta.channels : [{ id: "h0", n: L("Other", "Altro"), spend: 0 }], capacity: +meta.capacity || base.capacity, goal: +meta.goal || 0, consultStart: meta.start ? new Date(meta.start + "T00:00") : null, costs: meta.costs || [], saved: true, profile: ext ? meta.profile || null : null };
+  return { ...base, services: (meta.services || []).map((s, i) => !s.fixed && base.services?.[i]?.fixed && [].concat(typeof base.services[i].n === "object" ? Object.values(base.services[i].n) : base.services[i].n).includes(s.n) ? { ...s, fixed: true } : s), extras: meta.extras || [], channels: meta.channels?.length ? meta.channels : [{ id: "h0", n: L("Other", "Altro"), spend: 0 }], capacity: +meta.capacity || base.capacity, goal: +meta.goal || 0, consultStart: meta.start ? new Date(meta.start + "T00:00") : null, costs: meta.costs || [], saved: true, profile: ext ? meta.profile || null : null };
 }
 function serClient(c) {
   const id = (list, i) => list[i]?.id ?? null;
@@ -4521,7 +4990,7 @@ VIEWS.data = el => {
 };
 const costRow = c => `<div class="ed-r cost"><input aria-label="${esc(L("Cost", "Costo"))}" class="n" value="${esc(c.n)}" placeholder="${esc(L("e.g. social and health insurance", "es. contributi e sanità"))}"><input aria-label="${esc(L("Amount a month", "Importo al mese"))}" class="a" type="number" min="0" step="1" inputmode="decimal" value="${esc(String(c.a ?? ""))}"><input aria-label="${esc(L("From month", "Dal mese"))}" class="f" type="month" value="${esc(c.from || "")}"><input aria-label="${esc(L("Until month", "Fino al mese"))}" class="u" type="month" value="${esc(c.to || "")}"><button type="button" class="ed-x" data-del aria-label="Remove">${icon(IC.x)}</button></div>`;
 const delBtn = used => used ? `<span class="ed-lock" title="${esc(L("In use: has payments", "In uso: ha pagamenti"))}">●</span>` : `<button type="button" class="ed-x" data-del aria-label="Remove">${icon(IC.x)}</button>`;
-const svcRow = (s, i, used) => `<div class="ed-r svc" data-i="${i}" data-id="${esc(s.id || "")}"><input aria-label="${esc(t("service"))}" class="n" value="${esc(tr(s.n))}" placeholder="${esc(t("service"))}"><input aria-label="${esc(t("amount"))}" class="p" type="number" min="0" step="1" inputmode="decimal" value="${esc(s.p)}" placeholder="0"><select class="k" aria-label="Type">${KINDS().map(([k, l]) => `<option value="${k}" ${(s.trial ? "trial" : s.kind) === k ? "selected" : ""}>${esc(l)}</option>`).join("")}</select>${delBtn(used)}</div>`;
+const svcRow = (s, i, used) => `<div class="ed-r svc" data-i="${i}" data-id="${esc(s.id || "")}"><input aria-label="${esc(t("service"))}" class="n" value="${esc(tr(s.n))}" placeholder="${esc(t("service"))}"><input aria-label="${esc(t("amount"))}" class="p" type="number" min="0" step="1" inputmode="decimal" value="${esc(s.p)}" placeholder="0"${s.fixed ? ` readonly title="${esc(L("Set by the school: not editable", "Lo decide la scuola: non modificabile"))}"` : ""}><select class="k" aria-label="Type">${KINDS().map(([k, l]) => `<option value="${k}" ${(s.trial ? "trial" : s.kind) === k ? "selected" : ""}>${esc(l)}</option>`).join("")}</select>${delBtn(used)}</div>`;
 const extRow = (x, i, used) => `<div class="ed-r ext" data-i="${i}" data-id="${esc(x.id || "")}"><input aria-label="${esc(t("extras"))}" class="n" value="${esc(tr(x.n))}" placeholder="${esc(t("extras"))}"><input aria-label="${esc(t("amount"))}" class="p" type="number" min="0" step="1" inputmode="decimal" value="${esc(x.p)}" placeholder="0"><span></span>${delBtn(used)}</div>`;
 const chRow = (c, i, used) => `<div class="ed-r ch" data-i="${i}" data-id="${esc(c.id || "")}"><input aria-label="${esc(t("channel"))}" class="n" value="${esc(tr(c.n))}" placeholder="${esc(t("channel"))}"><input aria-label="${esc(t("spend"))}" class="p" type="number" min="0" step="10" inputmode="numeric" value="${esc(c.spend || 0)}"><input aria-label="Fee" class="c" type="number" min="0" max="60" step="1" inputmode="numeric" value="${esc(Math.round((c.comm || 0) * 100))}">${delBtn(used)}</div>`;
 function remap(kind, oldList, newList) {
@@ -4564,7 +5033,7 @@ function showCsv(kind, data) {
 APP.demoNames = {};
 const bizName = () => STORE.active ? (STORE.meta?.name || "—") : demoName();
 // the four pages used every day, then the deeper analysis, then data
-const NAV = ["overview", "today", "clients", "revenue", "#analysis", "schedule", "insights", "simulator", "report", "|", "data"]; // retention and marketing are off the menu (Gabri, Nov 2026)
+const NAV = ["overview", "today", "clients", "revenue", "#analysis", "schedule", "insights", "simulator", "report", "export", "|", "data"]; // retention and marketing are off the menu (Gabri, Nov 2026)
 function renderNav() {
   $("#nav").innerHTML = NAV.map(v => v === "|" ? `<div class="sep"></div>` : v === "#analysis" ? `<div class="nav-group">${L("Analysis", "Analisi")}</div>` : `<button type="button" data-view="${v}" aria-current="${APP.view === v}">${icon(NAV_ICONS[v])}<span>${v === "clients" ? Who() : v === "retention" && isVisit() ? L("Reviews & returns", "Recensioni e ritorni") : t("nav_" + v)}</span></button>`).join("");
 }
@@ -4596,6 +5065,7 @@ function renderView() {
   viewsEl.innerHTML = ""; viewsEl.appendChild(d);
   try { VIEWS[APP.view](d); } catch (e) { console.error(e); d.innerHTML = `<div class="panel"><h3>${L("This section could not be drawn.", "Questa sezione non si è caricata.")}</h3><p class="muted-p">${esc(e.message)}</p></div>`; }
   APP.lastW = viewsEl.clientWidth;
+  placePerInd();
 }
 function renderViewQuiet() { if (layer.children.length) APP.stale = true; else renderView(); }
 function go(v) { if (v !== APP.view) APP.importMsg = ""; APP.view = v; try { localStorage.setItem("clientela.view", v); } catch (e) { } renderNav(); renderView(); scrollTo({ top: 0, behavior: "smooth" }); }
@@ -4664,8 +5134,8 @@ document.addEventListener("click", e => {
   const v = e.target.closest("[data-view]"); if (v) return go(v.dataset.view);
   const g = e.target.closest("[data-go]"); if (g) return go(g.dataset.go);
   const p = e.target.closest("#period [data-p]"); if (p) { PERIOD = p.dataset.p; renderTop(); renderView(); return; }
-  const pr = e.target.closest("[data-per]"); if (pr) { PERIOD = pr.dataset.per; renderTop(); renderView(); return; }
-  if (e.target.closest("#perGo")) { const a = $("#perA").value, b = $("#perB").value; if (a && b) { PERIOD = `r:${a < b ? a : b}:${a < b ? b : a}`; renderTop(); renderView(); } return; }
+  const pr = e.target.closest("[data-per]"); if (pr) { PERIOD = pr.dataset.per; renderTop(); renderView(); $(".view")?.classList.add("per-anim"); return; }
+  if (e.target.closest("#perGo")) { const a = $("#perA").value, b = $("#perB").value; if (a && b) { PERIOD = `r:${a < b ? a : b}:${a < b ? b : a}`; renderTop(); renderView(); $(".view")?.classList.add("per-anim"); } return; }
   const l = e.target.closest("#lang [data-l]"); if (l) { LANG = l.dataset.l; try { localStorage.setItem("clientela.lang", LANG); } catch (err) { } if (!STORE.active) { /* demo names follow language */ } renderTop(); renderView(); return; }
   if (e.target.closest("#profBtn")) return openPicker();
   const a = e.target.closest("[data-act]")?.dataset.act;
@@ -4712,7 +5182,7 @@ function recordPlans() {
   if (!last && !PROFILES.some(p => !p.imported)) setTimeout(() => { if (STANDALONE.on && STORE.db && !STORE.list.length) showWelcome(); }, 700); // not in the owner's own copy
 })();
 
-document.addEventListener("change", e => { if (e.target.id === "perM" && e.target.value) { PERIOD = e.target.value; renderTop(); renderView(); } });
+document.addEventListener("change", e => { if (e.target.id === "perM" && e.target.value) { PERIOD = e.target.value; renderTop(); renderView(); $(".view")?.classList.add("per-anim"); } });
 
 </script>
 </body>
