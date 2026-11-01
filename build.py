@@ -1,13 +1,13 @@
 import sys,pathlib
 d=pathlib.Path(sys.argv[1]); s=(d/'page.html').read_text()
-i=s.index('<header>')
+i=s.index('<header')
 head,body=s[:i],s[i:]
 out=f'''<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%2309110E' stroke='%23D3AE66' stroke-width='3'/><text x='32' y='40' font-family='monospace' font-size='22' font-weight='700' fill='%23D3AE66' text-anchor='middle'>GC</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect x='6' y='6' width='24' height='24' rx='7' fill='%232445D8'/><circle cx='46' cy='18' r='12' fill='%23E2533A'/><circle cx='18' cy='46' r='12' fill='%2314935F'/><rect x='34' y='34' width='24' height='24' rx='7' fill='%23F0AE14'/></svg>">
 <meta property="og:title" content="Gabriele Cascone · Business & marketing growth with AI">
 <meta property="og:description" content="More revenue, more visibility, a sharper business plan. The first proposal is free.">
 <meta property="og:image" content="assets/gabriele.jpg">
