@@ -879,6 +879,29 @@ td .mdl{margin-left:4px}
 .srt:hover{border-color:var(--faint)}.srt i{font-style:normal;font-weight:700;min-width:0}
 .srt[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
 .sort-row small{color:var(--muted);font-size:.78rem;margin-left:4px}
+.seg[hidden]{display:none}
+#gross button[data-g="1"][aria-pressed="true"]{background:linear-gradient(120deg,var(--sun),var(--coral));color:#fff}
+/* review prices */
+.fee-p{flex-direction:row;flex-wrap:wrap;gap:12px;padding:14px 18px}
+.fee-r{display:flex;align-items:center;gap:14px;flex-wrap:wrap;width:100%}
+.fee-r label{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--muted)}.fee-r label span{display:inline-flex;align-items:center;gap:4px;color:var(--ink)}
+.fee-r input{width:72px;height:32px;padding:0 8px;border:1px solid var(--line);border-radius:8px;background:#fff;font:inherit;color:var(--ink)}.fee-r small{color:var(--muted);font-size:.78rem;flex:1;min-width:200px}
+.ladder{position:relative;display:flex;flex-direction:column;gap:3px;max-height:520px;overflow-y:auto;padding-right:4px}
+.ld{display:grid;grid-template-columns:120px 1fr 92px;align-items:center;gap:10px;padding:4px 6px;border:0;background:none;border-radius:8px;font:inherit;color:inherit;cursor:pointer;text-align:left;animation:fadeUp .35s both;animation-delay:calc(var(--i) * 12ms)}
+.ld:hover{background:var(--soft)}
+.ld-n{font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ld-b{position:relative;height:12px;border-radius:6px;background:var(--soft2)}
+.ld-b i{display:block;height:100%;border-radius:6px;opacity:.85}
+.ld-b::after{content:"";position:absolute;top:-3px;bottom:-3px;left:var(--nw);border-left:2px dashed var(--ink);opacity:.55}
+.ld-v{font:600 .8rem var(--f-body);text-align:right;white-space:nowrap}.ld-v small{display:block;font-weight:400;color:var(--faint);font-size:.7rem}
+.facts{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:9px;font-size:.86rem;line-height:1.45}
+.sim-c{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.sim-c>div{display:flex;flex-direction:column;gap:6px}
+.sim-k{margin:4px 0 0}
+.sim-t tr.fx{opacity:.6}.sim-t tr.on td:first-child{box-shadow:inset 3px 0 0 var(--lime)}
+.sim-t .up-t{color:var(--good)}.sim-t small.warn{color:#D2401E;font-weight:600}
+.sim-t input{accent-color:var(--blue)}
+@media (max-width:560px){.ld{grid-template-columns:86px 1fr 74px;gap:6px}}
 </style>
 </head>
 <body>
@@ -894,6 +917,7 @@ td .mdl{margin-left:4px}
       <div class="tools">
         <button class="prof-btn" id="profBtn" type="button" aria-haspopup="dialog"></button>
         <div class="seg" id="period" role="group" aria-label="Period"></div>
+        <div class="seg" id="gross" role="group" aria-label="Net or gross" hidden></div>
         <div class="seg" id="lang" role="group" aria-label="Language">
           <button type="button" data-l="en">EN</button><button type="button" data-l="it">IT</button>
         </div>
@@ -916,7 +940,7 @@ const I = {
   footnote: T("One platform for every independent professional. Your clients, your numbers, clear decisions.", "Una piattaforma per ogni libero professionista. I tuoi clienti, i tuoi numeri, decisioni chiare."),
   nav_overview: T("Overview", "Panoramica"), nav_clients: T("Clients", "Clienti"), nav_revenue: T("Revenue", "Ricavi"),
   nav_marketing: T("Marketing", "Marketing"), nav_retention: T("Retention", "Fidelizzazione"), nav_schedule: T("Schedule", "Agenda"),
-  nav_insights: T("AI insights", "Insight AI"), nav_simulator: T("What-if", "Simulatore"), nav_data: T("Data", "Dati"), nav_report: T("Report", "Report"), nav_today: T("Day register", "Registro"), nav_export: T("Export", "Esporta"),
+  nav_insights: T("AI insights", "Insight AI"), nav_simulator: T("What-if", "Simulatore"), nav_data: T("Data", "Dati"), nav_report: T("Report", "Report"), nav_today: T("Day register", "Registro"), nav_export: T("Export", "Esporta"), nav_prices: T("Review prices", "Rivedi i prezzi"),
   p30: T("30d", "30g"), p90: T("90d", "90g"), p12: T("12m", "12m"), pall: T("All", "Tutto"),
   pickTitle: T("Choose a profession", "Scegli la professione"),
   pickSub: T("Same platform, different fields, KPIs and advice. The demo data changes with it.", "Stessa piattaforma, campi, KPI e consigli diversi. I dati demo cambiano di conseguenza."),
@@ -995,6 +1019,7 @@ const NAV_ICONS = {
   schedule: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
   insights: '<path d="M12 3l2.2 5.3L20 9l-4.4 3.8L17 19l-5-3-5 3 1.4-6.2L4 9l5.8-.7z"/>',
   today: '<rect x="4" y="4" width="16" height="17" rx="2"/><path d="M8 2v4M16 2v4M8 13l2.5 2.5L16 10"/>',
+  prices: '<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/>',
   export: '<path d="M12 3v12M7 8l5-5 5 5"/><path d="M4 14v6h16v-6"/>',
   report: '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 17v-3M13 17v-5M16 17v-2"/>',
   simulator: '<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',
@@ -1568,7 +1593,7 @@ function refreshClient(db, c, initial) {
    The public build ships with no profiles: client names never live in public code.
    Profiles are added by the private build or imported from a profile file (kept in this browser). */
 const PROFILES = [];
-const PROFILE_KEYS = ["who", "who1", "names", "oneoff", "baseNew", "growth", "repeat", "upgrade", "reviewRate", "capacity", "elasticity", "holdDays", "churn", "renew", "freq", "summerChurn", "trialRate", "season", "hours", "days", "services", "extras", "channels", "originLabel", "origins", "segments", "fields", "corp", "methods", "portal", "cur", "real", "trialFirst", "week", "costs"];
+const PROFILE_KEYS = ["who", "who1", "names", "oneoff", "baseNew", "growth", "repeat", "upgrade", "reviewRate", "capacity", "elasticity", "holdDays", "churn", "renew", "freq", "summerChurn", "trialRate", "season", "hours", "days", "services", "extras", "channels", "originLabel", "origins", "segments", "fields", "corp", "methods", "portal", "cur", "real", "trialFirst", "week", "costs", "studentInfo"];
 // what a saved workspace keeps from its profile, so it works even where the profile is not installed
 const EXT_KEYS = ["who", "who1", "oneoff", "holdDays", "freq", "elasticity", "hours", "days", "originLabel", "origins", "segments", "fields", "corp", "methods", "portal", "trialFirst", "week"];
 const profileById = id => PROFILES.find(p => p.id === id);
@@ -1831,7 +1856,23 @@ function prevName(p = PERIOD) {
     || (p.startsWith("m:") ? L("month before", "mese prima") : p === "all" ? "" : L("same number of days before", "stesso numero di giorni prima"));
 }
 
+/* net or gross: a platform like Preply keeps a fee (service.fee, e.g. 0.18). Amounts are stored net, as earned;
+   with GROSS on they are shown as the student pays them. Stored data always stays net (see netAmt in serClient). */
+let GROSS = (() => { try { return localStorage.getItem("clientela.gross") === "1"; } catch (e) { return false; } })();
+const feeOf = s => +P.services[s]?.fee || 0;
+const hasFee = () => P.services.some(s => +s.fee > 0);
+const gfac = s => DB.gross && feeOf(s) ? 1 / (1 - feeOf(s)) : 1; // multiply a stored net price by this to show it
+function grossSync() {
+  const on = !!(GROSS && hasFee());
+  if (!!DB.gross === on) return;
+  for (const x of DB.txns) { if (x.k !== "svc") continue; const f = feeOf(x.s); if (!f) continue; x.a = on ? x.a / (1 - f) : Math.round(x.a * (1 - f) * 100) / 100; }
+  DB.gross = on;
+  for (const c of DB.clients) refreshClient(DB, c);
+}
+const netAmt = x => DB.gross && x.k === "svc" && feeOf(x.s) ? Math.round(x.a * (1 - feeOf(x.s)) * 100) / 100 : x.a;
+function setGross(on) { GROSS = !!on; try { localStorage.setItem("clientela.gross", on ? "1" : "0"); } catch (e) { } computeMonthly(); }
 function computeMonthly() {
+  grossSync();
   const z = () => new Array(NM).fill(0);
   M = { rev: z(), ext: z(), svc: P.services.map(z), mrr: z(), newC: z(), leads: z(), books: z(), noshow: z(), active: z(), extN: z(), svcN: z() };
   const act = Array.from({ length: NM }, () => new Set());
@@ -2160,11 +2201,11 @@ function lessonPrice(x) { const s = P.services[x.s]; if (!s || x.k !== "svc") re
 const paidLessons = c => c.txIdx.map(i => DB.txns[i]).filter(x => x && x.k === "svc" && x.a > 0 && x.st !== "refund" && !P.services[x.s]?.trial).sort((a, b) => a.d - b.d);
 // price history: what the student pays from each date. Set by hand in the student card, otherwise read from the payments
 function derivedPrices(c) { const out = []; for (const x of paidLessons(c)) { const p = Math.round(lessonPrice(x)); if (!out.length || out[out.length - 1].p !== p) out.push({ d: isoDay(x.d), p }); } return out; }
-const priceHistory = c => c.prices?.length ? [...c.prices].sort((a, b) => a.d.localeCompare(b.d)) : derivedPrices(c);
+const priceHistory = c => { if (!c.prices?.length) return derivedPrices(c); const g = gfac(currentSvc(c)); return [...c.prices].sort((a, b) => a.d.localeCompare(b.d)).map(x => g === 1 ? x : { d: x.d, p: Math.round(x.p * g) }); }; // shown net or gross like the rest
 const startOf = c => c.since ? new Date(c.since + "T00:00") : c.first;
 function priceOf(c) {
   const tx = paidLessons(c);
-  if (c.prices?.length) { const h = priceHistory(c), today = isoDay(NOW), now = h.filter(x => x.d <= today).pop() || h[0]; return { cur: now.p, first: h[0].p, avg: tx.length ? avg(tx.map(lessonPrice)) : now.p, set: true }; }
+  if (c.prices?.length) { const h = priceHistory(c), today = isoDay(NOW), now = h.filter(x => x.d <= today).pop() || h[0]; return { cur: now.p, first: h[0].p, avg: tx.length ? avg(tx.map(lessonPrice)) : now.p, set: true }; } // priceHistory is already net or gross
   if (!tx.length) return null;
   return { cur: lessonPrice(tx[tx.length - 1]), first: lessonPrice(tx[0]), avg: avg(tx.map(lessonPrice)) };
 }
@@ -2324,7 +2365,7 @@ function openClient(id) {
     if (a === "pbAdd") { $("#pbRows").insertAdjacentHTML("beforeend", priceRow({ d: isoDay(NOW), p: priceOf(c)?.cur ? Math.round(priceOf(c).cur) : "" })); return; }
     if (a === "pbDel") { e.target.closest(".pr-r").remove(); return; }
     if (a === "pbSave") {
-      const since = $("#pbSince").value, rows = $$("#pbRows .pr-r").map(r => ({ d: $(".d", r).value, p: +$(".p", r).value })).filter(x => x.d && x.p > 0).sort((x, y) => x.d.localeCompare(y.d));
+      const g = gfac(currentSvc(c)), since = $("#pbSince").value, rows = $$("#pbRows .pr-r").map(r => ({ d: $(".d", r).value, p: Math.round(+$(".p", r).value / g * 100) / 100 })).filter(x => x.d && x.p > 0).sort((x, y) => x.d.localeCompare(y.d));
       c.since = since && (!c.first || since !== isoDay(c.first)) ? since : null; if ($("#pbRows")) c.prices = rows.length ? rows : null;
       persistClient(c); afterChange(); openClient(c.id); toast(t("saved")); return;
     }
@@ -3960,6 +4001,123 @@ const XLSX_W = (() => {
 })();
 const xlsxBlob = sheets => XLSX_W(sheets);
 
+/* ================= review prices: when each price last changed, what students pay, what a raise would bring =================
+   Prices follow the Net / Gross switch at the top. Prices set by a school (service.fixed) are shown but never proposed for a raise.
+   For a platform with a fee (service.fee, rate = home currency per dollar) the dollar price the student pays is shown too. */
+APP.pr = { pct: 10, months: 12, min: 0, risk: 10, skip: new Set() };
+// lessons a month for one student: over the last 3 months with lessons (a holiday month does not count as zero)
+function recentPace() {
+  const ms = []; for (let i = NM - 1; i >= 0 && ms.length < 3; i--) if (M.rev[i] > 0 && i < NM - 1) ms.push(i);
+  if (!ms.length && M.rev[NM - 1] > 0) ms.push(NM - 1);
+  const set = new Set(ms), n = new Map();
+  for (const b of DB.books) if (!b.ns && !isTrialSvc(b.s) && set.has(monthIdx(b.d))) n.set(b.c, (n.get(b.c) || 0) + 1);
+  return { per: id => (n.get(id) || 0) / Math.max(1, ms.length), months: ms };
+}
+function priceRows() {
+  const pace = recentPace();
+  return DB.clients.filter(c => c.first && (c.status === "active" || c.status === "risk")).map(c => {
+    const s = currentSvc(c), sv = P.services[s]; if (!sv || sv.trial) return null;
+    const pr = priceOf(c); if (!pr || !pr.cur) return null;
+    const h = priceHistory(c), last = h.length ? h[h.length - 1] : null, lastD = last ? new Date(last.d + "T00:00") : null;
+    const fee = +sv.fee || 0, rate = +sv.rate || 0, grossOf = v => DB.gross || !fee ? v : v / (1 - fee);
+    return { c, s, sv, cur: pr.cur, first: pr.first, set: !!c.prices?.length, lastD, months: lastD ? (NOW - lastD) / DAY / 30.44 : 0, changes: Math.max(0, h.length - 1),
+      pm: pace.per(c.id), fixed: !!sv.fixed, fee, rate, usd: fee && rate ? grossOf(pr.cur) / rate : null, usd0: fee && rate ? grossOf(pr.first) / rate : null, start: startOf(c) };
+  }).filter(Boolean);
+}
+const usdF = v => "$" + nf(v, Math.abs(v - Math.round(v)) > .01 ? 2 : 0);
+// what one student would pay after the raise, in the amounts shown now (net or gross)
+function proposeFor(r, o) {
+  if (r.fixed || o.skip.has(r.c.id)) return null;
+  const stale = r.months >= o.months, k = 1 + o.pct / 100;
+  if (r.usd != null) {
+    let u = r.usd; if (stale && o.pct) u = Math.ceil(r.usd * k - .001); if (o.min && u < o.min) u = o.min;
+    if (u <= r.usd + .001) return null;
+    const gross = u * r.rate; return { usd: u, p: DB.gross ? gross : gross * (1 - r.fee) };
+  }
+  if (!stale || !o.pct) return null;
+  const p = Math.ceil(r.cur * k / 50) * 50; return p > r.cur ? { p } : null;
+}
+VIEWS.prices = el => {
+  if (!hasData()) { el.innerHTML = vhead(L("Prices", "Prezzi"), L("Review prices", "Rivedi i prezzi"), "") + emptyState(L("No students yet", "Ancora nessuno studente"), L("Add students and lessons: this page compares their prices.", "Aggiungi studenti e lezioni: questa pagina confronta i loro prezzi.")); return; }
+  const o = APP.pr, rows = priceRows(), U = unit(false), mode = DB.gross ? L("gross", "lordi") : L("net", "netti");
+  const fsvc = P.services.map((s, i) => i).filter(i => +P.services[i].fee > 0);
+  let h = vhead(L("Prices", "Prezzi"), L("Review prices", "Rivedi i prezzi"), L(`When each price last changed, what ${who()} pay and what a raise would bring. Amounts are ${mode}: switch Net / Gross at the top.`, `Quando è cambiato l'ultima volta ogni prezzo, quanto pagano gli ${who()} e quanto renderebbe un aumento. Importi ${mode}: cambia Netto / Lordo in alto.`));
+  // the platform fee and exchange rate, editable here
+  if (fsvc.length) h += `<div class="panel fee-p">${fsvc.map(i => { const s = P.services[i]; return `<div class="fee-r" data-fee="${i}"><b>${esc(tr(s.n))}</b><label>${L("Platform fee", "Commissione")}<span><input type="number" class="fee-in fee-f" min="0" max="60" step="0.5" value="${+(s.fee * 100).toFixed(1)}">%</span></label>${s.rate ? `<label>1 ${esc(s.cur2 || "$")} =<span><input type="number" class="fee-in fee-x" min="0" step="0.01" value="${s.rate}"> ${esc(CUR)}</span></label>` : ""}<small>${L(`On ${usdF(30)} the student pays, ${usdF(30 * (1 - s.fee))} reach you (${eur(30 * (s.rate || 0) * (1 - s.fee))}).`, `Su ${usdF(30)} pagati dallo studente ne arrivano ${usdF(30 * (1 - s.fee))} (${eur(30 * (s.rate || 0) * (1 - s.fee))}).`)}</small><button class="btn ghost sm" data-act="feeSave">${L("Save", "Salva")}</button></div>`; }).join("")}</div>`;
+  // headline numbers
+  const set = rows.filter(r => r.set && r.changes && r.lastD), latest = set.sort((a, b) => b.lastD - a.lastD)[0];
+  const free = rows.filter(r => !r.fixed), stale = free.filter(r => r.months >= o.months);
+  const fr = rows.filter(r => r.usd != null), recent = fr.filter(r => r.start && NOW - r.start < 183 * DAY), old = fr.filter(r => r.start && NOW - r.start >= 183 * DAY);
+  const avgNew = recent.length ? avg(recent.map(r => r.cur)) : 0, avgOld = old.length ? avg(old.map(r => r.cur)) : 0;
+  h += `<div class="mk-grid">
+    <div class="mk" style="--kc:var(--blue)"><span class="l"><i></i>${L("Last price update", "Ultimo aggiornamento prezzi")}</span><b>${latest ? fdate(latest.lastD, { day: "numeric", month: "short", year: "numeric" }) : "—"}</b><span class="s">${latest ? `<small>${esc(latest.c.name)} · ${eur(latest.cur)}${latest.usd ? " · " + usdF(latest.usd) : ""}</small>` : ""}</span></div>
+    <div class="mk" style="--kc:var(--coral)"><span class="l"><i></i>${L("To review", "Da rivedere")}</span><b>${nf(stale.length)}</b><span class="s"><small>${L(`same price for ${o.months}+ months`, `stesso prezzo da ${o.months}+ mesi`)}</small></span></div>
+    ${fsvc.length ? `<div class="mk" style="--kc:var(--violet)"><span class="l"><i></i>${L(`Average on ${tr(P.services[fsvc[0]].n)}`, `Media ${tr(P.services[fsvc[0]].n)}`)}</span><b>${fr.length ? eur(avg(fr.map(r => r.cur))) : "—"}</b><span class="s"><small>${fr.length ? usdF(avg(fr.map(r => r.usd))) + " " + L("gross", "lordi") : ""}</small></span></div>
+    <div class="mk" style="--kc:var(--lime)"><span class="l"><i></i>${L("New vs long-standing", "Nuovi vs storici")}</span><b>${avgOld ? (avgNew / avgOld - 1 >= 0 ? "+" : "−") + pct(Math.abs(avgNew / avgOld - 1)) : "—"}</b><span class="s"><small>${L(`new ${eur(avgNew)} · since 6+ months ${eur(avgOld)}`, `nuovi ${eur(avgNew)} · da 6+ mesi ${eur(avgOld)}`)}</small></span></div>` : ""}
+  </div>`;
+  // price ladder and facts
+  const lad = [...rows].sort((a, b) => b.cur - a.cur), mx = Math.max(...lad.map(r => r.cur), 1);
+  h += `<div class="grid">
+    <div class="panel c7"><div class="ph"><div><h3>${L("Who pays what", "Chi paga quanto")}</h3><p>${L(`Price of one ${U} now, from the highest. The line is what new ${who()} pay.`, `Prezzo di una ${U} oggi, dal più alto. La linea è quanto pagano i nuovi ${who()}.`)}</p></div></div>
+      <div class="ladder" style="--nw:${avgNew ? (avgNew / mx * 100).toFixed(1) : -10}%">${lad.map((r, k) => `<button type="button" class="ld" data-client="${r.c.id}" style="--i:${k}"><span class="ld-n">${esc(r.c.name)}</span><span class="ld-b"><i style="width:${(r.cur / mx * 100).toFixed(1)}%;background:${col(r.s)}"></i></span><span class="ld-v">${eur(r.cur)}${r.usd ? `<small>${usdF(r.usd)}</small>` : ""}</span></button>`).join("")}</div>
+      <div class="legend">${[...new Set(rows.map(r => r.s))].map(s => `<span><i style="background:${col(s)}"></i>${esc(tr(P.services[s].n))}</span>`).join("")}${avgNew ? `<span><i class="dash" style="border-color:var(--ink)"></i>${L("new students", "nuovi studenti")}</span>` : ""}</div></div>
+    <div class="panel c5"><div class="ph"><div><h3>${L("Good to know", "Info utili")}</h3><p>${L("What the prices say", "Cosa dicono i prezzi")}</p></div></div><ul class="facts">${priceFacts(rows, avgNew, recent).map(x => `<li>${x}</li>`).join("")}</ul></div>
+  </div>`;
+  // simulation
+  const opts = (k, vals, f) => vals.map(v => `<button type="button" data-pr="${k}" data-v="${v}" aria-selected="${o[k] === v}">${f(v)}</button>`).join("");
+  const sim = rows.map(r => ({ r, n: proposeFor(r, o) })), hit = sim.filter(x => x.n);
+  const extra = sum(hit.map(x => (x.n.p - x.r.cur) * x.r.pm)), base = sum(hit.map(x => x.n.p * x.r.pm)), lost = base * o.risk / 100;
+  h += `<div class="panel"><div class="ph"><div><h3>${L("What a raise would bring", "Potenziali risultati di un aumento")}</h3><p>${L(`Uses each student's pace over the last months with lessons. School prices are left out. Amounts ${mode}.`, `Usa il ritmo di ogni studente negli ultimi mesi di lavoro. I prezzi della scuola sono esclusi. Importi ${mode}.`)}</p></div></div>
+    <div class="sim-c">
+      <div><span class="eyebrow">${L("Raise", "Aumento")}</span><div class="seg-t">${opts("pct", [0, 5, 10, 15, 20], v => v ? "+" + v + "%" : L("none", "nessuno"))}</div></div>
+      <div><span class="eyebrow">${L("For who has had the same price for", "A chi ha lo stesso prezzo da")}</span><div class="seg-t">${opts("months", [6, 12, 18, 24], v => L(`${v}+ months`, `${v}+ mesi`))}</div></div>
+      ${fsvc.length ? `<div><span class="eyebrow">${L(`Minimum on ${tr(P.services[fsvc[0]].n)} (what the student pays)`, `Minimo su ${tr(P.services[fsvc[0]].n)} (quanto paga lo studente)`)}</span><div class="seg-t">${opts("min", [0, 20, 22, 25, 30], v => v ? usdF(v) : L("none", "nessuno"))}</div></div>` : ""}
+      <div><span class="eyebrow">${L("Chance that someone stops", "Rischio che qualcuno smetta")}</span><div class="seg-t">${opts("risk", [0, 5, 10, 20], v => v + "%")}</div></div>
+    </div>
+    <div class="mk-grid sim-k">
+      <div class="mk" style="--kc:var(--blue)"><span class="l"><i></i>${L("Students affected", "Studenti coinvolti")}</span><b>${nf(hit.length)}</b><span class="s"><small>${L(`of ${free.length} with a price you set`, `su ${free.length} con un prezzo tuo`)}</small></span></div>
+      <div class="mk" style="--kc:var(--lime)"><span class="l"><i></i>${L("More a month", "In più al mese")}</span><b>+${eur(extra)}</b><span class="s"><small>${L("if everyone stays", "se restano tutti")}</small></span></div>
+      <div class="mk" style="--kc:var(--teal)"><span class="l"><i></i>${L("More a year", "In più all'anno")}</span><b>+${eur(extra * 11)}</b><span class="s"><small>${L("11 working months", "11 mesi di lavoro")}</small></span></div>
+      <div class="mk" style="--kc:var(--sun)"><span class="l"><i></i>${L("With the risk", "Con il rischio")}</span><b>${extra - lost >= 0 ? "+" : "−"}${eur(Math.abs(extra - lost))}</b><span class="s"><small>${L(`a month, if ${o.risk}% of them stop`, `al mese, se smette il ${o.risk}% di loro`)}${base ? " · " + L(`worth it while fewer than ${pct(extra / base)} stop`, `conviene finché smette meno del ${pct(extra / base)}`) : ""}</small></span></div>
+    </div>
+    <div class="tablewrap"><table class="mm sim-t"><thead><tr><th></th><th>${Who(false)}</th><th class="num">${L("Now", "Ora")}</th><th class="num">${L("Proposed", "Proposto")}</th><th class="num">${L(`${Cap(unit())} a month`, `${Cap(unit())} al mese`)}</th><th class="num">${L("More a month", "In più al mese")}</th><th>${L("Last update", "Ultimo aggiornamento")}</th></tr></thead><tbody>
+    ${sim.sort((a, b) => (b.n ? (b.n.p - b.r.cur) * b.r.pm : -1) - (a.n ? (a.n.p - a.r.cur) * a.r.pm : -1) || b.r.months - a.r.months).map(({ r, n }) => `<tr class="${n ? "on" : r.fixed ? "fx" : ""}"><td>${r.fixed ? "" : `<input type="checkbox" data-skip="${r.c.id}" ${o.skip.has(r.c.id) ? "" : "checked"} aria-label="${esc(L("Include", "Includi"))}">`}</td><td><button type="button" class="lnk" data-client="${r.c.id}">${esc(r.c.name)}</button><small class="sub"><i class="sd" style="--sc:${col(r.s)}"></i>${esc(tr(r.sv.n))}${r.fixed ? " · " + L("set by the school", "lo decide la scuola") : ""}</small></td>
+      <td class="num"><b>${eur(r.cur)}</b>${r.usd ? `<small class="sub">${usdF(r.usd)}</small>` : ""}</td><td class="num">${n ? `<b class="up-t">${eur(n.p)}</b>${n.usd ? `<small class="sub">${usdF(n.usd)}</small>` : ""}` : "—"}</td><td class="num">${nf(r.pm, 1)}</td><td class="num">${n ? `<b>+${eur((n.p - r.cur) * r.pm)}</b>` : ""}</td>
+      <td>${r.lastD ? fdate(r.lastD, { day: "numeric", month: "short", year: "numeric" }) : "—"}<small class="sub ${r.months >= o.months && !r.fixed ? "warn" : ""}">${r.set ? (r.months < 1 ? L("this month", "questo mese") : L(`${nf(Math.floor(r.months))} months ago`, `${nf(Math.floor(r.months))} mesi fa`)) : L("not recorded: from the lessons", "non registrato: dalle lezioni")}${r.changes ? " · " + L(`${r.changes} change${r.changes > 1 ? "s" : ""}`, `${r.changes} ${r.changes > 1 ? "cambi" : "cambio"}`) : ""}</small></td></tr>`).join("")}
+    </tbody></table></div></div>`;
+  el.innerHTML = h;
+  $$(".mk b", el).forEach(b => b.closest(".sim-k") && b.animate?.([{ opacity: .3, transform: "translateY(4px)" }, { opacity: 1, transform: "none" }], { duration: 350, easing: "ease-out" }));
+  el.onclick = e => {
+    const b = e.target.closest("[data-pr]"); if (b) { o[b.dataset.pr] = +b.dataset.v; const y = scrollY; renderView(); scrollTo(0, y); return; }
+    if (e.target.closest("[data-act=feeSave]")) {
+      const r = e.target.closest("[data-fee]"), i = +r.dataset.fee, f = +$(".fee-f", r).value / 100, x = $(".fee-x", r) ? +$(".fee-x", r).value : P.services[i].rate;
+      if (!(f >= 0 && f < .6)) { toast(L("Fee between 0 and 60%", "Commissione tra 0 e 60%")); return; }
+      const g = GROSS; GROSS = false; grossSync(); // change the fee on net data, then show it again as before
+      P.services[i] = { ...P.services[i], fee: f, rate: x };
+      if (STORE.active) { const sv = P.services.map(s => ({ ...s, n: tr(s.n) })); saveMeta({ services: sv }); STORE.meta.services = sv; }
+      GROSS = g; computeMonthly(); renderTop(); renderView(); toast(t("saved")); return;
+    }
+  };
+  el.onchange = e => { const s = e.target.closest("[data-skip]"); if (s) { const id = +s.dataset.skip; s.checked ? o.skip.delete(id) : o.skip.add(id); const y = scrollY; renderView(); scrollTo(0, y); } };
+};
+function priceFacts(rows, avgNew, recent) {
+  const out = [], free = rows.filter(r => !r.fixed);
+  const below = free.filter(r => r.usd != null && avgNew && r.cur < avgNew * .97);
+  if (below.length) out.push(L(`<b>${below.length}</b> students pay less than new students (${eur(avgNew)}). At the new price they would bring <b>+${eur(sum(below.map(r => (avgNew - r.cur) * r.pm)))}</b> a month.`, `<b>${below.length}</b> studenti pagano meno dei nuovi (${eur(avgNew)}). Al prezzo dei nuovi porterebbero <b>+${eur(sum(below.map(r => (avgNew - r.cur) * r.pm)))}</b> al mese.`));
+  const oldest = free.filter(r => r.set).sort((a, b) => b.months - a.months)[0];
+  if (oldest) out.push(L(`Oldest price: <b>${esc(oldest.c.name)}</b>, ${eur(oldest.cur)}${oldest.usd ? ` (${usdF(oldest.usd)})` : ""}, unchanged for ${nf(Math.floor(oldest.months))} months.`, `Prezzo più vecchio: <b>${esc(oldest.c.name)}</b>, ${eur(oldest.cur)}${oldest.usd ? ` (${usdF(oldest.usd)})` : ""}, fermo da ${nf(Math.floor(oldest.months))} mesi.`));
+  const raised = free.filter(r => r.changes && r.first);
+  if (raised.length) out.push(L(`${raised.length} students had a raise: on average <b>+${pct(avg(raised.map(r => r.cur / r.first - 1)))}</b> since they started.`, `${raised.length} studenti hanno avuto un aumento: in media <b>+${pct(avg(raised.map(r => r.cur / r.first - 1)))}</b> da quando hanno iniziato.`));
+  const top = [...free].sort((a, b) => b.cur * b.pm - a.cur * a.pm)[0];
+  if (top) out.push(L(`Brings the most each month: <b>${esc(top.c.name)}</b>, ${nf(top.pm, 1)} lessons at ${eur(top.cur)} = ${eur(top.cur * top.pm)}.`, `Rende di più ogni mese: <b>${esc(top.c.name)}</b>, ${nf(top.pm, 1)} lezioni a ${eur(top.cur)} = ${eur(top.cur * top.pm)}.`));
+  const fs = P.services.find(s => +s.fee > 0);
+  if (fs) out.push(L(`${esc(tr(fs.n))} keeps ${pct(fs.fee)}: on ${usdF(30)} ${usdF(30 * (1 - fs.fee))} reach you.`, `${esc(tr(fs.n))} trattiene il ${pct(fs.fee)}: su ${usdF(30)} ne arrivano ${usdF(30 * (1 - fs.fee))}.`));
+  const nr = rows.filter(r => !r.set).length;
+  if (nr) out.push(L(`${nr} students have no recorded price history: their date is the first lesson in the data. Add it from their card.`, `${nr} studenti non hanno lo storico prezzi: la data è la prima lezione nei dati. Puoi aggiungerla dalla loro scheda.`));
+  if (rows.some(r => r.fixed)) out.push(L("School prices are set by the school: shown, never in the simulation.", "I prezzi della scuola li decide la scuola: li vedi, ma non entrano nella simulazione."));
+  return out;
+}
+
 /* ================= persistence: saved workspaces in the artifact database =================
    workspaces/{ws}                -> settings (name, profession, currency, price list, channels, goal, start date)
    workspaces/{ws}/chunks/{k}     -> { clients: { <clientKey>: client with its payments and sessions } }
@@ -3998,7 +4156,7 @@ function defaultMeta(o) {
   const base = profBase(o.prof, o.profile);
   const meta = {
     name: o.name, prof: base.id, cur: o.cur || base.cur || "EUR", goal: +o.goal || 0, start: o.start || null, capacity: +o.capacity || base.capacity,
-    services: base.services.map((s, i) => ({ id: "s" + i, n: tr(s.n), p: s.p, kind: s.kind, ...(s.sessions ? { sessions: s.sessions } : {}), ...(s.perWeek ? { perWeek: s.perWeek } : {}), ...(s.trial ? { trial: true } : {}), ...(s.fixed ? { fixed: true } : {}) })),
+    services: base.services.map((s, i) => ({ id: "s" + i, n: tr(s.n), p: s.p, kind: s.kind, ...(s.sessions ? { sessions: s.sessions } : {}), ...(s.perWeek ? { perWeek: s.perWeek } : {}), ...(s.trial ? { trial: true } : {}), ...(s.fixed ? { fixed: true } : {}), ...(s.fee ? { fee: s.fee, rate: s.rate || 0, cur2: s.cur2 || "" } : {}) })),
     extras: base.extras.map((x, i) => ({ id: "e" + i, n: tr(x.n), p: x.p, ...(x.perhead ? { perhead: true } : {}) })),
     channels: base.channels.map((c, i) => ({ id: "h" + i, n: tr(c.n), spend: 0, comm: c.comm || 0 })),
     created: new Date().toISOString(), updated: new Date().toISOString(),
@@ -4016,7 +4174,7 @@ function makeP(meta) {
   // profile settings apply while the workspace keeps the profession it was created with
   const ext = meta.ext && (meta.extProf || meta.prof) === prof.id ? meta.ext : null;
   const base = { ...prof, ...(ext || {}) };
-  return { ...base, services: (meta.services || []).map((s, i) => !s.fixed && base.services?.[i]?.fixed && [].concat(typeof base.services[i].n === "object" ? Object.values(base.services[i].n) : base.services[i].n).includes(s.n) ? { ...s, fixed: true } : s), extras: meta.extras || [], channels: meta.channels?.length ? meta.channels : [{ id: "h0", n: L("Other", "Altro"), spend: 0 }], capacity: +meta.capacity || base.capacity, goal: +meta.goal || 0, consultStart: meta.start ? new Date(meta.start + "T00:00") : null, costs: meta.costs || [], saved: true, profile: ext ? meta.profile || null : null };
+  return { ...base, services: (meta.services || []).map((s, i) => { const b = base.services?.[i]; if (!b || ![].concat(typeof b.n === "object" ? Object.values(b.n) : b.n).includes(s.n)) return s; const o = { ...s }; if (b.fixed && !s.fixed) o.fixed = true; if (b.fee && s.fee == null) Object.assign(o, { fee: b.fee, rate: b.rate || 0, cur2: b.cur2 || "" }); return o; }), extras: meta.extras || [], channels: meta.channels?.length ? meta.channels : [{ id: "h0", n: L("Other", "Altro"), spend: 0 }], capacity: +meta.capacity || base.capacity, goal: +meta.goal || 0, consultStart: meta.start ? new Date(meta.start + "T00:00") : null, costs: meta.costs || [], saved: true, profile: ext ? meta.profile || null : null };
 }
 function serClient(c) {
   const id = (list, i) => list[i]?.id ?? null;
@@ -4024,7 +4182,7 @@ function serClient(c) {
     name: c.name, email: c.email || "", phone: c.phone || "", origin: c.origin || "", ch: id(P.channels, c.ch), seg: c.seg || 0, size: c.size || 1, freq: c.freq || 1,
     f: c.f || {}, note: c.note || "", review: c.review || 0, created: new Date(c.created).toISOString(),
     sub: c.subActive ? { s: id(P.services, c.sub), active: true } : null,
-    pays: c.txIdx.map(i => DB.txns[i]).sort((a, b) => a.d - b.d).map(x => ({ d: x.d.toISOString(), k: x.k, s: id(x.k === "ext" ? P.extras : P.services, x.s), a: x.a, m: x.m, st: x.st })),
+    pays: c.txIdx.map(i => DB.txns[i]).sort((a, b) => a.d - b.d).map(x => ({ d: x.d.toISOString(), k: x.k, s: id(x.k === "ext" ? P.extras : P.services, x.s), a: netAmt(x), m: x.m, st: x.st })),
     sess: [...DB.books.filter(b => b.c === c.id), ...(DB.upcoming || []).filter(u => u.c === c.id)].map(b => ({ d: b.d.toISOString(), s: id(P.services, b.s), ns: b.ns || 0 })),
     ...(c.since ? { since: c.since } : {}), ...(c.prices?.length ? { prices: c.prices } : {}),
   };
@@ -4703,6 +4861,7 @@ function importTracker(text) {
   if (!T0.lessons.length) return { error: L("The file has no lessons.", "Il file non contiene lezioni.") };
   const people = trackerPeople(T0), fresh = !STORE.active;
   if (fresh) { DB = { clients: [], txns: [], books: [], upcoming: [] }; CUR = T0.home; }
+  const g0 = GROSS; if (DB.gross) { GROSS = false; grossSync(); } // the tracker holds net amounts: import into net data
   let newSettings = false, curNote = "";
   if (!fresh && STORE.meta.cur !== T0.home) {
     if (!DB.txns.length) { saveMeta({ cur: T0.home }); CUR = T0.home; }
@@ -4759,8 +4918,11 @@ function importTracker(text) {
     }
     touched.push(c);
   }
+  const info = P.studentInfo || (STORE.active && STORE.meta?.profile ? profileById(STORE.meta.profile)?.patch?.studentInfo : null);
+  if (info) applyStudentInfo(info, touched, T0.lessons.map(l => l.d).sort()[0]);
   DB.books.sort((a, b) => a.d - b.d);
   for (const c of touched) refreshClient(DB, c);
+  GROSS = g0;
   if (T0.costs.length && !(P.costs || []).length) { P.costs = T0.costs; saveMeta({ costs: T0.costs }); } // costs set in the program win over the tracker's
   if (!fresh) {
     if (newSettings) { const clean = { services: P.services.map(s => ({ ...s, n: tr(s.n) })), channels: P.channels.map(c => ({ id: c.id, n: tr(c.n), spend: c.spend || 0, comm: c.comm || 0 })) }; saveMeta(clean); Object.assign(STORE.meta, clean); }
@@ -4769,6 +4931,24 @@ function importTracker(text) {
   computeMonthly();
   const ds = T0.lessons.map(l => l.d).sort();
   return { tracker: true, nNew, nUpd, nLes, nTrial, people: people.length, gone: people.filter(p => p.gone).length, moved, from: ds[0], to: ds[ds.length - 1], cur: T0.home, curNote, total: sum(T0.lessons.map(l => l.a)) };
+}
+// start dates and price history known outside the tracker (profile studentInfo): prices in dollars are what the
+// student pays (gross), stored net in the home currency. Never overwrites what was set by hand in the program.
+function applyStudentInfo(info, list, from) {
+  const by = new Map(list.map(c => [c.name.trim().toLowerCase(), c]));
+  const fs = P.services.find(s => +s.fee > 0), fee = +fs?.fee || 0, rate = +fs?.rate || 1, d0 = from ? new Date(from + "T00:00") : null;
+  for (const s of info) {
+    const c = by.get(String(s.n).trim().toLowerCase()); if (!c) continue;
+    if (s.since && !c.since) c.since = s.since;
+    if (!c.prices?.length) { const h = s.usd ? s.usd.map(([d, v]) => ({ d, p: Math.round(v * rate * (1 - fee) * 100) / 100 })) : s.czk ? s.czk.map(([d, v]) => ({ d, p: +v })) : null; if (h) c.prices = h; }
+    if (s.note && !c.note) c.note = s.note;
+    // the free trial was put on the first tracker lesson: move it to the real start, or drop it when the start is older than the tracker
+    if (c.since) {
+      const tri = DB.books.filter(b => b.c === c.id && isTrialSvc(b.s)); if (!tri.length) continue;
+      const sd = new Date(c.since + "T00:00"); DB.books = DB.books.filter(b => !tri.includes(b));
+      if (d0 && sd >= d0) addSession(c, { d: sd, s: tri[0].s, ns: 0 }, true);
+    }
+  }
 }
 // lessons stored without a time (the tracker has dates only)
 const untimed = () => { const b = DB.books; if (b.length < 5) return false; let z = 0; for (const x of b) if (!x.d.getHours() && !x.d.getMinutes()) z++; return z / b.length > .8; };
@@ -5033,7 +5213,7 @@ function showCsv(kind, data) {
 APP.demoNames = {};
 const bizName = () => STORE.active ? (STORE.meta?.name || "—") : demoName();
 // the four pages used every day, then the deeper analysis, then data
-const NAV = ["overview", "today", "clients", "revenue", "#analysis", "schedule", "insights", "simulator", "report", "export", "|", "data"]; // retention and marketing are off the menu (Gabri, Nov 2026)
+const NAV = ["overview", "today", "clients", "revenue", "prices", "#analysis", "schedule", "insights", "simulator", "report", "export", "|", "data"]; // retention and marketing are off the menu (Gabri, Nov 2026)
 function renderNav() {
   $("#nav").innerHTML = NAV.map(v => v === "|" ? `<div class="sep"></div>` : v === "#analysis" ? `<div class="nav-group">${L("Analysis", "Analisi")}</div>` : `<button type="button" data-view="${v}" aria-current="${APP.view === v}">${icon(NAV_ICONS[v])}<span>${v === "clients" ? Who() : v === "retention" && isVisit() ? L("Reviews & returns", "Recensioni e ritorni") : t("nav_" + v)}</span></button>`).join("");
 }
@@ -5053,6 +5233,8 @@ function renderTop() {
   btn.title = L("Change client or category", "Cambia cliente o categoria");
   $("#period").innerHTML = [["30", "p30"], ["90", "p90"], ["12", "p12"], ["all", "pall"]].map(([v, k]) => `<button type="button" data-p="${v}" aria-pressed="${PERIOD === v}">${t(k)}</button>`).join("");
   $$("#lang button").forEach(b => b.setAttribute("aria-pressed", b.dataset.l === LANG));
+  const gs = $("#gross"); gs.hidden = !hasFee();
+  if (!gs.hidden) { gs.innerHTML = [["0", L("Net", "Netto")], ["1", L("Gross", "Lordo")]].map(([v, l]) => `<button type="button" data-g="${v}" aria-pressed="${!!DB.gross === (v === "1")}" title="${esc(v === "1" ? L("What students pay, before the platform fee", "Quanto pagano gli studenti, prima della commissione della piattaforma") : L("What is left after the platform fee", "Quanto resta dopo la commissione della piattaforma"))}">${l}</button>`).join(""); gs.title = L("Platform prices net or gross of the fee", "Prezzi delle piattaforme al netto o al lordo della commissione"); }
   const pill = $(".demo-pill"); pill.hidden = STORE.active; pill.dataset.i = P.realData ? "demoReal" : "demo"; pill.textContent = t(pill.dataset.i); pill.classList.toggle("real", !!P.realData);
   let ss = $("#saveState"); if (!ss) { ss = document.createElement("span"); ss.id = "saveState"; ss.className = "save-state hide-sm"; pill.after(ss); savingEl = ss; }
   ss.hidden = !STORE.active; if (STORE.active && ss.dataset.on !== "1") ss.textContent = L("Saved", "Salvato");
@@ -5136,6 +5318,7 @@ document.addEventListener("click", e => {
   const p = e.target.closest("#period [data-p]"); if (p) { PERIOD = p.dataset.p; renderTop(); renderView(); return; }
   const pr = e.target.closest("[data-per]"); if (pr) { PERIOD = pr.dataset.per; renderTop(); renderView(); $(".view")?.classList.add("per-anim"); return; }
   if (e.target.closest("#perGo")) { const a = $("#perA").value, b = $("#perB").value; if (a && b) { PERIOD = `r:${a < b ? a : b}:${a < b ? b : a}`; renderTop(); renderView(); $(".view")?.classList.add("per-anim"); } return; }
+  const gb = e.target.closest("#gross [data-g]"); if (gb) { setGross(gb.dataset.g === "1"); renderTop(); renderView(); toast(DB.gross ? L("Showing gross amounts: what students pay", "Importi lordi: quanto pagano gli studenti") : L("Showing net amounts: what is left after the fee", "Importi netti: quanto resta dopo la commissione")); return; }
   const l = e.target.closest("#lang [data-l]"); if (l) { LANG = l.dataset.l; try { localStorage.setItem("clientela.lang", LANG); } catch (err) { } if (!STORE.active) { /* demo names follow language */ } renderTop(); renderView(); return; }
   if (e.target.closest("#profBtn")) return openPicker();
   const a = e.target.closest("[data-act]")?.dataset.act;
