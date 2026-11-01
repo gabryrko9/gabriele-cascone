@@ -888,6 +888,8 @@ td .mdl{margin-left:4px}
 .fee-r{display:flex;align-items:center;gap:14px;flex-wrap:wrap;width:100%}
 .fee-r label{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--muted)}.fee-r label span{display:inline-flex;align-items:center;gap:4px;color:var(--ink)}
 .fee-r input{width:72px;height:32px;padding:0 8px;border:1px solid var(--line);border-radius:8px;background:#fff;font:inherit;color:var(--ink)}.fee-r small{color:var(--muted);font-size:.78rem;flex:1;min-width:200px}
+.acc-t td{vertical-align:middle}.acc-t .chip{margin:2px 0}.acc-x{border:0;background:none;color:var(--muted);cursor:pointer;font-size:1rem;line-height:1;padding:0 0 0 4px}.acc-x:hover{color:var(--bad)}
+.acc-f{display:flex;gap:6px}.acc-f input{height:32px;padding:0 8px;border:1px solid var(--line);border-radius:8px;font:inherit;min-width:160px}
 .pr-sum{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
 .pr-sum>span{flex:1 1 200px;display:flex;flex-direction:column;gap:2px;background:var(--card,#fff);border:1px solid var(--line);border-radius:14px;padding:12px 16px;min-width:0}
 .pr-sum small{color:var(--muted);font-size:.76rem}.pr-sum b{font:700 1.3rem var(--f-display);letter-spacing:-.02em}.pr-sum em{font-style:normal;color:var(--faint);font-size:.76rem}
@@ -4474,36 +4476,86 @@ function makeDocStore(backend) {
 }
 
 /* ---------- cloud sync through the owner's Supabase project ---------- */
-const CLOUD_SQL = `-- Clientela: run once in Supabase > SQL editor
-create table if not exists public.clientela_docs (
-  owner uuid not null default auth.uid() references auth.users on delete cascade,
-  path text not null,
+// one Supabase project for the consultant and every client: each client sees only their own space, the admins see all of them
+const CLOUD_SQL = `-- Clientela: run once in Supabase > SQL editor. Then add yourself as admin (last line).
+create table if not exists public.clientela_admins (email text primary key);
+create table if not exists public.clientela_members (
+  ws text not null,
+  email text not null,
+  added_at timestamptz not null default now(),
+  primary key (ws, email)
+);
+create table if not exists public.clientela_space_docs (
+  path text primary key check (path ~ '^workspaces/[A-Za-z0-9_-]+(/chunks/[A-Za-z0-9_-]+)?$'),
+  ws text generated always as (split_part(path, '/', 2)) stored,
   data jsonb,
   deleted boolean not null default false,
-  updated_at timestamptz not null default now(),
-  primary key (owner, path)
+  updated_by uuid default auth.uid(),
+  updated_at timestamptz not null default now()
 );
-alter table public.clientela_docs enable row level security;
-drop policy if exists "own rows" on public.clientela_docs;
-create policy "own rows" on public.clientela_docs for all
-  using (owner = auth.uid()) with check (owner = auth.uid());
+create index if not exists clientela_space_docs_ws on public.clientela_space_docs (ws);
+create index if not exists clientela_space_docs_upd on public.clientela_space_docs (updated_at);
+
+-- who is asking, and what they may open
+create or replace function public.clientela_me() returns text
+  language sql stable as $$ select lower(coalesce(auth.jwt() ->> 'email', '')) $$;
+create or replace function public.clientela_is_admin() returns boolean
+  language sql stable security definer set search_path = public as $$
+  select exists (select 1 from clientela_admins where lower(email) = clientela_me()) $$;
+-- a client space is open to the admins, to its members, and to whoever creates it
+create or replace function public.clientela_can(w text) returns boolean
+  language sql stable security definer set search_path = public as $$
+  select clientela_me() <> '' and (clientela_is_admin()
+    or exists (select 1 from clientela_members where ws = w and lower(email) = clientela_me())
+    or not exists (select 1 from clientela_space_docs where ws = w)) $$;
+
+-- whoever creates a space becomes its member; every write is stamped
 create or replace function public.clientela_touch() returns trigger
-  language plpgsql as $$ begin new.updated_at = now(); return new; end $$;
-drop trigger if exists clientela_touch on public.clientela_docs;
-create trigger clientela_touch before insert or update on public.clientela_docs
+  language plpgsql security definer set search_path = public as $$
+begin
+  new.updated_at = now(); new.updated_by = auth.uid();
+  if tg_op = 'INSERT' and clientela_me() <> '' and not clientela_is_admin() then
+    insert into clientela_members (ws, email) values (split_part(new.path, '/', 2), clientela_me()) on conflict do nothing;
+  end if;
+  return new;
+end $$;
+drop trigger if exists clientela_touch on public.clientela_space_docs;
+create trigger clientela_touch before insert or update on public.clientela_space_docs
   for each row execute function public.clientela_touch();
-create index if not exists clientela_docs_updated on public.clientela_docs (owner, updated_at);`;
+
+alter table public.clientela_admins enable row level security;
+alter table public.clientela_members enable row level security;
+alter table public.clientela_space_docs enable row level security;
+drop policy if exists "me" on public.clientela_admins;
+create policy "me" on public.clientela_admins for select to authenticated using (lower(email) = clientela_me());
+drop policy if exists "read" on public.clientela_members;
+create policy "read" on public.clientela_members for select to authenticated using (clientela_is_admin() or lower(email) = clientela_me());
+drop policy if exists "admin add" on public.clientela_members;
+create policy "admin add" on public.clientela_members for insert to authenticated with check (clientela_is_admin());
+drop policy if exists "admin remove" on public.clientela_members;
+create policy "admin remove" on public.clientela_members for delete to authenticated using (clientela_is_admin());
+drop policy if exists "read" on public.clientela_space_docs;
+create policy "read" on public.clientela_space_docs for select to authenticated using (clientela_can(ws));
+drop policy if exists "add" on public.clientela_space_docs;
+create policy "add" on public.clientela_space_docs for insert to authenticated with check (clientela_can(ws));
+drop policy if exists "change" on public.clientela_space_docs;
+create policy "change" on public.clientela_space_docs for update to authenticated using (clientela_can(ws)) with check (clientela_can(ws));
+
+-- you, the consultant: you see every client space. Put your email here and run again.
+insert into public.clientela_admins (email) values ('your@email.com') on conflict do nothing;`;
+const SITE_CLOUD = window.CLIENTELA_SITE && window.CLIENTELA_SITE.url && window.CLIENTELA_SITE.key ? window.CLIENTELA_SITE : null; // set when the site is built with its Supabase project
 const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } };
 const lsSet = (k, v) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
 const CLOUD = {
-  cfg: null, session: null, state: "off", err: "", lastSync: null, pending: new Set(), timer: null, pushT: null, busy: false, store: null,
-  load() { this.cfg = lsGet("clientela.cloud", null); this.session = lsGet("clientela.cloud.session", null); this.pending = new Set(lsGet("clientela.cloud.pending", [])); this.since = lsGet("clientela.cloud.since", null); },
+  cfg: null, session: null, state: "off", err: "", lastSync: null, pending: new Set(), timer: null, pushT: null, busy: false, store: null, admin: null, skipped: 0,
+  load() { this.cfg = lsGet("clientela.cloud", null); if (SITE_CLOUD) this.cfg = { url: SITE_CLOUD.url, key: SITE_CLOUD.key, email: this.cfg?.email || "" }; this.session = lsGet("clientela.cloud.session", null); this.pending = new Set(lsGet("clientela.cloud.pending", [])); this.since = lsGet("clientela.cloud.since", null); },
   enabled() { return !!(this.cfg && this.cfg.url && this.cfg.key && this.session); },
   base() { return String(this.cfg.url).replace(/\/+$/, ""); },
   hdr(auth = true) { const h = { apikey: this.cfg.key, "Content-Type": "application/json" }; if (auth && this.session) h.Authorization = "Bearer " + this.session.access_token; return h; },
   savePending() { lsSet("clientela.cloud.pending", [...this.pending]); },
   setState(s, err) { this.state = s; this.err = err || ""; const el = document.getElementById("cloudState"); if (el) el.innerHTML = cloudStateHtml(); },
   async signInLink(url, key, email) {
+    if (SITE_CLOUD) { url = SITE_CLOUD.url; key = SITE_CLOUD.key; }
     this.cfg = { url: url.trim(), key: key.trim(), email: email.trim() }; lsSet("clientela.cloud", this.cfg);
     const back = location.href.split("#")[0];
     const r = await fetch(this.base() + "/auth/v1/otp?redirect_to=" + encodeURIComponent(back), { method: "POST", headers: this.hdr(false), body: JSON.stringify({ email: this.cfg.email, create_user: true }) });
@@ -4533,17 +4585,21 @@ const CLOUD = {
     this.session = { ...this.session, access_token: j.access_token, refresh_token: j.refresh_token || this.session.refresh_token, expires_at: Date.now() + (j.expires_in || 3600) * 1000, user: j.user ? { id: j.user.id, email: j.user.email } : this.session.user };
     lsSet("clientela.cloud.session", this.session);
   },
-  signOut(keepCfg) { this.session = null; lsSet("clientela.cloud.session", null); clearInterval(this.timer); this.timer = null; if (!keepCfg) { this.cfg = null; lsSet("clientela.cloud", null); } this.setState("off"); },
+  signOut(keepCfg) { this.session = null; this.admin = null; lsSet("clientela.cloud.session", null); clearInterval(this.timer); this.timer = null; if (!keepCfg) { this.cfg = null; lsSet("clientela.cloud", null); } this.setState("off"); },
   markPending(path) { if (!this.enabled()) return; this.pending.add(path); this.savePending(); clearTimeout(this.pushT); this.pushT = setTimeout(() => this.sync(), 900); },
   async push() {
     if (!this.pending.size) return;
-    const uid = this.session.user?.id; if (!uid) throw new Error("no user");
-    const paths = [...this.pending], docs = this.store.all();
+    const paths = [...this.pending], docs = this.store.all(), row = p => docs.has(p) ? { path: p, data: docs.get(p), deleted: false } : { path: p, data: null, deleted: true };
+    const send = rows => fetch(this.base() + "/rest/v1/clientela_space_docs?on_conflict=path", { method: "POST", headers: { ...this.hdr(), Prefer: "resolution=merge-duplicates,return=minimal" }, body: JSON.stringify(rows) });
+    const why = async r => { try { return (await r.json()).message || ""; } catch (e) { return ""; } };
     for (let i = 0; i < paths.length; i += 20) {
-      const part = paths.slice(i, i + 20);
-      const body = part.map(p => docs.has(p) ? { owner: uid, path: p, data: docs.get(p), deleted: false } : { owner: uid, path: p, data: null, deleted: true });
-      const r = await fetch(this.base() + "/rest/v1/clientela_docs?on_conflict=owner,path", { method: "POST", headers: { ...this.hdr(), Prefer: "resolution=merge-duplicates,return=minimal" }, body: JSON.stringify(body) });
-      if (!r.ok) { let m = ""; try { m = (await r.json()).message || ""; } catch (e) { } throw new Error(m || ("HTTP " + r.status)); }
+      const part = paths.slice(i, i + 20), r = await send(part.map(row));
+      if (!r.ok) {
+        const m = await why(r);
+        if (!/row-level security/i.test(m)) throw new Error(m || ("HTTP " + r.status));
+        // a space this account may not change (someone else's): keep it on this device only, send the rest
+        for (const p of part) { const r1 = await send([row(p)]); if (!r1.ok) { const m1 = await why(r1); if (!/row-level security/i.test(m1)) throw new Error(m1 || ("HTTP " + r1.status)); this.skipped++; } }
+      }
       part.forEach(p => this.pending.delete(p)); this.savePending();
     }
   },
@@ -4551,7 +4607,7 @@ const CLOUD = {
     let from = 0, maxTs = this.since;
     for (; ;) {
       const q = "select=path,data,deleted,updated_at&order=updated_at.asc" + (this.since ? "&updated_at=gt." + encodeURIComponent(this.since) : "");
-      const r = await fetch(this.base() + "/rest/v1/clientela_docs?" + q, { headers: { ...this.hdr(), Range: from + "-" + (from + 199), "Range-Unit": "items" } });
+      const r = await fetch(this.base() + "/rest/v1/clientela_space_docs?" + q, { headers: { ...this.hdr(), Range: from + "-" + (from + 199), "Range-Unit": "items" } });
       if (!r.ok) { let m = ""; try { m = (await r.json()).message || ""; } catch (e) { } throw new Error(m || ("HTTP " + r.status)); }
       const rows = await r.json();
       for (const row of rows) { if (this.pending.has(row.path)) continue; await this.store.apply(row.path, row.deleted ? null : row.data); if (!maxTs || row.updated_at > maxTs) maxTs = row.updated_at; }
@@ -4561,10 +4617,15 @@ const CLOUD = {
   },
   async sync() {
     if (!this.enabled() || this.busy) return; this.busy = true; this.setState("syncing");
-    try { await this.token(); await this.push(); await this.pull(); this.lastSync = new Date(); this.setState("ok"); }
+    try { await this.token(); if (this.admin == null) await this.whoAmI(); await this.push(); await this.pull(); this.lastSync = new Date(); this.setState("ok"); }
     catch (e) { this.setState(navigator.onLine === false ? "offline" : "error", e.message || String(e)); }
     finally { this.busy = false; }
   },
+  // admins (the consultant) see every client space and decide who can open each one
+  async whoAmI() { const r = await fetch(this.base() + "/rest/v1/clientela_admins?select=email", { headers: this.hdr() }); this.admin = r.ok ? (await r.json()).length > 0 : false; },
+  async members() { await this.token(); const r = await fetch(this.base() + "/rest/v1/clientela_members?select=ws,email&order=email.asc", { headers: this.hdr() }); if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); },
+  async addMember(ws, email) { await this.token(); const r = await fetch(this.base() + "/rest/v1/clientela_members?on_conflict=ws,email", { method: "POST", headers: { ...this.hdr(), Prefer: "resolution=ignore-duplicates,return=minimal" }, body: JSON.stringify({ ws, email: email.trim().toLowerCase() }) }); if (!r.ok) { let m = ""; try { m = (await r.json()).message || ""; } catch (e) { } throw new Error(m || ("HTTP " + r.status)); } },
+  async removeMember(ws, email) { await this.token(); const r = await fetch(this.base() + "/rest/v1/clientela_members?ws=eq." + encodeURIComponent(ws) + "&email=eq." + encodeURIComponent(email), { method: "DELETE", headers: this.hdr() }); if (!r.ok) throw new Error("HTTP " + r.status); },
   start() {
     if (!this.enabled()) return;
     clearInterval(this.timer); this.timer = setInterval(() => { if (document.visibilityState === "visible") this.sync(); }, 20000);
@@ -4978,10 +5039,13 @@ function backupPanelHtml() {
       </div>`;
   if (sa) {
     const on = CLOUD.enabled(), cfg = CLOUD.cfg || {};
-    h += `<div class="c6 bk"><span class="eyebrow">${L("Sync laptop and phone", "Sincronizza computer e telefono")}</span>
+    h += `<div class="c6 bk"><span class="eyebrow">${SITE_CLOUD ? L("Your account", "Il tuo account") : L("Sync laptop and phone", "Sincronizza computer e telefono")}</span>
         <div class="cloud-state" id="cloudState">${cloudStateHtml()}</div>
         ${on ? `<p class="muted-p" style="margin:0">${L("Signed in as", "Accesso come")} <b>${esc(CLOUD.session?.user?.email || cfg.email || "")}</b>. ${L("Open this page on another device and sign in with the same email to see the same clients.", "Apri questa pagina su un altro dispositivo e accedi con la stessa email per vedere gli stessi clienti.")}</p>
           <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost sm" id="clSync">${L("Sync now", "Sincronizza ora")}</button><button class="btn ghost sm" id="clOut">${L("Sign out", "Esci")}</button></div>`
+        : SITE_CLOUD ? `<p class="muted-p" style="margin:0">${L("Sign in with your email: your data is saved online, private to you, and you find it on every device. You get a link by email, no password.", "Accedi con la tua email: i tuoi dati si salvano online, visibili solo a te, e li ritrovi su ogni dispositivo. Ti arriva un link via mail, niente password.")}</p>
+          <form class="form" id="clF" style="padding:0;grid-template-columns:1fr">${fld("cl_mail", L("Your email", "La tua email"), inp("cl_mail", cfg.email || "", "email", 'autocomplete="email" required'), "full")}
+          <div class="err" hidden></div><div class="acts"><button class="btn main sm" type="submit">${L("Send me the sign-in link", "Mandami il link di accesso")}</button></div></form>`
         : `<form class="form" id="clF" style="padding:0;grid-template-columns:1fr">
           ${fld("cl_url", L("Supabase project URL", "URL del progetto Supabase"), inp("cl_url", cfg.url || "", "url", 'placeholder="https://xxxx.supabase.co" autocomplete="off"'), "full")}
           ${fld("cl_key", L("Anon public key", "Chiave anon public"), inp("cl_key", cfg.key || "", "text", 'autocomplete="off" spellcheck="false"'), "full", L("Supabase > Project settings > API. It is safe to use in a browser.", "Supabase > Project settings > API. Si può usare nel browser."))}
@@ -4993,8 +5057,10 @@ function backupPanelHtml() {
             <li>${L("Open <b>SQL editor</b>, paste the code below and press Run.", "Apri <b>SQL editor</b>, incolla il codice qui sotto e premi Run.")}</li>
             <li>${L("In <b>Authentication > URL configuration</b> set Site URL to this page's address:", "In <b>Authentication > URL configuration</b> imposta come Site URL l'indirizzo di questa pagina:")} <code>${esc(location.href.split("#")[0])}</code></li>
             <li>${L("Copy URL and anon key from <b>Project settings > API</b> into the form, then open the link in the email on this device.", "Copia URL e chiave anon da <b>Project settings > API</b> nel modulo, poi apri il link della mail su questo dispositivo.")}</li></ol>
-            <div class="ph" style="margin-top:8px"><span class="eyebrow">SQL</span><button type="button" class="btn ghost sm" id="clSqlC">${t("copy")}</button></div><pre class="csv" id="clSql">${esc(CLOUD_SQL)}</pre></details>`}
-      </div>
+            <div class="ph" style="margin-top:8px"><span class="eyebrow">SQL</span><button type="button" class="btn ghost sm" id="clSqlC">${t("copy")}</button></div><pre class="csv" id="clSql">${esc(cloudSql())}</pre></details>`}
+      </div>${on && CLOUD.admin ? `<div class="c12 bk" id="accP"><span class="eyebrow">${L("Clients and access", "Clienti e accessi")}</span>
+        <p class="muted-p" style="margin:0">${L("You see every client space. Each client sees only the spaces where their email is listed: whoever creates a space is added on their own. Add an email to let someone else in.", "Tu vedi tutti gli spazi cliente. Ogni cliente vede solo gli spazi dove c'è la sua email: chi crea uno spazio viene aggiunto da solo. Aggiungi un'email per far entrare qualcun altro.")}</p>
+        <div id="accL"><p class="muted-p">${L("Loading…", "Carico…")}</p></div></div>` : ""}
       <div class="c12 bk"><span class="eyebrow">${L("AI analyst", "Analista AI")}</span>
         <p class="muted-p" style="margin:0">${ai?.key ? L("Questions in AI insights are answered by Claude with your Anthropic key, saved only in this browser.", "Le domande in Insight AI ricevono risposta da Claude con la tua chiave Anthropic, salvata solo in questo browser.") : L("Without a key, AI insights use the built-in answers. With your Anthropic API key (console.anthropic.com), Claude answers any question on the data. The key stays in this browser.", "Senza chiave, Insight AI usa le risposte integrate. Con la tua chiave API Anthropic (console.anthropic.com), Claude risponde a qualsiasi domanda sui dati. La chiave resta in questo browser.")}</p>
         <form class="ai-f" id="aiF">${ai?.key ? `<span class="chip"><i style="background:var(--lime)"></i>${L("Key saved", "Chiave salvata")} ···${esc(ai.key.slice(-4))}</span><button type="button" class="btn ghost sm" id="aiDel">${L("Remove key", "Rimuovi chiave")}</button>` : `<input id="aiKey" type="password" placeholder="sk-ant-…" autocomplete="off" aria-label="Anthropic API key"><button class="btn ghost sm" type="submit">${L("Save key", "Salva chiave")}</button>`}</form>
@@ -5025,13 +5091,14 @@ function bindBackupPanel(el) {
   const clF = $("#clF", host);
   if (clF) clF.onsubmit = async e => {
     e.preventDefault(); const fd = Object.fromEntries(new FormData(clF)), er = $(".err", clF);
-    if (!/^https?:\/\/.+/.test(fd.cl_url || "") || !fd.cl_key || !/@/.test(fd.cl_mail || "")) { er.textContent = L("Fill in URL, key and email.", "Compila URL, chiave ed email."); er.hidden = false; return; }
+    if (!SITE_CLOUD && (!/^https?:\/\/.+/.test(fd.cl_url || "") || !fd.cl_key) || !/@/.test(fd.cl_mail || "")) { er.textContent = L("Fill in URL, key and email.", "Compila URL, chiave ed email."); er.hidden = false; return; }
     const b = $("button[type=submit]", clF); b.disabled = true;
     try { await CLOUD.signInLink(fd.cl_url, fd.cl_key, fd.cl_mail); er.hidden = false; er.style.color = "var(--good)"; er.textContent = L("Link sent. Open the email on this device and tap the link.", "Link inviato. Apri la mail su questo dispositivo e tocca il link."); }
     catch (err) { er.style.color = ""; er.textContent = L("Could not send the link: ", "Impossibile inviare il link: ") + (err.message || err); er.hidden = false; }
     finally { b.disabled = false; }
   };
-  const sq = $("#clSqlC", host); if (sq) sq.onclick = () => { try { navigator.clipboard.writeText(CLOUD_SQL).then(() => toast(t("copied"))); } catch (e) { } };
+  if ($("#accL", host)) drawAccess($("#accL", host));
+  const sq = $("#clSqlC", host); if (sq) sq.onclick = () => { try { navigator.clipboard.writeText(cloudSql()).then(() => toast(t("copied"))); } catch (e) { } };
   const cs = $("#clSync", host); if (cs) cs.onclick = () => CLOUD.sync();
   const co = $("#clOut", host); if (co) co.onclick = () => { CLOUD.signOut(true); renderView(); toast(L("Signed out. Data stays on this device.", "Uscito. I dati restano su questo dispositivo.")); };
   const aiF = $("#aiF", host);
@@ -5039,6 +5106,18 @@ function bindBackupPanel(el) {
     aiF.onsubmit = e => { e.preventDefault(); const k = ($("#aiKey", aiF)?.value || "").trim(); if (!/^sk-/.test(k)) { toast(L("That does not look like an Anthropic key.", "Non sembra una chiave Anthropic.")); return; } lsSet("clientela.ai", { key: k }); STORE.sample = ownKeySampler(); renderView(); toast(t("saved")); };
     const d = $("#aiDel", aiF); if (d) d.onclick = () => { lsSet("clientela.ai", null); STORE.sample = null; renderView(); };
   }
+}
+
+const cloudSql = () => CLOUD_SQL.replace("your@email.com", CLOUD.cfg?.email || "your@email.com");
+// the consultant's list: every client space and the emails that can open it
+async function drawAccess(box) {
+  let rows; try { rows = await CLOUD.members(); } catch (e) { box.innerHTML = `<p class="muted-p">${L("Could not load the access list: ", "Impossibile caricare gli accessi: ")}${esc(e.message || e)}</p>`; return; }
+  const by = new Map(); rows.forEach(r => { if (!by.has(r.ws)) by.set(r.ws, []); by.get(r.ws).push(r.email); });
+  const ws = STORE.list.filter(w => !w.deleted);
+  box.innerHTML = ws.length ? `<div class="tablewrap"><table class="mm acc-t"><thead><tr><th>${L("Client space", "Spazio cliente")}</th><th>${L("Who can open it", "Chi può aprirlo")}</th><th>${L("Add an email", "Aggiungi un'email")}</th></tr></thead><tbody>${ws.map(w => `<tr data-ws="${esc(w.id)}"><td><b>${esc(w.name || w.id)}</b></td><td>${(by.get(w.id) || []).map(e => `<span class="chip">${esc(e)}<button type="button" class="acc-x" data-rm="${esc(e)}" aria-label="${esc(L("Remove ", "Togli ") + e)}">×</button></span>`).join(" ") || `<span class="sub">${L("only you", "solo tu")}</span>`}</td><td><form class="acc-f"><input type="email" required placeholder="${esc(L("client's email", "email del cliente"))}" aria-label="${esc(L("Email", "Email"))}"><button class="btn ghost sm">${L("Add", "Aggiungi")}</button></form></td></tr>`).join("")}</tbody></table></div>`
+    : `<p class="muted-p">${L("No client spaces yet. When a client signs in from their device, their space appears here.", "Ancora nessuno spazio cliente. Quando un cliente accede dal suo dispositivo, il suo spazio compare qui.")}</p>`;
+  box.onsubmit = async e => { e.preventDefault(); const f = e.target.closest(".acc-f"), w = f.closest("[data-ws]").dataset.ws, v = $("input", f).value; try { await CLOUD.addMember(w, v); toast(L("Added: they can sign in with that email", "Aggiunto: può accedere con quella email")); drawAccess(box); } catch (err) { toast(err.message || String(err)); } };
+  box.onclick = async e => { const b = e.target.closest("[data-rm]"); if (!b) return; const w = b.closest("[data-ws]").dataset.ws; try { await CLOUD.removeMember(w, b.dataset.rm); drawAccess(box); } catch (err) { toast(err.message || String(err)); } };
 }
 
 /* ---------- starter file: one client's profile and data, sent to them to use the tool on their own ----------
@@ -5061,12 +5140,14 @@ function showWelcome() {
   wrap.innerHTML = `<div class="scrim" style="z-index:77" data-wclose></div><div class="modal"><div class="modal-card" role="dialog" aria-modal="true" aria-label="Clientela">
     <div class="dh"><h3>${L("Welcome to Clientela", "Ciao, questo è Clientela")}</h3><button class="x" type="button" data-wclose aria-label="Close">${icon(IC.x)}</button></div>
     <div style="padding:20px 22px 24px;display:flex;flex-direction:column;gap:14px">
+      ${SITE_CLOUD ? `<form id="wSign" style="display:flex;flex-direction:column;gap:8px"><p style="margin:0"><b>${L("Do you have an account?", "Hai un account?")}</b> ${L("Sign in with your email: you get a link, no password.", "Accedi con la tua email: ti arriva un link, niente password.")}</p><input type="email" required autocomplete="email" placeholder="${esc(L("your email", "la tua email"))}" class="w-mail" style="height:42px;padding:0 12px;border:1px solid var(--line);border-radius:10px;font:inherit"><button class="btn main" style="justify-content:center">${L("Send me the link", "Mandami il link")}</button><div class="w-msg muted-p"></div></form><hr style="border:0;border-top:1px solid var(--line);margin:0">` : ""}
       <p style="margin:0">${L("If you received a file with your data, open it here. Your students and lessons appear straight away and stay only on this device: no account, no cloud.", "Se hai ricevuto un file con i tuoi dati, aprilo qui. Studenti e lezioni compaiono subito e restano solo su questo dispositivo: niente account, niente cloud.")}</p>
-      <label class="btn main" style="cursor:pointer;justify-content:center">${icon(IC.file)}${L("Open the file I received", "Apri il file che ho ricevuto")}<input type="file" id="wIn" accept=".json,application/json" hidden></label>
+      <label class="btn ${SITE_CLOUD ? "ghost" : "main"}" style="cursor:pointer;justify-content:center">${icon(IC.file)}${L("Open the file I received", "Apri il file che ho ricevuto")}<input type="file" id="wIn" accept=".json,application/json" hidden></label>
       <button class="btn ghost" type="button" data-wclose style="justify-content:center">${L("Just look at the demo", "Guarda solo la demo")}</button>
       <div id="wRes"></div></div></div></div>`;
   document.body.appendChild(wrap);
   wrap.addEventListener("click", e => { if (e.target.closest("[data-wclose]")) wrap.remove(); });
+  const ws = $("#wSign", wrap); if (ws) ws.onsubmit = async e => { e.preventDefault(); const m = $(".w-msg", ws); try { await CLOUD.signInLink("", "", $(".w-mail", ws).value); m.textContent = L("Link sent: open the email on this device and tap the link.", "Link inviato: apri la mail su questo dispositivo e tocca il link."); } catch (err) { m.textContent = L("Could not send the link: ", "Impossibile inviare il link: ") + (err.message || err); } };
   $("#wIn", wrap).onchange = async e => {
     const f = e.target.files[0]; if (!f) return;
     try { const res = await startFromFile(JSON.parse(await f.text())); if (res.started || res.nWs) { wrap.remove(); if (!res.started) { toast(L("Restored. Pick your space from the Clients menu.", "Ripristinato. Scegli il tuo spazio dal menu Clienti.")); openPicker && openPicker(); } } else $("#wRes", wrap).innerHTML = `<p class="muted-p">${L("Profiles added. Pick one from the Clients menu.", "Profili aggiunti. Scegline uno dal menu Clienti.")}</p>`; }
@@ -5241,6 +5322,8 @@ function renderTop() {
   const cx = $("#curx"); cx.hidden = !canEur();
   if (!cx.hidden) { cx.innerHTML = [["0", CUR], ["1", "EUR"]].map(([v, l]) => `<button type="button" data-x="${v}" aria-pressed="${showEur() === (v === "1")}">${l}</button>`).join(""); cx.title = L(`Show amounts in ${CUR} or in euro (1 € = ${nf(eurRate(), 2)} ${CUR})`, `Mostra gli importi in ${CUR} o in euro (1 € = ${nf(eurRate(), 2)} ${CUR})`); }
   const pill = $(".demo-pill"); pill.hidden = STORE.active; pill.dataset.i = P.realData ? "demoReal" : "demo"; pill.textContent = t(pill.dataset.i); pill.classList.toggle("real", !!P.realData);
+  let si = $("#signIn"); if (!si && SITE_CLOUD) { si = document.createElement("button"); si.id = "signIn"; si.type = "button"; si.className = "btn main sm"; si.onclick = () => go("data"); pill.after(si); }
+  if (si) { si.hidden = !STANDALONE.on || CLOUD.enabled(); si.textContent = L("Sign in", "Accedi"); }
   let ss = $("#saveState"); if (!ss) { ss = document.createElement("span"); ss.id = "saveState"; ss.className = "save-state hide-sm"; pill.after(ss); savingEl = ss; }
   ss.hidden = !STORE.active; if (STORE.active && ss.dataset.on !== "1") ss.textContent = L("Saved", "Salvato");
   document.documentElement.lang = LANG;
@@ -5368,7 +5451,7 @@ function recordPlans() {
   openDemo(okDemo ? demoId : "tour");
   STORE.init();
   // first visit to the standalone page: offer to open a starter file
-  if (!last && !PROFILES.some(p => !p.imported)) setTimeout(() => { if (STANDALONE.on && STORE.db && !STORE.list.length) showWelcome(); }, 700); // not in the owner's own copy
+  if (!last && !PROFILES.some(p => !p.imported)) setTimeout(() => { if (STANDALONE.on && STORE.db && !STORE.list.length && !CLOUD.enabled()) showWelcome(); }, 700); // not in the owner's own copy
 })();
 
 document.addEventListener("change", e => { if (e.target.id === "perM" && e.target.value) { PERIOD = e.target.value; renderTop(); renderView(); $(".view")?.classList.add("per-anim"); } });
