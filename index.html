@@ -213,6 +213,22 @@ section{padding-block:110px}
 .browser .top i:nth-child(2){background:#FFC83D}.browser .top i:nth-child(3){background:#22C27A}
 .browser .top span{margin-left:10px;flex:1;font:500 .72rem var(--f-mono);color:var(--muted);background:var(--soft);border-radius:8px;padding:4px 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .browser .shot{aspect-ratio:1200/683;overflow:hidden}
+.plat{display:grid;grid-template-columns:1fr 1.25fr;gap:48px;align-items:center;padding:56px;border-radius:36px;background:var(--violet-s)}
+.plat>*{min-width:0}
+.plat .l{display:grid;gap:18px;align-content:start}
+.plat .tagline{justify-self:start;font:500 .74rem var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:#fff;background:var(--violet);padding:6px 12px;border-radius:999px}
+.plat h2{font-size:clamp(1.9rem,3.6vw,2.9rem)}
+.plat .sub{color:var(--muted);font-size:1.06rem;max-width:46ch}
+.plat ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.plat li{display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:center;font-weight:500}
+.plat li::before{content:"✓";display:grid;place-items:center;width:30px;height:30px;border-radius:10px;font-weight:800;color:#fff;background:var(--k,var(--violet))}
+.plat li:nth-child(2){--k:var(--coral)} .plat li:nth-child(3){--k:var(--sun)} .plat li:nth-child(4){--k:var(--lime)}
+.plat .acts{display:flex;gap:12px;flex-wrap:wrap}
+.plat .r{display:grid;gap:10px}
+.plat .browser .shot{aspect-ratio:1440/820}
+.plat .r small{font:500 .72rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:right}
+.plat a.browser{display:block}.plat a.browser:hover{transform:rotate(-1deg) scale(1.01)}
+@media (max-width:980px){.plat{grid-template-columns:1fr;padding:34px 24px;gap:32px}}
 .browser img{width:100%;height:100%;object-fit:cover;object-position:top;transition:transform .7s cubic-bezier(.2,.8,.2,1)}
 .work:hover .browser img{transform:scale(1.04)}
 .work .meta{padding-inline:10px;display:grid;gap:10px}
@@ -313,6 +329,7 @@ footer a{color:var(--ink);text-decoration:none;font-weight:600}
       <a href="#services" data-i18n="nav.services">Services</a>
       <a href="#offer" data-i18n="nav.offer">Free proposal</a>
       <a href="#work" data-i18n="nav.work">Work</a>
+      <a href="#platform" data-i18n="nav.platform">Platform</a>
       <a href="#how" data-i18n="nav.how">How it works</a>
     </nav>
     <div class="langs" role="group" aria-label="Language">
@@ -473,6 +490,24 @@ footer a{color:var(--ink);text-decoration:none;font-weight:600}
     </div>
   </section>
 
+  <section id="platform" style="padding-top:0">
+    <div class="wrap">
+      <div class="plat rv">
+        <div class="l">
+          <span class="tagline" data-i18n="pf.tag">Included in the consulting</span>
+          <h2 data-i18n="pf.title">Your own dashboard, built around your work.</h2>
+          <p class="sub" data-i18n="pf.sub">When we work together you get Clientela: one place for your clients, lessons or bookings, revenue and prices. Every month we look at the same numbers and decide what to change.</p>
+          <ul><li data-i18n="pf.1">Revenue month by month and the month-end forecast</li><li data-i18n="pf.2">Who to call back before they stop coming</li><li data-i18n="pf.3">Prices to review and what a raise would bring</li><li data-i18n="pf.4">Log a lesson or a payment in one tap, from your phone</li></ul>
+          <div class="acts"><a class="btn main" href="#contact"><span data-i18n="hero.cta1">Get my free proposal</span><span class="arr">→</span></a><a class="btn ghost" href="clientela/" target="_blank" rel="noopener"><span data-i18n="pf.demo">See the live demo</span><span class="arr">↗</span></a></div>
+        </div>
+        <div class="r">
+          <a class="browser" href="clientela/" target="_blank" rel="noopener" aria-label="Clientela demo"><div class="top"><i></i><i></i><i></i><span>Clientela</span></div><div class="shot"><img src="assets/clientela.jpg" alt="Clientela dashboard: revenue, students and lessons" loading="lazy" width="1440" height="820"></div></a>
+          <small data-i18n="pf.ex">Example with simulated data</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="tint">
     <div class="wrap">
       <div class="head rv">
@@ -558,6 +593,7 @@ const LISTS = {
 
 const T = {
 en:{
+ "nav.platform":"Platform","pf.tag":"Included in the consulting","pf.title":"Your own dashboard, built around your work.","pf.sub":"When we work together you get Clientela: one place for your clients, lessons or bookings, revenue and prices. Every month we look at the same numbers and decide what to change.","pf.1":"Revenue month by month and the month-end forecast","pf.2":"Who to call back before they stop coming","pf.3":"Prices to review and what a raise would bring","pf.4":"Log a lesson or a payment in one tap, from your phone","pf.demo":"See the live demo","pf.ex":"Example with simulated data",
  "nav.services":"Services","hero.w1":"More","hero.k1":"revenue","hero.w2":"more","hero.k2":"visibility","hero.w3":"a sharper","hero.k3":"business plan","hero.w4":"","il.rev":"Revenue","il.revv":"Growing","il.vis":"Visibility","il.ai":"AI tools on","il.plan":"Business plan","il.ex":"Illustration",
  "nav.offer":"Free proposal","nav.work":"Work","nav.how":"How it works","nav.contact":"Contact","nav.cta":"Free proposal",
  "hero.tag":"Business & marketing growth with AI","hero.h1a":"More revenue.","hero.h1b":"More visibility.","hero.h1c":"A sharper business plan.",
@@ -586,6 +622,7 @@ en:{
  "foot":"Business & marketing growth with AI · Prague"
 },
 it:{
+ "nav.platform":"Piattaforma","pf.tag":"Inclusa nella consulenza","pf.title":"La tua dashboard, costruita sul tuo lavoro.","pf.sub":"Quando lavoriamo insieme hai Clientela: un unico posto per clienti, lezioni o prenotazioni, incassi e prezzi. Ogni mese guardiamo gli stessi numeri e decidiamo cosa cambiare.","pf.1":"Incassi mese per mese e previsione di fine mese","pf.2":"Chi ricontattare prima che smetta di venire","pf.3":"Prezzi da rivedere e quanto renderebbe un aumento","pf.4":"Segni una lezione o un pagamento con un tocco, dal telefono","pf.demo":"Guarda la demo","pf.ex":"Esempio con dati simulati",
  "nav.services":"Servizi","hero.w1":"Più","hero.k1":"guadagni","hero.w2":"più","hero.k2":"visibilità","hero.w3":"un","hero.k3":"business plan","hero.w4":" più solido","il.rev":"Ricavi","il.revv":"In crescita","il.vis":"Visibilità","il.ai":"Strumenti IA attivi","il.plan":"Business plan","il.ex":"Illustrazione",
  "nav.offer":"Proposta gratuita","nav.work":"Progetti","nav.how":"Come funziona","nav.contact":"Contatti","nav.cta":"Proposta gratuita",
  "hero.tag":"Crescita di business e marketing con l'IA","hero.h1a":"Più guadagni.","hero.h1b":"Più visibilità.","hero.h1c":"Un business plan più forte.",
@@ -614,6 +651,7 @@ it:{
  "foot":"Crescita di business e marketing con l'IA · Praga"
 },
 cs:{
+ "nav.platform":"Platforma","pf.tag":"Součást konzultací","pf.title":"Vlastní přehled, postavený na vaší práci.","pf.sub":"Když spolupracujeme, dostanete Clientelu: jedno místo pro klienty, lekce nebo rezervace, tržby a ceny. Každý měsíc se díváme na stejná čísla a rozhodujeme, co změnit.","pf.1":"Tržby po měsících a odhad na konec měsíce","pf.2":"Koho kontaktovat, než přestane chodit","pf.3":"Ceny k revizi a co by přineslo zdražení","pf.4":"Lekci nebo platbu zapíšete jedním klepnutím z telefonu","pf.demo":"Ukázka naživo","pf.ex":"Ukázka se simulovanými daty",
  "nav.services":"Služby","hero.w1":"Vyšší","hero.k1":"příjmy","hero.w2":"větší","hero.k2":"viditelnost","hero.w3":"silnější","hero.k3":"byznys plán","hero.w4":"","il.rev":"Tržby","il.revv":"Rostou","il.vis":"Viditelnost","il.ai":"AI nástroje zapnuté","il.plan":"Byznys plán","il.ex":"Ilustrace",
  "nav.offer":"Návrh zdarma","nav.work":"Projekty","nav.how":"Jak to funguje","nav.contact":"Kontakt","nav.cta":"Návrh zdarma",
  "hero.tag":"Růst byznysu a marketingu s AI","hero.h1a":"Vyšší příjmy.","hero.h1b":"Větší viditelnost.","hero.h1c":"Silnější byznys plán.",
