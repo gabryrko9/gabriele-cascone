@@ -34,6 +34,7 @@
   color-scheme:light;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{background:var(--bg)}
 body{margin:0;color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:90;background:var(--bg)}
@@ -3609,7 +3610,7 @@ VIEWS.today = el => {
   const day = APP.day ? new Date(APP.day) : dayStart(new Date()), past = dayStart(day) <= dayStart(new Date());
   const isToday = sameDay(day, new Date());
   const title = isToday ? L("Today", "Oggi") : day.toLocaleDateString(loc(), { weekday: "long", day: "numeric", month: "long" });
-  const nav = `<div class="filters day-nav"><input type="date" class="sel" id="dayPick" value="${isoDay(day)}" aria-label="${esc(L("Go to a day", "Vai a un giorno"))}">${isToday ? "" : `<button class="btn ghost sm" data-day="0">${L("Today", "Oggi")}</button>`}</div>`;
+  const nav = `<div class="filters day-nav"><input type="date" class="sel" id="dayPick" value="${isoDay(day)}" aria-label="${esc(L("Go to a day", "Vai a un giorno"))}">${isToday ? "" : `<button class="btn ghost sm" data-day="0">${L("Today", "Oggi")}</button>`}<label class="btn ghost sm" style="cursor:pointer" title="${esc(L("Lessons from the tracker or a spreadsheet: they are added and saved", "Lezioni dal tracker o da un foglio: vengono aggiunte e salvate"))}">${icon(IC.file)}${L("Upload Excel", "Carica Excel")}<input type="file" id="dayFile" accept="${SHEET_ACCEPT}" hidden></label></div>`;
   let h = vhead(L("Day register", "Registro del giorno"), Cap(title), isVisit()
     ? L(`The ${unit()} of the day: mark who showed up and add the review stars after the ${unit(false)}. Every tap is saved.`, `I ${unit()} del giorno: segna chi si è presentato e aggiungi le stelle della recensione dopo il ${unit(false)}. Ogni tocco viene salvato.`)
     : L(`Pick the day and tap who had a ${unit(false)}. Every tap is saved.`, `Scegli il giorno e tocca chi ha fatto ${unit(false)}. Ogni tocco viene salvato.`), nav);
@@ -3636,6 +3637,12 @@ VIEWS.today = el => {
   $$("[data-dset]", el).forEach(b => b.onclick = () => goDay(new Date(b.dataset.dset + "T12:00")));
   $(".wsd.on", el)?.scrollIntoView({ block: "nearest", inline: "center" });
   $("#dayPick", el).onchange = e => { if (e.target.value) goDay(new Date(e.target.value + "T12:00")); };
+  $("#dayFile", el).onchange = async e => {
+    const r = await importFiles(e.target.files); e.target.value = ""; if (!r) return;
+    if (r.error) { toast(r.error); return; }
+    APP.portalMsg = APP.importMsg = r.html; renderTop(); toast(r.short);
+    if (r.tracker?.to) goDay(new Date(r.tracker.to + "T12:00")); else renderView();
+  };
   el.onclick = e => {
     const r = e.target.closest("[data-i]"); const a = e.target.closest("[data-a]")?.dataset.a;
     if (a === "dayBook") return;
@@ -4718,11 +4725,13 @@ function portalTables(texts) {
   }
   return out;
 }
-function clearHistory(ids) {
+// from/to (optional): only what falls in those days is cleared, the rest of each history stays
+function clearHistory(ids, from, to) {
   if (!ids.size) return;
-  DB.txns = DB.txns.filter(x => !ids.has(x.c)).map((x, i) => ({ ...x, id: i }));
-  DB.books = DB.books.filter(x => !ids.has(x.c));
-  DB.upcoming = (DB.upcoming || []).filter(x => !ids.has(x.c));
+  const hit = x => ids.has(x.c) && (!from || (x.d >= from && x.d < to));
+  DB.txns = DB.txns.filter(x => !hit(x)).map((x, i) => ({ ...x, id: i }));
+  DB.books = DB.books.filter(x => !hit(x));
+  DB.upcoming = (DB.upcoming || []).filter(x => !hit(x));
   DB.clients.forEach(c => c.txIdx = []); DB.txns.forEach(x => DB.clients[x.c].txIdx.push(x.id));
 }
 const GOAL_SEG = [[/travel|holiday|vacan|viagg|trip|cultur/i, 0], [/partner|family|famil|wife|husband|boyfriend|girlfriend|moglie|marito|fidanzat/i, 1], [/work|job|career|business|lavoro|colleg/i, 2], [/mov|living|live in|relocat|trasfer/i, 3], [/exam|univers|cils|celi|plida|school|esame/i, 4]];
@@ -4803,30 +4812,100 @@ const portalSite = () => (STORE.active ? STORE.meta?.site : null) || profileById
 function portalPanelHtml() {
   if (!P.portal) return "";
   return `<div class="panel c12" id="portalP" style="border-color:var(--violet)"><div class="ph"><div><h3>${L("Import from the student portal", "Importa dal portale studenti")}</h3><p>${L("Students, packages and lessons from " + portalSite() + ", in one go. Import again each month: nothing is duplicated.", "Studenti, pacchetti e lezioni da " + portalSite() + ", in un colpo. Reimporta ogni mese: niente si duplica.")}</p></div></div>
-    <div class="grid" style="gap:14px;margin:0"><ol class="steps c6"><li>${L("Open Supabase, project of the portal, then <b>Table editor</b>.", "Apri Supabase, progetto del portale, poi <b>Table editor</b>.")}</li><li>${L("Open <b>students</b>, then <b>Export → Export table as CSV</b>. Do the same for <b>packages</b> and <b>lessons</b>.", "Apri <b>students</b>, poi <b>Export → Export table as CSV</b>. Fai lo stesso con <b>packages</b> e <b>lessons</b>.")}</li><li>${L("Drop the three files here together.", "Trascina qui i tre file insieme.")}</li><li>${L("Or drop the <b>lesson tracker</b> export (one CSV with lessons and students): each lesson becomes a payment and a lesson held.", "Oppure trascina l'export del <b>tracker lezioni</b> (un solo CSV con lezioni e studenti): ogni lezione diventa un pagamento e una lezione svolta.")}</li></ol>
-    <label class="drop c6" id="pdrop">${icon(IC.file)}<b>${L("Drop the portal files or the tracker CSV", "Trascina i file del portale o il CSV del tracker")}</b><span class="btn ghost sm">${t("choose")}</span><input type="file" id="pIn" accept=".csv,text/csv" multiple hidden></label></div>
+    <div class="grid" style="gap:14px;margin:0"><ol class="steps c6"><li>${L("Open Supabase, project of the portal, then <b>Table editor</b>.", "Apri Supabase, progetto del portale, poi <b>Table editor</b>.")}</li><li>${L("Open <b>students</b>, then <b>Export → Export table as CSV</b>. Do the same for <b>packages</b> and <b>lessons</b>.", "Apri <b>students</b>, poi <b>Export → Export table as CSV</b>. Fai lo stesso con <b>packages</b> e <b>lessons</b>.")}</li><li>${L("Drop the three files here together.", "Trascina qui i tre file insieme.")}</li><li>${L("Or drop the <b>lesson tracker</b> export (Excel or CSV, the whole history or one month): each lesson becomes a payment and a lesson held.", "Oppure trascina l'export del <b>tracker lezioni</b> (Excel o CSV, tutto lo storico o un solo mese): ogni lezione diventa un pagamento e una lezione svolta.")}</li></ol>
+    <label class="drop c6" id="pdrop">${icon(IC.file)}<b>${L("Drop the portal files or the tracker file (Excel or CSV)", "Trascina i file del portale o il file del tracker (Excel o CSV)")}</b><span class="btn ghost sm">${t("choose")}</span><input type="file" id="pIn" accept="${SHEET_ACCEPT}" multiple hidden></label></div>
     <div id="pRes">${APP.portalMsg || ""}</div></div>`;
 }
 function bindPortalPanel(el) {
   const drop = $("#pdrop", el), fin = $("#pIn", el); if (!drop) return;
   const handle = async files => {
-    const list = [...files].slice(0, 6); if (!list.length) return;
-    const texts = await Promise.all(list.map(f => f.text ? f.text() : new Promise(r => { const rd = new FileReader(); rd.onload = () => r(String(rd.result)); rd.readAsText(f); })));
-    const box = $("#pRes", el), trk = texts.map(importTrackerSafe).find(Boolean);
-    if (trk) {
-      if (trk.error) { box.innerHTML = `<div class="note-box" style="background:var(--coral-s)">${icon(IC.info)}<div>${esc(trk.error)}</div></div>`; return; }
-      APP.portalMsg = trackerMsg(trk); renderView(); return;
-    }
-    const res = importPortal(texts);
-    if (res.error) { box.innerHTML = `<div class="note-box" style="background:var(--coral-s)">${icon(IC.info)}<div>${esc(res.error)}</div></div>`; return; }
-    const miss = [!res.hasPk && "packages.csv", !res.hasLs && "lessons.csv"].filter(Boolean);
-    APP.portalMsg = `<div class="note-box" style="background:var(--lime-s)">${icon(IC.up)}<div><b>${L("Portal imported", "Portale importato")}</b>: ${nf(res.students)} ${who()} (${nf(res.nNew)} ${L("new", "nuovi")}, ${nf(res.nUpd)} ${L("updated", "aggiornati")}), ${nf(res.nPay)} ${L("packages", "pacchetti")}, ${nf(res.nSess)} ${L("lessons", "lezioni")}.${miss.length ? " " + L("Missing: ", "Mancano: ") + miss.join(", ") + "." : ""}${STORE.active ? "" : " " + L("The simulated students were replaced. Create a client workspace to keep the real ones.", "Gli studenti simulati sono stati sostituiti. Crea uno spazio cliente per tenere quelli reali.")}</div></div>`;
-    renderView();
+    const r = await importFiles(files, true), box = $("#pRes", el); if (!r) return;
+    if (r.error) { box.innerHTML = `<div class="note-box" style="background:var(--coral-s)">${icon(IC.info)}<div>${esc(r.error)}</div></div>`; return; }
+    APP.portalMsg = r.html; renderView();
   };
   fin.onchange = () => handle(fin.files);
   drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("over"); });
   drop.addEventListener("dragleave", () => drop.classList.remove("over"));
   drop.addEventListener("drop", e => { e.preventDefault(); drop.classList.remove("over"); handle(e.dataTransfer.files); });
+}
+
+/* ================= reading an Excel file (.xlsx) =================
+   No library: the browser unzips it (DecompressionStream) and reads the sheets as XML. Dates come back as
+   2026-11-05, numbers as numbers. A workbook with one sheet per section (Lezioni, Studenti, ...) becomes the same
+   text as the tracker CSV, so both go through one importer. */
+async function unzip(buf) {
+  const u8 = new Uint8Array(buf), dv = new DataView(buf), dec = new TextDecoder(), at = {};
+  let e = u8.length - 22; while (e >= 0 && dv.getUint32(e, true) !== 0x06054b50) e--;
+  if (e < 0) throw new Error("zip");
+  for (let i = 0, n = dv.getUint16(e + 10, true), p = dv.getUint32(e + 16, true); i < n && dv.getUint32(p, true) === 0x02014b50; i++) {
+    const fl = dv.getUint16(p + 28, true), name = dec.decode(u8.subarray(p + 46, p + 46 + fl));
+    at[name] = { meth: dv.getUint16(p + 10, true), size: dv.getUint32(p + 20, true), off: dv.getUint32(p + 42, true) };
+    p += 46 + fl + dv.getUint16(p + 30, true) + dv.getUint16(p + 32, true);
+  }
+  return async name => {
+    const z = at[name]; if (!z) return null;
+    const s = z.off + 30 + dv.getUint16(z.off + 26, true) + dv.getUint16(z.off + 28, true), data = u8.subarray(s, s + z.size);
+    return z.meth ? new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).text() : dec.decode(data);
+  };
+}
+const xmlTags = (doc, n) => doc ? [...doc.getElementsByTagNameNS("*", n)] : [];
+const colOf = ref => { let n = 0; for (const ch of ref.replace(/\d+$/, "").toUpperCase()) n = n * 26 + ch.charCodeAt(0) - 64; return n - 1; };
+const xlDay = v => new Date(Math.round((v - 25569) * 864e5)).toISOString().slice(0, v % 1 ? 16 : 10).replace("T", " ");
+async function xlsxSheets(buf) {
+  const read = await unzip(buf), X = async n => { const t = await read(n); return t ? new DOMParser().parseFromString(t, "application/xml") : null; };
+  const shared = xmlTags(await X("xl/sharedStrings.xml"), "si").map(si => xmlTags(si, "t").filter(t => t.parentNode.localName !== "rPh").map(t => t.textContent).join(""));
+  const st = await X("xl/styles.xml"), fmt = {}; xmlTags(st, "numFmt").forEach(f => fmt[f.getAttribute("numFmtId")] = f.getAttribute("formatCode") || "");
+  const isDate = xmlTags(xmlTags(st, "cellXfs")[0], "xf").map(x => { const id = +x.getAttribute("numFmtId"); return (id >= 14 && id <= 22) || (id >= 45 && id <= 47) || /[dy]/i.test((fmt[id] || "").replace(/"[^"]*"|\[[^\]]*\]/g, "")); });
+  const rel = {}; xmlTags(await X("xl/_rels/workbook.xml.rels"), "Relationship").forEach(r => rel[r.getAttribute("Id")] = r.getAttribute("Target"));
+  const out = [];
+  for (const sh of xmlTags(await X("xl/workbook.xml"), "sheet")) {
+    const t = rel[sh.getAttribute("r:id") || sh.getAttributeNS("http://schemas.openxmlformats.org/officeDocument/2006/relationships", "id")] || "";
+    const doc = await X(t.startsWith("/") ? t.slice(1) : "xl/" + t.replace(/^\.\//, "")); if (!doc) continue;
+    const rows = [];
+    for (const r of xmlTags(doc, "row")) {
+      const row = [];
+      for (const c of xmlTags(r, "c")) {
+        const ty = c.getAttribute("t"), v = xmlTags(c, "v")[0]?.textContent ?? "", ref = c.getAttribute("r");
+        let val = ty === "s" ? shared[+v] ?? "" : ty === "inlineStr" ? xmlTags(c, "t").map(x => x.textContent).join("") : ty === "b" ? (v === "1" ? "TRUE" : "FALSE") : v;
+        if ((!ty || ty === "n") && v !== "" && isDate[+c.getAttribute("s") || 0]) val = xlDay(+v);
+        row[ref ? colOf(ref) : row.length] = val;
+      }
+      rows[(+r.getAttribute("r") || rows.length + 1) - 1] = Array.from(row, x => x ?? "");
+    }
+    out.push({ name: sh.getAttribute("name") || "", rows: Array.from(rows, r => r || []) });
+  }
+  return out;
+}
+const csvCell = v => { v = String(v ?? ""); return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+const rowsCsv = rows => rows.map(r => r.map(csvCell).join(",")).join("\n");
+function sheetsText(sheets) {
+  if (sheets.some(s => s.rows.some(r => /^\s*===.+===\s*$/.test(r[0] || "")))) return sheets.map(s => rowsCsv(s.rows)).join("\n");
+  const sec = n => /lezion|lesson/i.test(n) ? "LEZIONI" : /dettagl|detail/i.test(n) ? "DETTAGLIO LEZIONI PER STUDENTE" : /studen/i.test(n) ? "STUDENTI" : /spes|cost|expens/i.test(n) ? "SPESE MENSILI" : null;
+  if (sheets.some(s => sec(s.name) === "LEZIONI")) return sheets.filter(s => sec(s.name)).map(s => `=== ${sec(s.name)} ===\n` + rowsCsv(s.rows)).join("\n\n");
+  return rowsCsv((sheets.find(s => s.rows.length) || { rows: [] }).rows);
+}
+const SHEET_ACCEPT = ".xlsx,.csv,.txt,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+async function fileText(f) {
+  if (/\.xlsx$/i.test(f.name) || /spreadsheetml/.test(f.type)) {
+    try { return sheetsText(await xlsxSheets(await f.arrayBuffer())); }
+    catch (e) { throw new Error(L("This Excel file could not be read. Save it again as .xlsx, or export it as CSV.", "Non riesco a leggere questo file Excel. Salvalo di nuovo come .xlsx, oppure esportalo in CSV.")); }
+  }
+  if (/\.xls$/i.test(f.name)) throw new Error(L("This is an old Excel file (.xls). Open it in Excel and save it as .xlsx, or export it as CSV.", "È un file Excel vecchio (.xls). Aprilo in Excel e salvalo come .xlsx, oppure esportalo in CSV."));
+  return f.text ? f.text() : new Promise(r => { const rd = new FileReader(); rd.onload = () => r(String(rd.result)); rd.readAsText(f); });
+}
+// one door for every file: the lesson tracker (CSV or Excel), the student portal export, or a plain list of clients
+async function importFiles(files, portal) {
+  const list = [...files].slice(0, 6); if (!list.length) return null;
+  let texts; try { texts = await Promise.all(list.map(fileText)); } catch (e) { return { error: e.message }; }
+  const trk = texts.map(importTrackerSafe).find(Boolean);
+  if (trk) return trk.error ? { error: trk.error } : { html: trackerMsg(trk), short: L(`${nf(trk.nLes)} lessons imported`, `${nf(trk.nLes)} lezioni importate`), tracker: trk };
+  if (P.portal && (portal || texts.some(t => /^\s*"?id"?\s*,/i.test(t)))) {
+    const res = importPortal(texts); if (res.error) return { error: res.error };
+    const miss = [!res.hasPk && "packages.csv", !res.hasLs && "lessons.csv"].filter(Boolean);
+    return { short: L("Portal imported", "Portale importato"), html: `<div class="note-box" style="background:var(--lime-s)">${icon(IC.up)}<div><b>${L("Portal imported", "Portale importato")}</b>: ${nf(res.students)} ${who()} (${nf(res.nNew)} ${L("new", "nuovi")}, ${nf(res.nUpd)} ${L("updated", "aggiornati")}), ${nf(res.nPay)} ${L("packages", "pacchetti")}, ${nf(res.nSess)} ${L("lessons", "lezioni")}.${miss.length ? " " + L("Missing: ", "Mancano: ") + miss.join(", ") + "." : ""}${STORE.active ? "" : " " + L("The simulated students were replaced. Create a client workspace to keep the real ones.", "Gli studenti simulati sono stati sostituiti. Crea uno spazio cliente per tenere quelli reali.")}</div></div>` };
+  }
+  const res = importCSV(texts[0]); if (res.error) return { error: res.error };
+  return { short: nf(res.rows) + " " + t("imported"), html: `<div class="note-box" style="background:var(--lime-s)">${icon(IC.up)}<div><b>${nf(res.rows)} ${t("imported")}</b>: ${nf(res.nNew)} ${L("new " + who(), "nuovi " + who())}, ${nf(res.nPay)} ${L("payments", "pagamenti")}. ${L("Every section now includes them.", "Tutte le sezioni ora li includono.")}${STORE.active ? "" : " " + L("Kept in this demo only.", "Tenuti solo in questa demo.")}</div></div>` };
 }
 
 /* ================= import from a lesson tracker export (one CSV with sections) =================
@@ -4868,6 +4947,7 @@ function trackerParse(text) {
       const k = day(r[0]) + "|" + (+r[r.length - 1] || 0).toFixed(2); b.left.set(k, (b.left.get(k) || 0) + 1);
     }
   }
+  if (blocks.length && blocks.every(b => !b.left.size)) blocks.length = 0; // export of a period: the detail lists names only
   const ck = Object.keys(sec).find(k => /SPESE|COSTS|EXPENSES/.test(k)), costs = [];
   if (ck) {
     const cr = parseCSV(sec[ck].join("\n")).filter(r => r.some(x => (x || "").trim()));
@@ -4877,26 +4957,37 @@ function trackerParse(text) {
   return { home, lessons, students, blocks, costs };
 }
 // who is who: one person per detail block, plus one per name for lessons of students no longer listed
+const isTrialName = s => /^(trial|prova|test|probe)$/i.test(String(s).trim());
 function trackerPeople(T0) {
-  const low = s => s.toLowerCase(), people = T0.blocks.map(b => ({ name: b.name, src: b.src, block: b, lessons: [] })), loose = new Map();
+  const low = s => s.trim().toLowerCase(), people = T0.blocks.map(b => ({ name: b.name, src: b.src, block: b, lessons: [] })), loose = new Map();
+  // an export of a period has no detail: the student list says who is who, by name and source
+  const listed = !T0.blocks.length && T0.students.length ? T0.students.filter(s => !isTrialName(s.name)).map(s => ({ name: s.name, src: s.src, lessons: [], listed: true })) : [];
   for (const l of T0.lessons) {
     const k = l.d + "|" + l.a.toFixed(2), n = low(l.name);
+    if (listed.length && !isTrialName(l.name)) {
+      const q = listed.find(x => low(x.name) === n && low(x.src) === low(l.src)) || (listed.filter(x => low(x.name) === n).length === 1 ? listed.find(x => low(x.name) === n) : null);
+      if (q) { q.lessons.push(l); continue; }
+    }
     const take = ok => people.find(p => p.block.left.get(k) > 0 && ok(low(p.name)));
     const p = take(x => x === n) || take(x => x.startsWith(n + " ") || n.startsWith(x + " "));
     if (p) { p.block.left.set(k, p.block.left.get(k) - 1); p.lessons.push(l); continue; }
     if (!loose.has(n)) loose.set(n, { name: l.name, src: l.src, lessons: [], gone: true });
     loose.get(n).lessons.push(l);
   }
-  const all = [...people, ...loose.values()].filter(p => p.lessons.length);
+  // a lesson logged as "Trial": one free trial each, named by its day, to rename once you know who it was
+  const trials = [];
+  for (const [k, p] of loose) if (isTrialName(p.name)) { loose.delete(k); for (const l of p.lessons) trials.push({ name: L("Trial", "Prova") + " " + l.d.slice(8, 10) + "." + l.d.slice(5, 7), src: l.src, lessons: [l], trial: true }); }
+  for (const p of people.filter(p => isTrialName(p.name))) { people.splice(people.indexOf(p), 1); for (const l of p.lessons) trials.push({ name: L("Trial", "Prova") + " " + l.d.slice(8, 10) + "." + l.d.slice(5, 7), src: l.src, lessons: [l], trial: true }); }
+  const all = [...people, ...listed, ...loose.values(), ...trials];
   for (const p of all) {
     p.lessons.sort((a, b) => a.d < b.d ? -1 : 1);
-    const st = T0.students.find(s => low(s.name) === low(p.name) && low(s.src) === low(p.src));
-    p.start = st?.start && st.start < p.lessons[0].d ? st.start : p.lessons[0].d; p.note = st?.note || "";
+    const st = T0.students.find(s => low(s.name) === low(p.name) && low(s.src) === low(p.src)), d0 = p.lessons[0]?.d;
+    p.start = st?.start && (!d0 || st.start < d0) ? st.start : d0; p.note = p.trial ? L("Free trial: rename it once you know who it was.", "Lezione di prova: rinominala quando sai chi era.") : st?.note || "";
   }
   // same first name for two people: the one who came later gets the source next to the name
   const byName = new Map(); for (const p of all) { const k = low(p.name); byName.set(k, [...(byName.get(k) || []), p]); }
   for (const g of byName.values()) if (g.length > 1) g.sort((a, b) => a.start < b.start ? -1 : 1).slice(1).forEach(p => p.name += ` (${p.src || p.lessons[0].src})`);
-  return all.sort((a, b) => a.start < b.start ? -1 : 1);
+  return all.filter(p => p.lessons.length).sort((a, b) => a.start < b.start ? -1 : 1);
 }
 const srcKind = s => /preply|italki|verbling|cambly|platform|piattaform/i.test(s) ? "platform" : /privat|direct|dirett/i.test(s) ? "private" : /scuol|school|istitut|institute/i.test(s) ? "school" : "other";
 const isGroupName = s => /bambin|kids|children|grupp|group/i.test(s || "");
@@ -4943,10 +5034,14 @@ function importTracker(text) {
   const modeField = P.fields.find(f => f.k === "mode");
   const byName = new Map(DB.clients.map(c => [c.name.trim().toLowerCase(), c]));
   const at = d => new Date(d + "T00:00");
+  // only the days this file covers are replaced: an export of one month adds to what is already there
+  const span = T0.lessons.map(l => l.d).sort(), rFrom = at(span[0]), rTo = new Date(at(span[span.length - 1]).getTime() + 864e5);
+  const kept = !fresh && DB.books.some(b => !isTrialSvc(b.s) && (b.d < rFrom || b.d >= rTo));
   let nNew = 0, nUpd = 0, nLes = 0, moved = 0, nTrial = 0;
   const trialFor = () => { let i = P.services.findIndex(s => s.trial); if (i < 0) { P.services.push({ id: "s" + Date.now().toString(36) + "t", n: L("Free trial", "Prova gratuita"), p: 0, kind: "oneoff", trial: true }); newSettings = true; i = P.services.length - 1; } return i; }; const touched = [], reset = new Set();
   for (const p of people) { const c = byName.get(p.name.toLowerCase()); if (c) reset.add(c.id); }
-  clearHistory(reset);
+  clearHistory(reset, rFrom, rTo);
+  const firstDay = [span[0], ...DB.books.filter(b => !isTrialSvc(b.s)).map(b => isoDay(b.d))].sort()[0];
   for (const p of people) {
     const group = isGroupName(p.name) || isGroupName(p.note), src0 = p.lessons[0].src || p.src;
     const f = {}; if (modeField && srcKind(src0) === "platform") f[modeField.k] = modeField.opts[1][0];
@@ -4955,9 +5050,12 @@ function importTracker(text) {
     if (!c) { c = addClient({ name: p.name, origin: srcKind(src0) === "platform" ? "Online · " + src0 : "—", ch: chFor(src0), seg: group && segGroup >= 0 ? segGroup : 0, f, created: at(p.start), note }); nNew++; }
     else { nUpd++; if (at(p.start) < c.created) c.created = at(p.start); for (const k in f) if (!c.f[k]) c.f[k] = f[k]; if (!c.note && note) c.note = note; }
     if (new Set(p.lessons.map(l => srcKind(l.src))).size > 1) moved++;
-    if (P.trialFirst) { addSession(c, { d: at(p.start), s: trialFor(), ns: 0 }, true); nTrial++; } // the tracker has no trial dates: placed on the start day
+    // the tracker has no trial dates: placed on the start day, once
+    if (P.trialFirst && !p.trial && !DB.books.some(b => b.c === c.id && isTrialSvc(b.s))) { addSession(c, { d: at(p.start), s: trialFor(), ns: 0 }, true); nTrial++; }
     for (const l of p.lessons) {
-      const s = svcFor(l.src || p.src), d = at(l.d);
+      const d = at(l.d);
+      if (!(l.a > 0)) { addSession(c, { d, s: trialFor(), ns: 0 }, true); nTrial++; continue; } // a lesson at 0 is a free trial
+      const s = svcFor(l.src || p.src);
       addPayment(c, { k: "svc", s, a: l.a, d, m: srcKind(l.src) === "platform" ? l.src : "Other", st: "paid" });
       addSession(c, { d, s, ns: 0 }, true); nLes++;
     }
@@ -4968,7 +5066,7 @@ function importTracker(text) {
     for (const s of info.filter(x => x.lead && !byName.has(x.n.toLowerCase()) && !touched.some(c => c.name.toLowerCase() === x.n.toLowerCase()))) {
       touched.push(addClient({ name: s.n, origin: s.src ? "Online · " + s.src : "—", ch: chFor(s.src || ""), seg: 0, f: modeField && srcKind(s.src) === "platform" ? { [modeField.k]: modeField.opts[1][0] } : {}, created: NOW, note: s.note || "" }));
     }
-    applyStudentInfo(info, touched, T0.lessons.map(l => l.d).sort()[0]);
+    applyStudentInfo(info, touched, firstDay);
   }
   DB.books.sort((a, b) => a.d - b.d);
   for (const c of touched) refreshClient(DB, c);
@@ -4979,8 +5077,7 @@ function importTracker(text) {
     const ks = new Set(); for (const c of touched) ks.add(persistClient(c, true)); ks.forEach(k => k && queueWrite(k));
   }
   computeMonthly();
-  const ds = T0.lessons.map(l => l.d).sort();
-  return { tracker: true, nNew, nUpd, nLes, nTrial, people: people.length, gone: people.filter(p => p.gone).length, moved, from: ds[0], to: ds[ds.length - 1], cur: T0.home, curNote, total: sum(T0.lessons.map(l => l.a)) };
+  return { tracker: true, nNew, nUpd, nLes, nTrial, people: people.length, gone: people.filter(p => p.gone).length, moved, from: span[0], to: span[span.length - 1], cur: T0.home, curNote, kept, total: sum(T0.lessons.map(l => l.a)) };
 }
 // corrections known outside the tracker, before the students are created: a new name (as), lessons that belong
 // to another student with the same name (split), lessons logged under the wrong source or price (src, amount), a note
@@ -5020,7 +5117,7 @@ function applyStudentInfo(info, list, from) {
 const untimed = () => { const b = DB.books; if (b.length < 5) return false; let z = 0; for (const x of b) if (!x.d.getHours() && !x.d.getMinutes()) z++; return z / b.length > .8; };
 const importTrackerSafe = txt => /^\s*===\s*(LEZIONI|LESSONS)\s*===/mi.test(txt) ? importTracker(txt) : null;
 function trackerMsg(r) {
-  return `<div class="note-box" style="background:var(--lime-s)">${icon(IC.up)}<div><b>${L("Lesson tracker imported", "Tracker lezioni importato")}</b>: ${nf(r.nLes)} ${L("lessons", "lezioni")} ${L("from", "dal")} ${fdate(new Date(r.from + "T12:00"), { day: "numeric", month: "short" })} ${L("to", "al")} ${fdate(new Date(r.to + "T12:00"), { day: "numeric", month: "short", year: "numeric" })}, ${nf(r.people)} ${who()} (${nf(r.nNew)} ${L("new", "nuovi")}, ${nf(r.nUpd)} ${L("updated", "aggiornati")}), ${eur(r.total)}.${r.curNote ? " " + esc(r.curNote) : ""}</div></div>`;
+  return `<div class="note-box" style="background:var(--lime-s)">${icon(IC.up)}<div><b>${L("Lesson tracker imported", "Tracker lezioni importato")}</b>: ${nf(r.nLes)} ${L("lessons", "lezioni")} ${L("from", "dal")} ${fdate(new Date(r.from + "T12:00"), { day: "numeric", month: "short" })} ${L("to", "al")} ${fdate(new Date(r.to + "T12:00"), { day: "numeric", month: "short", year: "numeric" })}, ${nf(r.people)} ${who()} (${nf(r.nNew)} ${L("new", "nuovi")}, ${nf(r.nUpd)} ${L("updated", "aggiornati")}), ${eur(r.total)}.${r.kept ? " " + L("Lessons on other days stay as they were.", "Le lezioni degli altri giorni restano come erano.") : ""}${r.curNote ? " " + esc(r.curNote) : ""}</div></div>`;
 }
 const realLabel = () => { const r = P.realData; return r?.to ? L("real data to ", "dati reali fino al ") + fdate(new Date(r.to + "T12:00"), { day: "numeric", month: "short", year: "numeric" }) : L("real data", "dati reali"); };
 
@@ -5197,7 +5294,7 @@ VIEWS.data = el => {
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost sm" data-add="cost">${icon(IC.plus)}${L("Cost", "Costo")}</button><button class="btn main sm" data-save="cost" style="margin-left:auto">${L("Save costs", "Salva costi")}</button></div>
     </div>
     <div class="panel c6"><div class="ph"><div><h3>${t("import")}</h3><p>${t("importSub")} ${L("One row per payment; rows with the same email join one client.", "Una riga per pagamento; righe con la stessa email diventano un solo cliente.")}</p></div></div>
-      <label class="drop" id="drop">${icon(IC.file)}<b>${L("Drop a .csv file here", "Trascina qui un file .csv")}</b><span class="btn ghost sm">${t("choose")}</span><input type="file" id="csvIn" accept=".csv,text/csv,.txt" hidden></label>
+      <label class="drop" id="drop">${icon(IC.file)}<b>${L("Drop an Excel or CSV file here", "Trascina qui un file Excel o CSV")}</b><span class="btn ghost sm">${t("choose")}</span><input type="file" id="csvIn" accept="${SHEET_ACCEPT}" hidden></label>
       <div id="impRes">${APP.importMsg || ""}</div>
       <div class="ph"><span class="eyebrow">${t("template")}</span><button class="btn ghost sm" id="cpT">${t("copy")}</button></div><pre class="csv" id="tpl">${esc(csvTemplate())}</pre>
     </div>
@@ -5246,7 +5343,7 @@ VIEWS.data = el => {
     if (a?.dataset.act === "resetDemo") { openDemo(APP.demoKey || P.id); toast(t("resetDone")); }
   };
   const drop = $("#drop", el), fin = $("#csvIn", el);
-  const handle = file => { if (!file) return; const rd = new FileReader(); rd.onload = () => { const res = importCSV(String(rd.result)); const box = $("#impRes", el); if (res.error) { box.innerHTML = `<div class="note-box" style="background:var(--coral-s)">${icon(IC.info)}<div>${esc(res.error)}</div></div>`; return; } APP.importMsg = box.innerHTML = `<div class="note-box" style="background:var(--lime-s)">${icon(IC.up)}<div><b>${nf(res.rows)} ${t("imported")}</b>: ${nf(res.nNew)} ${L("new " + who(), "nuovi " + who())}, ${nf(res.nPay)} ${L("payments", "pagamenti")}. ${L("Every section now includes them.", "Tutte le sezioni ora li includono.")}${STORE.active ? "" : " " + L("Kept in this demo only.", "Tenuti solo in questa demo.")}</div></div>`; renderTop(); toast(nf(res.rows) + " " + t("imported")); }; rd.readAsText(file); };
+  const handle = async file => { if (!file) return; const r = await importFiles([file]), box = $("#impRes", el); if (!r) return; if (r.error) { box.innerHTML = `<div class="note-box" style="background:var(--coral-s)">${icon(IC.info)}<div>${esc(r.error)}</div></div>`; return; } APP.importMsg = box.innerHTML = r.html; renderTop(); toast(r.short); if (r.tracker) renderView(); };
   fin.onchange = () => handle(fin.files[0]);
   drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("over"); });
   drop.addEventListener("dragleave", () => drop.classList.remove("over"));
